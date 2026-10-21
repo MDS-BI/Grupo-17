@@ -4,19 +4,23 @@ Acompaña a [data-model.md](data-model.md). Las entidades base (`Entity`, `Docum
 
 ## Diagrama
 
+![Diagrama ER de Contabilidad y Finanzas](diagrama.png)
+
+[Ver diagrama en formato Mermaid (.mmd)](diagrama.mmd)
+
 ```mermaid
 erDiagram
-    Entity ||--o{ CuentaContable : "cuenta auxiliar"
-    Entity ||--o{ AsientoContable : "tercero del asiento"
-    Entity ||--o{ LineaAsiento : "auxiliar en línea"
-    Entity ||--|{ Pago : "cobra o paga"
-    Document |o--o{ AsientoContable : "origina"
-    Document |o--o{ Pago : "liquida"
-    PeriodoContable ||--o{ AsientoContable : "agrupa"
-    CuentaContable |o--o{ CuentaContable : "parent_id (hijo)"
-    CuentaContable ||--|{ LineaAsiento : "recibe"
-    AsientoContable ||--|{ LineaAsiento : "contiene"
-    AsientoContable |o--o{ Pago : "registra"
+    Entity ||--o{ CuentaContable : "cuenta auxiliar (opcional)"
+    Entity ||--o{ AsientoContable : "tercero relacionado (opcional)"
+    Entity ||--o{ LineaAsiento : "auxiliar por línea (opcional)"
+    Entity ||--|{ Pago : "tercero (obligatorio)"
+    Document |o--o{ AsientoContable : "origina (sourceDocumentId)"
+    Document |o--o{ Pago : "se liquida (document_id)"
+    PeriodoContable ||--|{ AsientoContable : "pertenece"
+    CuentaContable |o--o{ CuentaContable : "jerarquía padre/hijo"
+    CuentaContable ||--|{ LineaAsiento : "afecta (cuenta hoja y activa)"
+    AsientoContable ||--|{ LineaAsiento : "contiene (>= 2, cascada)"
+    Pago |o--o| AsientoContable : "genera / corresponde (opcional)"
 
     Entity {
         string entity_id PK
@@ -61,7 +65,7 @@ erDiagram
     AsientoContable {
         string id PK
         string series
-        number folio UK
+        number folio
         string date
         string period_id FK
         string concept
@@ -113,17 +117,17 @@ erDiagram
 
 | Relación | Lectura | FK |
 |---|---|---|
-| Entity 1 — 0..* CuentaContable | Un tercero puede tener cuentas auxiliares | `CuentaContable.entity_id` |
-| Entity 1 — 0..* AsientoContable | Un asiento puede involucrar un tercero | `AsientoContable.entity_id` |
-| Entity 1 — 0..* LineaAsiento | Auxiliar por línea para reportes por tercero | `LineaAsiento.entity_id` |
-| Entity 1 — * Pago | Todo pago involucra exactamente un tercero | `Pago.entity_id` |
+| Entity 1 — 0..* CuentaContable | Un tercero puede tener cuentas auxiliares (opcional) | `CuentaContable.entity_id` |
+| Entity 1 — 0..* AsientoContable | Un asiento puede involucrar un tercero (opcional) | `AsientoContable.entity_id` |
+| Entity 1 — 0..* LineaAsiento | Auxiliar por línea para reportes por tercero (opcional) | `LineaAsiento.entity_id` |
+| Entity 1 — * Pago | Todo pago involucra exactamente un tercero (obligatorio) | `Pago.entity_id` |
 | Document 0..1 — 0..* AsientoContable | Un documento origina cero o varios asientos | `AsientoContable.sourceDocumentId` |
 | Document 0..1 — 0..* Pago | Un documento se liquida en cero o varios pagos | `Pago.document_id` |
-| PeriodoContable 1 — * AsientoContable | Todo asiento pertenece a un periodo abierto | `AsientoContable.period_id` |
+| PeriodoContable 1 — * AsientoContable | Todo asiento pertenece a un periodo contable | `AsientoContable.period_id` |
 | CuentaContable 0..1 — 0..* CuentaContable | Jerarquía padre/hijo sin ciclos | `CuentaContable.parent_id` |
 | CuentaContable 1 — * LineaAsiento | Toda línea afecta una cuenta hoja activa | `LineaAsiento.cuenta_id` |
-| AsientoContable 1 — * LineaAsiento | Todo asiento tiene dos o más líneas (cascada) | `LineaAsiento.asiento_id` |
-| AsientoContable 0..1 — 0..* Pago | Un pago genera como mucho un asiento | `Pago.asiento_id` |
+| AsientoContable 1 — * LineaAsiento | Todo asiento tiene dos o más líneas (eliminación en cascada) | `LineaAsiento.asiento_id` |
+| Pago 0..1 — 0..1 AsientoContable | Un pago puede generar/corresponder como mucho a un asiento (opcional) | `Pago.asiento_id` |
 
 ## Reglas de Integridad Derivadas
 
