@@ -1,15 +1,16 @@
 erDiagram
-    Entity ||--o{ CuentaContable : "cuenta auxiliar (opcional)"
-    Entity ||--o{ AsientoContable : "tercero relacionado (opcional)"
-    Entity ||--o{ LineaAsiento : "auxiliar por línea (opcional)"
-    Entity ||--|{ Pago : "tercero (obligatorio)"
+    Entity ||--o{ Document : "documentos (base)"
+    Entity |o--o{ CuentaContable : "cuenta auxiliar (opcional)"
+    Entity |o--o{ AsientoContable : "tercero relacionado (opcional)"
+    Entity |o--o{ LineaAsiento : "auxiliar por línea (opcional)"
+    Entity ||--o{ Pago : "tercero (obligatorio)"
     Document |o--o{ AsientoContable : "origina (sourceDocumentId)"
     Document |o--o{ Pago : "se liquida (document_id)"
-    PeriodoContable ||--|{ AsientoContable : "pertenece"
+    PeriodoContable ||--o{ AsientoContable : "pertenece"
     CuentaContable |o--o{ CuentaContable : "jerarquía padre/hijo"
-    CuentaContable ||--|{ LineaAsiento : "afecta (cuenta hoja y activa)"
-    AsientoContable ||--|{ LineaAsiento : "contiene (>= 2, cascada)"
-    Pago |o--o| AsientoContable : "genera / corresponde (opcional)"
+    CuentaContable ||--o{ LineaAsiento : "afecta (cuenta hoja y activa)"
+    AsientoContable ||--|{ LineaAsiento : "contiene (2 o más, cascada)"
+    AsientoContable |o--o| Pago : "genera / corresponde (1:1 opcional)"
 
     Entity {
         string entity_id PK
@@ -53,16 +54,16 @@ erDiagram
     }
     AsientoContable {
         string id PK
-        string series
-        number folio
+        string series "parte de UK(series, folio)"
+        number folio "parte de UK(series, folio)"
         string date
         string period_id FK
         string concept
         string sourceDocumentType
         string sourceDocumentId FK
         string entity_id FK
-        number totalDebit
-        number totalCredit
+        integer totalDebit "centavos"
+        integer totalCredit "centavos"
         string currency
         string status
     }
@@ -71,20 +72,20 @@ erDiagram
         string asiento_id FK
         string cuenta_id FK
         string concept
-        number debit
-        number credit
+        integer debit "centavos"
+        integer credit "centavos"
         string entity_id FK
     }
     Pago {
         string id PK
         string numero UK
-        string series
-        number folio
+        string series "parte de UK(series, folio)"
+        number folio "parte de UK(series, folio)"
         string date
         string entity_id FK
         string document_id FK
-        string asiento_id FK
-        number amount
+        string asiento_id FK "UK: 1:1 opcional"
+        integer amount "centavos"
         string currency
         string method
         string status
