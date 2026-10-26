@@ -1,4 +1,3 @@
-<!--
 Sync Impact Report
 - Version change: Template → 1.0.0
 - Modified principles: Added four principles for code quality, testing standards, user experience consistency, and performance requirements.
@@ -34,3 +33,15 @@ Every change MUST follow a small, reviewable increment with clear acceptance cri
 This constitution supersedes ad-hoc quality expectations for this project. Amendments require a documented rationale, updates to affected templates and plans, and review by the maintainers before adoption. Compliance is reviewed during planning, implementation review, and release readiness; deviations MUST be explicitly justified and tracked.
 
 **Version**: 1.0.0 | **Ratified**: 2026-07-08 | **Last Amended**: 2026-07-08
+
+
+
+
+## Módulo: Contabilidad y Finanzas
+
+Para nuestra parte del ERP, este módulo se va a encargar de todo el flujo de dinero. Las funcionalidades principales que vamos a armar son:
+- **Plan de Cuentas y Libro Mayor**: Para registrar todos los asientos contables y el historial de transacciones.
+- **Cuentas por Cobrar y Pagar**: Básicamente gestionar las facturas que nos deben los clientes y lo que le debemos a los proveedores.
+- **Presupuestos y Centros de Costo**: Para controlar cuánta plata se le asigna a cada departamento y hacer seguimiento de los gastos.
+
+**Responsable de esta parte:** Nicolás (diseño del módulo, tablas financieras y specs).
