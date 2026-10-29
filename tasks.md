@@ -7,7 +7,7 @@
 
 > No existe un `plan.md` específico para esta feature; las tareas se derivan de `specs.md`, del modelo de datos de Contabilidad y Finanzas y de la arquitectura Vite/Vanilla JS existente.
 
-> **Nota de entorno**: el checkout consultado no contiene `index.html` ni `src/`, aunque las pruebas y el plan base los referencian. Antes de ejecutar T002 y T007 debe verificarse o restaurarse la base del módulo 001 (`index.html`, `src/`, `tests/`).
+> **Nota de entorno**: la base del módulo 001 (`index.html`, `src/` y `tests/`) está restaurada en el checkout actual.
 
 ## Formato: `[ID] [P?] [Historia] Descripción`
 
@@ -41,7 +41,7 @@
 
 **⚠️ CRÍTICO**: Ninguna historia de usuario puede comenzar hasta completar esta fase.
 
-- [ ] T004 [P] Definir en `src/payments.js` las constantes y funciones puras compartidas: estados `pendiente`, `aplicado`, `cancelado`; medios `efectivo`, `transferencia`, `cheque`, `tarjeta`; normalización de serie y formateo de importes almacenados en centavos.
+- [ ] T004 [P] Definir en `src/payments.js` las constantes y funciones puras compartidas: estados `pendiente`, `aplicado`, `cancelado`; medios `efectivo`, `transferencia`, `cheque`, `tarjeta`; normalización de serie y formateo de importes con dos decimales.
 - [ ] T005 [P] Extender `src/storage.js` con la clave `erp_contabilidad_finanzas:payments`, las funciones `loadPayments` y `savePayments`, y la limpieza de pagos en `clearAll`, manteniendo el acceso centralizado a `localStorage`.
 - [ ] T006 Añadir en `src/payments.js` la forma canónica del pago y la fábrica `crearPago` con `id`, `createdAt` y `updatedAt`, sin persistencia (depende de T004).
 - [ ] T007 Integrar la vista de pagos en el enrutamiento de módulos de `src/app.js` para que el botón "Pagos" muestre `view-payments`.
@@ -66,8 +66,8 @@
 
 ### Implementación para la Historia de Usuario 1
 
-- [ ] T011 [P] [US1] Implementar `validarPago` y `generarNumeroPago` en `src/payments.js`, incluyendo fecha válida, tercero existente, folio entero positivo, importe mayor que cero, máximo dos decimales, serie normalizada, medio de pago permitido y referencias existentes.
-- [ ] T012 [P] [US1] Implementar `addPayment` en `src/storage.js` con estado inicial `pendiente`, validación de unicidad de `numero` y `(series, folio)`, y vínculo 1:1 opcional con asiento.
+- [ ] T011 [P] [US1] Implementar `validarPago` y `generarNumeroPago` en `src/payments.js`, incluyendo fecha válida, tercero existente, folio entero positivo, importe mayor que cero, máximo dos decimales, serie opcional, medio de pago permitido y referencias existentes.
+- [ ] T012 [P] [US1] Implementar `addPayment` en `src/storage.js` con estado inicial `pendiente`, validación de unicidad de `numero` y de la combinación serie/folio, y vínculo opcional con un asiento.
 - [ ] T013 [P] [US1] Crear el formulario de pago en `src/components/payment-form.js` con fecha, tercero, serie, folio, importe, moneda, medio de pago, documento, asiento y notas.
 - [ ] T014 [P] [US1] Crear la lista básica de pagos en `src/components/payment-list.js` mostrando número, fecha, tercero, importe, moneda, medio de pago y estado.
 - [ ] T015 [US1] Conectar el envío del formulario, la validación inline y la persistencia en `src/app.js`.
@@ -95,12 +95,12 @@
 ### Implementación para la Historia de Usuario 2
 
 - [ ] T021 [P] [US2] Implementar `filtrarPagos` y `buscarPagos` en `src/payments.js` con los criterios de la especificación: rango de fechas, tercero, estado, medio de pago, número y serie/folio.
-- [ ] T022 [P] [US2] Ampliar `src/components/payment-list.js` con la tabla de resultados, filtros y estado vacío.
+- [ ] T022 [P] [US2] Ampliar `src/components/payment-list.js` con la tabla de resultados, filtros por fecha, tercero, estado, medio de pago, número y serie/folio, y estado vacío.
 - [ ] T023 [P] [US2] Crear `src/components/payment-detail.js` con el detalle completo, notas, documento y asiento vinculados.
 - [ ] T024 [US2] Conectar filtros, limpieza de filtros, selección de pago y detalle en `src/app.js`.
 - [ ] T025 [US2] Mantener visibles los pagos `aplicado` y `cancelado` sin acciones de borrado físico en `src/components/payment-list.js` y `src/app.js`.
 - [ ] T026 [P] [US2] Añadir estilos para filtros, tabla, detalle y estado vacío en `src/styles.css`.
-- [ ] T027 [US2] Añadir una prueba de rendimiento con al menos 500 pagos para verificar que la lista y los filtros responden sin degradación en `tests/integration/consult-payments.test.js`.
+- [ ] T027 [US2] Añadir una prueba de rendimiento con al menos 500 pagos para verificar que la lista y los filtros responden en menos de 1 segundo en `tests/integration/consult-payments.test.js`.
 
 **Punto de control**: Las Historias de Usuario 1 y 2 deben funcionar de forma independiente y en conjunto.
 
