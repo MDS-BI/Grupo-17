@@ -15,7 +15,17 @@ Además, el módulo utilizará las estructuras existentes del ERP base, como Ent
 
 La implementación inicial se enfocará en una interfaz frontend funcional que permita representar y probar las principales operaciones mediante datos de ejemplo, sin requerir una conexión real a una base de datos.
 
-## Escenarios de Usuario y Pruebas *(obligatorio)*
+## Clarifications
+
+### Session 2026-11-02
+
+- Q: ¿El alcance MVP debe incluir el registro y la consulta de pagos y cobros descritos en la Historia de Usuario 4? (FR-013–FR-016) → A: Incluir pagos y cobros en el MVP (registro, listado y detalle).
+- Q: ¿El MVP debe incluir un ciclo de estados para los asientos contables (borrador → aprobado → cancelado) con bloqueo de edición una vez aprobados? → A: Incluir el ciclo completo: borrador, aprobado y cancelado, con bloqueo de edición tras aprobar.
+- Q: Cuando se elimina un Documento que tiene asientos contables asociados, ¿qué comportamiento debe aplicar el sistema? → A: RESTRICT: impedir borrar el documento mientras existan asientos asociados.
+- Q: ¿El sistema debe permitir que existan periodos contables con fechas superpuestas? → A: Prohibir cualquier solapamiento entre periodos, abiertos o cerrados.
+- Q: ¿El módulo manejará una sola moneda o registrará operaciones en varias monedas? → A: Una sola moneda (MXN) para todo el módulo, sin conversión.
+
+## Escenarios de Usuario y Pruebas 
 
 ### Historia de Usuario 1 -  Consultar el resumen financiero (Prioridad: P1)
 Como gerente o encargado de finanzas, quiero consultar un resumen de los ingresos, gastos y resultados financieros de la empresa, para conocer su situación económica y facilitar la toma de decisiones.
@@ -132,7 +142,7 @@ Como analista financiero o contador, quiero generar y consultar reportes de los 
 - ¿Qué ocurre cuando un usuario ingresa un monto igual a cero o un valor negativo en una línea de asiento?
 - ¿Qué ocurre cuando se intenta registrar un asiento contable en un periodo que se encuentra cerrado?
 - ¿Qué ocurre cuando un usuario intenta crear un periodo contable cuya fecha de término es anterior a la fecha de inicio?
-- ¿Qué ocurre cuando se intenta crear un periodo contable que se superpone con otro periodo existente?
+- Se rechaza la creación de un periodo contable cuyas fechas se superpongan con otro periodo existente, abierto o cerrado.
 - ¿Qué ocurre cuando un usuario intenta registrar un pago sin indicar su monto, fecha o entidad relacionada?
 - ¿Qué ocurre cuando se intenta asociar un pago a un documento que no existe?
 - ¿Qué ocurre cuando un usuario consulta un reporte financiero para un periodo sin movimientos registrados?
@@ -142,7 +152,7 @@ Como analista financiero o contador, quiero generar y consultar reportes de los 
 - ¿Se mantienen los registros contables al navegar entre las distintas secciones del módulo?
 - ¿Qué ocurre cuando el usuario intenta modificar o eliminar un registro que está relacionado con otros movimientos contables?
 
-## Requisitos *(obligatorio)*
+## Requisitos 
 
 ### Requisitos Funcionales
 
@@ -155,7 +165,7 @@ Como analista financiero o contador, quiero generar y consultar reportes de los 
 - **FR-007**: El sistema DEBE permitir registrar asientos contables indicando su fecha, concepto y periodo contable correspondiente.
 - **FR-008**: El sistema DEBE permitir agregar una o más líneas contables a cada asiento, indicando la cuenta involucrada y el monto correspondiente al debe o al haber.
 - **FR-009**: Cada línea de asiento contable DEBE registrar un monto en el debe o en el haber, pero no en ambos simultáneamente.
-- **FR-010: El sistema DEBE exigir al menos dos líneas contables para registrar un asiento.
+- **FR-010**: El sistema DEBE exigir al menos dos líneas contables para registrar un asiento.
 - **FR-011**: El sistema DEBE validar que la suma de los débitos sea igual a la suma de los créditos antes de permitir guardar un asiento contable.
 - **FR-012**: El sistema DEBE informar claramente cuando un asiento contable no cumpla con la condición de igualdad entre débitos y créditos.
 - **FR-013**: El sistema DEBE permitir registrar y consultar pagos y cobros realizados por la empresa.
@@ -176,8 +186,12 @@ Como analista financiero o contador, quiero generar y consultar reportes de los 
 - **FR-028**: El sistema DEBE mantener la información de los registros al navegar entre las distintas secciones del módulo.
 - **FR-029**: El sistema DEBE permitir visualizar los registros contables mediante listados organizados y formularios de consulta.
 - **FR-030**: El sistema DEBE utilizar datos de ejemplo para representar las operaciones del módulo durante la implementación frontend, sin requerir una conexión real a una base de datos.
+- **FR-031**: El sistema DEBE manejar los estados `borrador`, `aprobado` y `cancelado` en los asientos contables, impidiendo modificar o eliminar las líneas de un asiento aprobado y conservando los asientos cancelados para auditoría.
+- **FR-032**: El sistema DEBE impedir eliminar un documento que tenga asientos contables asociados, conservando la referencia al documento de origen.
+- **FR-033**: El sistema DEBE impedir crear un periodo contable cuyas fechas se superpongan con las de otro periodo existente, independientemente de su estado.
+- **FR-034**: El sistema DEBE operar con una sola moneda (MXN) y NO DEBE realizar conversiones de moneda durante el MVP.
 
-### Requisitos de Extensibilidad *(obligaciones del módulo base)*
+### Requisitos de Extensibilidad 
 
 El módulo de Contabilidad y Finanzas DEBE:
 - **XR-001**: Reutilizar las estructuras base Entity y Document del sistema ERP para relacionar las operaciones financieras con los registros generales de la empresa.
@@ -187,7 +201,7 @@ El módulo de Contabilidad y Finanzas DEBE:
 - **XR-005**: Permitir incorporar futuras funcionalidades financieras sin modificar innecesariamente la estructura central del ERP.
 - **XR-006**: Mantener la compatibilidad con la estructura de datos definida por el módulo base.
 
-### Entidades Clave *(incluir si la funcionalidad implica datos)*
+### Entidades Clave 
 
 
 - **CuentaContable**: Representa una cuenta del plan contable de la empresa. Permite clasificar las operaciones financieras según su naturaleza y mantener una estructura jerárquica mediante cuentas principales y subcuentas.
@@ -198,11 +212,11 @@ El módulo de Contabilidad y Finanzas DEBE:
 - **Entity (Entidad)**: Estructura heredada del módulo base ERP que representa clientes, proveedores u otras entidades relacionadas con las operaciones financieras.
 - **Document (Documento)**: Estructura heredada del módulo base ERP que permite relacionar documentos comerciales o transaccionales con las operaciones del módulo financiero.
 
-## Criterios de Éxito *(obligatorio)*
+## Criterios de Éxito 
 
 ### Resultados Medibles
 
-- **SC-001**:SC-001: Los usuarios pueden crear y consultar cuentas contables desde la interfaz del módulo.
+- **SC-001**: Los usuarios pueden crear y consultar cuentas contables desde la interfaz del módulo.
 - **SC-002**: Los usuarios pueden registrar un asiento contable cuando la suma de débitos coincide con la suma de créditos.
 - **SC-003**: El sistema identifica y rechaza los asientos contables que no cumplen el principio de partida doble.
 - **SC-004**: Los usuarios pueden registrar y consultar pagos y cobros asociados a entidades existentes.
@@ -220,12 +234,16 @@ El módulo de Contabilidad y Finanzas DEBE:
 - El módulo se enfoca en funcionalidades básicas de contabilidad y finanzas, sin implementar procesos avanzados de auditoría, tributación o conciliación bancaria.
 - Los asientos contables deben cumplir el principio de partida doble, por lo que la suma de débitos debe ser igual a la suma de créditos.
 - Cada asiento contable debe contener al menos dos líneas contables.
+- Los asientos contables siguen el ciclo de vida borrador → aprobado → cancelado; solo los borradores admiten edición y borrado físico.
 - Las cuentas contables se organizan mediante una estructura jerárquica que permite establecer relaciones entre cuentas principales y subcuentas.
 - Los periodos contables poseen una fecha de inicio, una fecha de término y un estado que indica si están abiertos o cerrados.
+- No se permite que dos periodos contables tengan fechas superpuestas, sin importar su estado.
 - No se permite registrar nuevos asientos contables en periodos que se encuentren cerrados.
+- Los pagos y cobros forman parte del MVP y deben permitir registro, listado y consulta de detalle.
 - Los pagos y cobros pueden asociarse a entidades y, opcionalmente, a documentos existentes.
 - Los reportes financieros se generan utilizando los movimientos contables registrados en el módulo.
 - La implementación inicial corresponde a una solución frontend, por lo que se utilizarán datos de ejemplo para representar las operaciones.
 - No se contempla una conexión real a una base de datos ni la integración con sistemas bancarios externos durante esta etapa del proyecto.
 - La información utilizada en el prototipo tiene fines demostrativos y no corresponde a registros financieros reales.
+- Todas las operaciones del módulo se registran en una sola moneda (MXN); no se contemplan conversiones de moneda.
 

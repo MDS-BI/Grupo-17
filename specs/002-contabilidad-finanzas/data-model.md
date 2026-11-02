@@ -48,11 +48,11 @@ Cabecera de un registro contable en el diario. Agrupa las líneas, fija fecha y 
 | period_id | string | FK → PeriodoContable | Periodo contable al que pertenece el asiento | Obligatorio, debe referenciar un periodo existente. Al eliminar el periodo se aplica RESTRICT |
 | concept | string | — | Glosa o descripción del asiento | Obligatorio, no vacío |
 | sourceDocumentType | string | — | Tipo de documento origen: `document` u otro módulo | Opcional; requerido cuando se usa `sourceDocumentId` |
-| sourceDocumentId | string | FK → Document (`id`) | Documento base que origina el asiento | Opcional; debe referenciar un documento existente. `SET NULL` (propuesto) o `RESTRICT` (pendiente de decisión) al eliminar el documento |
+| sourceDocumentId | string | FK → Document (`id`) | Documento base que origina el asiento | Opcional; debe referenciar un documento existente. `RESTRICT` al eliminar el documento |
 | entity_id | string | FK → Entity (`entity_id`) | Tercero relacionado con el asiento | Opcional; al eliminar la entidad se aplica SET NULL |
 | totalDebit | integer | — | Suma de los débitos de sus líneas, en centavos | Obligatorio, entero no negativo; exactamente igual a `totalCredit`; se recalcula desde las líneas |
 | totalCredit | integer | — | Suma de los créditos de sus líneas, en centavos | Obligatorio, entero no negativo; exactamente igual a `totalDebit`; se recalcula desde las líneas |
-| currency | string | — | Código de moneda de los importes (p. ej., MXN, USD) | Opcional |
+| currency | string | — | Código de moneda de los importes; en el MVP siempre `MXN` | Obligatorio en el MVP; valor fijo `MXN` |
 | status | string | — | Estado: `borrador`, `aprobado`, `cancelado` | Opcional; si ModuleConfig define `statusLifecycle`, se aplica ese ciclo. Solo `borrador` admite borrado físico; aprobados/cancelados se anulan lógicamente |
 | notes | string | — | Notas u observaciones libres | Opcional |
 | createdAt | string | — | Marca de tiempo de creación | Obligatorio |
@@ -74,7 +74,7 @@ Movimiento individual de un asiento contra una cuenta del plan. Implementa la re
 | createdAt | string | — | Marca de tiempo de creación | Obligatorio |
 | updatedAt | string | — | Marca de última modificación | Obligatorio |
 
-## Entidad: Pago (registro de cobro o desembolso) — Fase futura (conservada, no MVP)
+## Entidad: Pago (registro de cobro o desembolso) — MVP
 
 Movimiento financiero de dinero contra un tercero: cobro a un cliente o pago a un proveedor. Opcionalmente genera el asiento contable correspondiente.
 
@@ -89,7 +89,7 @@ Movimiento financiero de dinero contra un tercero: cobro a un cliente o pago a u
 | document_id | string | FK → Document (`id`) | Documento que se liquida con el pago | Opcional; debe referenciar un documento existente; SET NULL al eliminar el documento |
 | asiento_id | string | FK, UK → AsientoContable (`id`) | Asiento generado por el pago (1:1 opcional) | Opcional, único; debe referenciar un asiento existente; SET NULL al eliminar el asiento |
 | amount | integer | — | Importe pagado en la moneda configurada, en centavos | Obligatorio, entero mayor que cero |
-| currency | string | — | Código de moneda (p. ej., MXN, USD) | Opcional |
+| currency | string | — | Código de moneda; en el MVP siempre `MXN` | Obligatorio en el MVP; valor fijo `MXN` |
 | method | string | — | Medio de pago: `efectivo`, `transferencia`, `cheque`, `tarjeta` | Opcional, valor del conjunto cerrado |
 | status | string | — | Estado: `pendiente`, `aplicado`, `cancelado` | Opcional; si ModuleConfig define `statusLifecycle`, se aplica ese ciclo. Un pago aplicado/cancelado no se elimina físicamente: se anula lógicamente |
 | notes | string | — | Notas u observaciones libres | Opcional |
@@ -127,7 +127,7 @@ Ventana de tiempo (mes, trimestre o año) en la que se registran asientos. Los a
 - La suma de `debit` debe ser exactamente igual a la suma de `credit` en todas sus líneas; los totales se recalculan en centavos y se almacenan en `totalDebit` y `totalCredit` con igualdad exacta, sin tolerancia.
 - Cada línea debe llevar importe en débito o en crédito, nunca ambos ni ninguno (el monto debe ser mayor que cero en uno de los dos).
 - La fecha debe caer dentro de un `PeriodoContable` con `status = abierto`; los periodos cerrados rechazan asientos nuevos o modificaciones.
-- Un asiento con `sourceDocumentId` debe referenciar un `Document` existente. Al eliminar el documento, la FK queda pendiente de decisión entre `SET NULL` y `RESTRICT`.
+- Un asiento con `sourceDocumentId` debe referenciar un `Document` existente. Al eliminar el documento se aplica `RESTRICT`: no se borra un documento con asientos asociados.
 - Un asiento `aprobado` no admite cambios en sus líneas; `cancelado` debe conservar su registro para auditoría (anulación lógica, no borrado físico).
 - Solo un asiento en `borrador` puede eliminarse físicamente; al hacerlo se eliminan en cascada sus líneas. Los asientos aprobados o cancelados nunca se borran físicamente.
 
@@ -149,7 +149,7 @@ Ventana de tiempo (mes, trimestre o año) en la que se registran asientos. Los a
 ### Periodo contable
 
 - `startDate` y `endDate` deben ser fechas válidas con `endDate >= startDate`.
-- No se permite que dos periodos abiertos se solapen.
+- No se permite que dos periodos se solapen, independientemente de su estado (abierto o cerrado).
 - Un periodo con asientos no se elimina: se cierra (`status = cerrado`). El borrado está restringido por `AsientoContable.period_id`.
 
 ## Precisión Monetaria y Validación de Totales
@@ -162,7 +162,7 @@ Ventana de tiempo (mes, trimestre o año) en la que se registran asientos. Los a
   - `totalDebit = totalCredit`
 - La tolerancia es `0`; no se aceptan diferencias por redondeo.
 - Los totales se recalculan desde las líneas en cada alta o edición y se sobrescriben; no se confía en los valores enviados por el cliente.
-- El MVP no realiza conversión de moneda; cada asiento usa una sola moneda.
+- El MVP opera en una sola moneda (`MXN`) y no realiza conversión de moneda.
 
 ## Relaciones y Cardinalidades
 
@@ -175,7 +175,7 @@ La cardinalidad se lee como **A ↔ B**: cuántos A puede tener cada B y cuánto
 | Entity ← AsientoContable | 0..1 a 0..* | `AsientoContable.entity_id` | FK opcional; SET NULL al eliminar la entidad |
 | Entity ← LineaAsiento | 0..1 a 0..* | `LineaAsiento.entity_id` | FK opcional; SET NULL al eliminar la entidad |
 | Entity ← Pago | 1 a 0..* | `Pago.entity_id` | FK obligatoria; RESTRICT al eliminar la entidad |
-| Document ← AsientoContable | 0..1 a 0..* | `AsientoContable.sourceDocumentId` | FK opcional; SET NULL (propuesto) o RESTRICT (pendiente) |
+| Document ← AsientoContable | 0..1 a 0..* | `AsientoContable.sourceDocumentId` | FK opcional; RESTRICT al eliminar el documento |
 | Document ← Pago | 0..1 a 0..* | `Pago.document_id` | FK opcional; SET NULL al eliminar el documento |
 | PeriodoContable ← AsientoContable | 1 a 0..* | `AsientoContable.period_id` | FK obligatoria; RESTRICT al eliminar el periodo |
 | CuentaContable ← CuentaContable | 0..1 a 0..* | `CuentaContable.parent_id` | Autorreferencia padre/hijo; RESTRICT |
@@ -193,7 +193,7 @@ Se mantiene la **anulación lógica** (`status = cancelado`) para asientos y pag
 | `CuentaContable.parent_id → CuentaContable.id` | `RESTRICT` | Evita cuentas hijas huérfanas y mantiene la jerarquía del plan |
 | `CuentaContable.entity_id → Entity.entity_id` | `SET NULL` | La cuenta y su saldo histórico sobreviven; solo se pierde el auxiliar del tercero |
 | `AsientoContable.period_id → PeriodoContable.id` | `RESTRICT` | No se borra un periodo con asientos; se cierra |
-| `AsientoContable.sourceDocumentId → Document.id` | `SET NULL` (propuesto) o `RESTRICT` (pendiente) | `SET NULL` conserva el asiento pero pierde la trazabilidad al documento; `RESTRICT` conserva el vínculo pero bloquea borrar documentos con asientos y, por la regla base `Document.entity_id CASCADE`, puede bloquear el borrado de una Entity con documentos conciliados. Decisión pendiente |
+| `AsientoContable.sourceDocumentId → Document.id` | `RESTRICT` | Conserva la trazabilidad del asiento a su documento de origen; no se borra un documento con asientos asociados. Por la regla base `Document.entity_id CASCADE`, también puede impedir borrar una Entity con documentos conciliados |
 | `AsientoContable.entity_id → Entity.entity_id` | `SET NULL` | El asiento histórico sobrevive; el tercero es un auxiliar opcional |
 | `LineaAsiento.asiento_id → AsientoContable.id` | `CASCADE` | Única cascada contable necesaria: una línea no existe sin su asiento. Solo aplica al borrado físico de asientos en `borrador` |
 | `LineaAsiento.cuenta_id → CuentaContable.id` | `RESTRICT` | No se borra una cuenta con movimientos; se marca `inactiva` |
@@ -223,14 +223,16 @@ No se elimina ninguna de las cinco entidades; solo se prioriza su implementació
 | AsientoContable | MVP | Cabecera del registro contable |
 | LineaAsiento | MVP | Implementa la partida doble |
 | PeriodoContable | MVP | `period_id` es obligatorio y controla periodos abiertos/cerrados |
-| Pago | Fase futura | Tesorería/cobros/desembolsos; los asientos pueden registrarse sin él. Se conserva en el modelo |
+| Pago | MVP | Tesorería/cobros/desembolsos; la Historia 4 y FR-013 a FR-016 lo exigen en el MVP |
 
-> Si el MVP exige registrar cobros o desembolsos, `Pago` pasa a ser imprescindible. Esa decisión debe confirmarla el grupo.
+> Decisión confirmada: `Pago` forma parte del MVP (clarificación 2026-11-02).
 
-## Decisiones Pendientes de Validación
+## Decisiones Resueltas
 
-1. **`AsientoContable.sourceDocumentId`: `SET NULL` vs `RESTRICT`.** `SET NULL` conserva el asiento histórico pero pierde la trazabilidad al documento; `RESTRICT` conserva el vínculo pero impide borrar un `Document` con asientos y, dado que `Document.entity_id` es `CASCADE` por regla base, también puede impedir borrar una `Entity` con documentos conciliados.
-2. **¿El MVP incluye `Pago`?** Se propone dejarlo como fase futura; si el alcance exige cobros/desembolsos, debe pasar a MVP y validarse su ciclo de vida.
+- `AsientoContable.sourceDocumentId`: se adopta `RESTRICT` para conservar la trazabilidad (clarificación 2026-11-02).
+- `Pago` forma parte del MVP (clarificación 2026-11-02).
+- Moneda única `MXN` sin conversión (clarificación 2026-11-02).
+- Sin solapamiento de periodos, abiertos o cerrados (clarificación 2026-11-02).
 
 ## Notas de Extensibilidad
 

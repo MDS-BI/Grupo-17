@@ -36,7 +36,7 @@ La cardinalidad se lee como **A ↔ B**: cuántos A puede tener cada B y cuánto
 | Entity ← AsientoContable | 0..1 a 0..* | `AsientoContable.entity_id` | `SET NULL` | Un asiento puede referenciar un tercero; un tercero puede tener cero o más asientos |
 | Entity ← LineaAsiento | 0..1 a 0..* | `LineaAsiento.entity_id` | `SET NULL` | Una línea puede tener un tercero auxiliar; un tercero puede tener cero o más líneas |
 | Entity ← Pago | 1 a 0..* | `Pago.entity_id` | `RESTRICT` | Todo pago involucra exactamente un tercero; un tercero puede tener cero o más pagos |
-| Document ← AsientoContable | 0..1 a 0..* | `AsientoContable.sourceDocumentId` | `SET NULL` (propuesto) o `RESTRICT` (pendiente) | Un asiento proviene como mucho de un documento; un documento puede originar cero o más asientos |
+| Document ← AsientoContable | 0..1 a 0..* | `AsientoContable.sourceDocumentId` | `RESTRICT` | Un asiento proviene como mucho de un documento; un documento puede originar cero o más asientos |
 | Document ← Pago | 0..1 a 0..* | `Pago.document_id` | `SET NULL` | Un pago liquida como mucho un documento; un documento puede liquidarse en cero o más pagos |
 | PeriodoContable ← AsientoContable | 1 a 0..* | `AsientoContable.period_id` | `RESTRICT` | Todo asiento pertenece a exactamente un periodo; un periodo puede tener cero o más asientos |
 | CuentaContable ← CuentaContable | 0..1 a 0..* | `CuentaContable.parent_id` | `RESTRICT` | Una cuenta tiene como mucho una cuenta padre; una cuenta padre puede tener cero o más hijas |
@@ -50,10 +50,10 @@ La cardinalidad se lee como **A ↔ B**: cuántos A puede tener cada B y cuánto
 
 - **Partida doble exacta**: por cada `AsientoContable`, `SUM(LineaAsiento.debit) = SUM(LineaAsiento.credit)` y `totalDebit = totalCredit`, con igualdad exacta de enteros en centavos y tolerancia `0`. Los totales se recalculan desde las líneas.
 - **Cascadas**: la única cascada contable nueva es `AsientoContable → LineaAsiento` y solo aplica al borrado físico de asientos en `borrador`. `Document.entity_id → Entity.entity_id` es una cascada heredada del módulo base y no se modifica.
-- **Historial contable**: `Entity` y `Document` no borran asientos, líneas, cuentas ni pagos. Las referencias opcionales usan `SET NULL` y las obligatorias usan `RESTRICT` para no perder registros históricos.
+- **Historial contable**: `Entity` y `Document` no borran asientos, líneas, cuentas ni pagos. Las referencias opcionales usan `SET NULL`, salvo `AsientoContable.sourceDocumentId` que usa `RESTRICT`, y las obligatorias usan `RESTRICT` para no perder registros históricos.
 - **Anulación lógica**: asientos y pagos aprobados, aplicados o cancelados no se borran físicamente; se anulan con `status = cancelado`. Cuentas con movimientos o hijas se inactivan; periodos con asientos se cierran.
 - **Unicidad**: `code` en `CuentaContable`, `name` en `PeriodoContable` y `numero` en `Pago` son únicos. En `AsientoContable` y `Pago` la unicidad de `folio` es compuesta: `UNIQUE(series, folio)`, normalizando `series` vacía a cadena vacía. `Pago.asiento_id` es único.
-- **Periodos**: un `AsientoContable` solo puede existir en un `PeriodoContable` con `status = abierto`; un periodo con asientos se cierra, no se elimina.
+- **Periodos**: un `AsientoContable` solo puede existir en un `PeriodoContable` con `status = abierto`; un periodo con asientos se cierra, no se elimina. Los periodos no pueden solaparse, sin importar su estado.
 
 ## Alcance MVP
 
@@ -65,14 +65,16 @@ No se elimina ninguna de las cinco entidades; solo se prioriza su implementació
 | AsientoContable | MVP | Cabecera del registro contable |
 | LineaAsiento | MVP | Implementa la partida doble |
 | PeriodoContable | MVP | `period_id` es obligatorio y controla periodos abiertos/cerrados |
-| Pago | Fase futura | Tesorería/cobros/desembolsos; los asientos pueden registrarse sin él. Se conserva en el modelo |
+| Pago | MVP | Tesorería/cobros/desembolsos; la Historia 4 y FR-013 a FR-016 lo exigen en el MVP |
 
-> Si el MVP exige registrar cobros o desembolsos, `Pago` pasa a ser imprescindible. Esa decisión debe confirmarla el grupo.
+> Decisión confirmada: `Pago` forma parte del MVP (clarificación 2026-11-02).
 
-## Decisiones Pendientes de Validación
+## Decisiones Resueltas
 
-1. **`AsientoContable.sourceDocumentId`: `SET NULL` vs `RESTRICT`.** `SET NULL` conserva el asiento histórico pero pierde la trazabilidad al documento; `RESTRICT` conserva el vínculo pero impide borrar un `Document` con asientos y, dado que `Document.entity_id` es `CASCADE` por regla base, también puede impedir borrar una `Entity` con documentos conciliados.
-2. **¿El MVP incluye `Pago`?** Se propone dejarlo como fase futura; si el alcance exige cobros/desembolsos, debe pasar a MVP y validarse su ciclo de vida.
+1. **`AsientoContable.sourceDocumentId`: `RESTRICT`.** Conserva la trazabilidad del asiento a su documento de origen; no se borra un documento con asientos asociados (clarificación 2026-11-02).
+2. **`Pago` forma parte del MVP.** La Historia 4 y FR-013 a FR-016 lo exigen (clarificación 2026-11-02).
+3. **Moneda única `MXN` sin conversión** (clarificación 2026-11-02).
+4. **Sin solapamiento de periodos**, abiertos o cerrados (clarificación 2026-11-02).
 
 
 ```mermaid
@@ -197,7 +199,7 @@ La cardinalidad se lee como **A ↔ B**: cuántos A puede tener cada B y cuánto
 | Entity ← AsientoContable | 0..1 a 0..* | `AsientoContable.entity_id` | `SET NULL` | Un asiento puede referenciar un tercero; un tercero puede tener cero o más asientos |
 | Entity ← LineaAsiento | 0..1 a 0..* | `LineaAsiento.entity_id` | `SET NULL` | Una línea puede tener un tercero auxiliar; un tercero puede tener cero o más líneas |
 | Entity ← Pago | 1 a 0..* | `Pago.entity_id` | `RESTRICT` | Todo pago involucra exactamente un tercero; un tercero puede tener cero o más pagos |
-| Document ← AsientoContable | 0..1 a 0..* | `AsientoContable.sourceDocumentId` | `SET NULL` (propuesto) o `RESTRICT` (pendiente) | Un asiento proviene como mucho de un documento; un documento puede originar cero o más asientos |
+| Document ← AsientoContable | 0..1 a 0..* | `AsientoContable.sourceDocumentId` | `RESTRICT` | Un asiento proviene como mucho de un documento; un documento puede originar cero o más asientos |
 | Document ← Pago | 0..1 a 0..* | `Pago.document_id` | `SET NULL` | Un pago liquida como mucho un documento; un documento puede liquidarse en cero o más pagos |
 | PeriodoContable ← AsientoContable | 1 a 0..* | `AsientoContable.period_id` | `RESTRICT` | Todo asiento pertenece a exactamente un periodo; un periodo puede tener cero o más asientos |
 | CuentaContable ← CuentaContable | 0..1 a 0..* | `CuentaContable.parent_id` | `RESTRICT` | Una cuenta tiene como mucho una cuenta padre; una cuenta padre puede tener cero o más hijas |
@@ -211,10 +213,10 @@ La cardinalidad se lee como **A ↔ B**: cuántos A puede tener cada B y cuánto
 
 - **Partida doble exacta**: por cada `AsientoContable`, `SUM(LineaAsiento.debit) = SUM(LineaAsiento.credit)` y `totalDebit = totalCredit`, con igualdad exacta de enteros en centavos y tolerancia `0`. Los totales se recalculan desde las líneas.
 - **Cascadas**: la única cascada contable nueva es `AsientoContable → LineaAsiento` y solo aplica al borrado físico de asientos en `borrador`. `Document.entity_id → Entity.entity_id` es una cascada heredada del módulo base y no se modifica.
-- **Historial contable**: `Entity` y `Document` no borran asientos, líneas, cuentas ni pagos. Las referencias opcionales usan `SET NULL` y las obligatorias usan `RESTRICT` para no perder registros históricos.
+- **Historial contable**: `Entity` y `Document` no borran asientos, líneas, cuentas ni pagos. Las referencias opcionales usan `SET NULL`, salvo `AsientoContable.sourceDocumentId` que usa `RESTRICT`, y las obligatorias usan `RESTRICT` para no perder registros históricos.
 - **Anulación lógica**: asientos y pagos aprobados, aplicados o cancelados no se borran físicamente; se anulan con `status = cancelado`. Cuentas con movimientos o hijas se inactivan; periodos con asientos se cierran.
 - **Unicidad**: `code` en `CuentaContable`, `name` en `PeriodoContable` y `numero` en `Pago` son únicos. En `AsientoContable` y `Pago` la unicidad de `folio` es compuesta: `UNIQUE(series, folio)`, normalizando `series` vacía a cadena vacía. `Pago.asiento_id` es único.
-- **Periodos**: un `AsientoContable` solo puede existir en un `PeriodoContable` con `status = abierto`; un periodo con asientos se cierra, no se elimina.
+- **Periodos**: un `AsientoContable` solo puede existir en un `PeriodoContable` con `status = abierto`; un periodo con asientos se cierra, no se elimina. Los periodos no pueden solaparse, sin importar su estado.
 
 ## Alcance MVP
 
@@ -226,11 +228,13 @@ No se elimina ninguna de las cinco entidades; solo se prioriza su implementació
 | AsientoContable | MVP | Cabecera del registro contable |
 | LineaAsiento | MVP | Implementa la partida doble |
 | PeriodoContable | MVP | `period_id` es obligatorio y controla periodos abiertos/cerrados |
-| Pago | Fase futura | Tesorería/cobros/desembolsos; los asientos pueden registrarse sin él. Se conserva en el modelo |
+| Pago | MVP | Tesorería/cobros/desembolsos; la Historia 4 y FR-013 a FR-016 lo exigen en el MVP |
 
-> Si el MVP exige registrar cobros o desembolsos, `Pago` pasa a ser imprescindible. Esa decisión debe confirmarla el grupo.
+> Decisión confirmada: `Pago` forma parte del MVP (clarificación 2026-11-02).
 
-## Decisiones Pendientes de Validación
+## Decisiones Resueltas
 
-1. **`AsientoContable.sourceDocumentId`: `SET NULL` vs `RESTRICT`.** `SET NULL` conserva el asiento histórico pero pierde la trazabilidad al documento; `RESTRICT` conserva el vínculo pero impide borrar un `Document` con asientos y, dado que `Document.entity_id` es `CASCADE` por regla base, también puede impedir borrar una `Entity` con documentos conciliados.
-2. **¿El MVP incluye `Pago`?** Se propone dejarlo como fase futura; si el alcance exige cobros/desembolsos, debe pasar a MVP y validarse su ciclo de vida.
+1. **`AsientoContable.sourceDocumentId`: `RESTRICT`.** Conserva la trazabilidad del asiento a su documento de origen; no se borra un documento con asientos asociados (clarificación 2026-11-02).
+2. **`Pago` forma parte del MVP.** La Historia 4 y FR-013 a FR-016 lo exigen (clarificación 2026-11-02).
+3. **Moneda única `MXN` sin conversión** (clarificación 2026-11-02).
+4. **Sin solapamiento de periodos**, abiertos o cerrados (clarificación 2026-11-02).
