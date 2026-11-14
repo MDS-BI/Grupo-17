@@ -25,16 +25,27 @@ export const userConfig = null;
 // ---------------------------------------------------------------------------
 
 export const DEFAULT_CONFIG = Object.freeze({
-  moduleName: 'Módulo Base ERP',
+  moduleName: 'Contabilidad y Finanzas',
   labels: Object.freeze({
     entity: 'Entidad',
     entities: 'Entidades',
     document: 'Documento',
-    documents: 'Documentos'
+    documents: 'Documentos',
+    cuenta: 'Cuenta contable',
+    cuentas: 'Cuentas contables',
+    asiento: 'Asiento contable',
+    asientos: 'Asientos contables',
+    pago: 'Pago',
+    pagos: 'Pagos',
+    periodo: 'Periodo contable',
+    periodos: 'Periodos contables',
+    reporte: 'Reporte financiero',
+    reportes: 'Reportes financieros',
+    resumen: 'Resumen financiero'
   }),
   customFields: Object.freeze([]),
   statusLifecycle: null,
-  theme: Object.freeze({ accentColor: '#2563eb' })
+  theme: Object.freeze({ accentColor: '#0f766e' })
 });
 
 export const FIELD_TYPES = ['text', 'number', 'date', 'select'];
@@ -120,7 +131,7 @@ export function normalizeConfig(raw){
   if(raw.labels !== undefined){
     if(typeof raw.labels !== 'object' || raw.labels === null) errors.push('labels debe ser un objeto');
     else {
-      for(const key of ['entity', 'entities', 'document', 'documents']){
+      for(const key of ['entity', 'entities', 'document', 'documents', 'cuenta', 'cuentas', 'asiento', 'asientos', 'pago', 'pagos', 'periodo', 'periodos', 'reporte', 'reportes', 'resumen']){
         if(raw.labels[key] === undefined) continue;
         if(!isNonEmptyString(raw.labels[key])){ errors.push(`labels.${key} debe ser una cadena no vacía`); continue; }
         cfg.labels[key] = raw.labels[key].trim();

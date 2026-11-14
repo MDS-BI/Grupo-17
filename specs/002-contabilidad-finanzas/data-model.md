@@ -84,6 +84,7 @@ Movimiento financiero de dinero contra un tercero: cobro a un cliente o pago a u
 | numero | string | UK | Número oficial del pago derivado de serie y folio | Obligatorio, no vacío, único |
 | series | string | — (UK compuesta) | Serie del pago (p. ej., `COB`, `PAG`) | Opcional; forma parte de `UNIQUE(series, folio)`. Si está vacía se normaliza a cadena vacía para la unicidad |
 | folio | number | — (UK compuesta) | Folio consecutivo del pago | Obligatorio, entero positivo, único en combinación `(series, folio)` |
+| tipo | string | — | Tipo de operación: `cobro` (entrada de dinero) o `pago` (salida de dinero) | Obligatorio, valor del conjunto cerrado; por defecto `pago` |
 | date | string | — | Fecha del pago en formato YYYY-MM-DD | Obligatorio, fecha de calendario válida |
 | entity_id | string | FK → Entity (`entity_id`) | Tercero pagado o que realiza el cobro | Obligatorio, debe referenciar una entidad existente; RESTRICT al eliminar la entidad |
 | document_id | string | FK → Document (`id`) | Documento que se liquida con el pago | Opcional; debe referenciar un documento existente; SET NULL al eliminar el documento |
@@ -141,6 +142,8 @@ Ventana de tiempo (mes, trimestre o año) en la que se registran asientos. Los a
 ### Pago
 
 - `numero`, `date`, `entity_id` y `amount` son obligatorios; `amount` debe ser un entero mayor que cero en centavos.
+- `tipo` distingue cobros de pagos y debe pertenecer al conjunto `cobro`, `pago`; si no se envía, se asume `pago`.
+- Si no se envían `series` y `folio`, se generan automáticamente con la serie `COB` o `PAG` según `tipo` y el siguiente folio disponible.
 - `entity_id`, `document_id` y `asiento_id`, cuando existen, deben referenciar registros existentes.
 - `numero` es único; `folio` es un entero positivo único en combinación `(series, folio)`, con `series` vacía normalizada a cadena vacía.
 - `asiento_id` es único: un pago genera o referencia como mucho un asiento y un asiento corresponde como mucho a un pago (1:1 opcional).

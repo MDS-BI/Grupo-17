@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Módulo Base ERP</title>
+    <title>Contabilidad y Finanzas</title>
   </head>
   <body>
     <div id="config-errors" class="config-error" role="alert" hidden></div>
@@ -12,7 +12,7 @@
       <header class="topbar">
         <div class="brand">
           <span id="logo-mark" class="logo-mark" aria-hidden="true"></span>
-          <span id="brand-name" class="brand-name">Módulo Base ERP</span>
+          <span id="brand-name" class="brand-name">Contabilidad y Finanzas</span>
         </div>
       </header>
 
@@ -34,42 +34,80 @@
             <svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="9" r="5"></circle><path d="m12.8 12.8 4.2 4.2"></path></svg>
             <span class="nav-label" id="nav-search-label">Búsqueda</span>
           </button>
+          <button type="button" class="nav-module" data-module="resumen" id="nav-resumen">
+            <svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v14h14"></path><path d="M6 13V8"></path><path d="M10 13V5"></path><path d="M14 13V9"></path></svg>
+            <span class="nav-label" id="nav-resumen-label">Resumen financiero</span>
+          </button>
+          <button type="button" class="nav-module" data-module="cuentas" id="nav-cuentas">
+            <svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5.5h14"></path><path d="M3 10h14"></path><path d="M3 14.5h9"></path><circle cx="15.5" cy="14.5" r="1.5"></circle></svg>
+            <span class="nav-label" id="nav-cuentas-label">Cuentas contables</span>
+          </button>
+          <button type="button" class="nav-module" data-module="asientos" id="nav-asientos">
+            <svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 2.5h10v15H5z"></path><path d="M7.5 6h5"></path><path d="M7.5 9.5h5"></path><path d="M7.5 13h3"></path></svg>
+            <span class="nav-label" id="nav-asientos-label">Asientos contables</span>
+          </button>
+          <button type="button" class="nav-module" data-module="pagos" id="nav-pagos">
+            <svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="5" width="15" height="10" rx="2"></rect><path d="M2.5 8.5h15"></path><path d="M6 12.5h4"></path></svg>
+            <span class="nav-label" id="nav-pagos-label">Pagos</span>
+          </button>
+          <button type="button" class="nav-module" data-module="periodos" id="nav-periodos">
+            <svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4.5" width="14" height="12" rx="1.5"></rect><path d="M3 8h14"></path><path d="M6.5 2.5v4"></path><path d="M13.5 2.5v4"></path></svg>
+            <span class="nav-label" id="nav-periodos-label">Periodos contables</span>
+          </button>
+          <button type="button" class="nav-module" data-module="reportes" id="nav-reportes">
+            <svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 16.5V3.5"></path><path d="M4 16.5h12"></path><path d="m6.5 12 3-3 2.5 2 4-5"></path></svg>
+            <span class="nav-label" id="nav-reportes-label">Reportes financieros</span>
+          </button>
         </nav>
       </aside>
 
       <main class="content" id="app">
         <section id="view-dashboard" aria-labelledby="dashboard-heading">
-          <h1 id="dashboard-heading">Módulo Base ERP</h1>
-          <p id="dashboard-subtitle" class="muted">Gestiona tus entidades y documentos en un solo lugar.</p>
+          <h1 id="dashboard-heading">Contabilidad y Finanzas</h1>
+          <p id="dashboard-subtitle" class="muted">Administra cuentas, asientos, pagos, periodos y reportes financieros en un solo lugar.</p>
+
+          <div class="dashboard-filter">
+            <label for="dashboard-periodo">Periodo contable</label>
+            <select id="dashboard-periodo"></select>
+          </div>
+          <div id="dashboard-empty" class="empty" hidden></div>
 
           <div class="stat-grid">
             <div class="stat-card">
-              <span class="stat-value" id="stat-entities">0</span>
-              <span class="stat-label" id="stat-entities-label">Entidades</span>
+              <span class="stat-value" id="stat-ingresos">$0.00</span>
+              <span class="stat-label">Ingresos</span>
             </div>
             <div class="stat-card">
-              <span class="stat-value" id="stat-documents">0</span>
-              <span class="stat-label" id="stat-documents-label">Documentos</span>
+              <span class="stat-value" id="stat-gastos">$0.00</span>
+              <span class="stat-label">Gastos</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-value" id="stat-resultado">$0.00</span>
+              <span class="stat-label">Resultado financiero</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-value" id="stat-asientos">0</span>
+              <span class="stat-label">Asientos contables</span>
             </div>
           </div>
 
           <h2 id="quick-actions-heading">Acciones rápidas</h2>
           <div class="action-grid">
-            <button type="button" class="action-card" id="action-new-entity">
-              <strong id="action-new-entity-title">Nueva Entidad</strong>
-              <span class="muted" id="action-new-entity-sub">Crear un registro de entidad</span>
+            <button type="button" class="action-card" id="action-nuevo-asiento">
+              <strong id="action-nuevo-asiento-title">Nuevo asiento contable</strong>
+              <span class="muted" id="action-nuevo-asiento-sub">Registrar un asiento en el libro diario</span>
             </button>
-            <button type="button" class="action-card" id="action-new-document">
-              <strong id="action-new-document-title">Nuevo Documento</strong>
-              <span class="muted" id="action-new-document-sub">Registrar un registro de documento</span>
+            <button type="button" class="action-card" id="action-cuentas">
+              <strong id="action-cuentas-title">Cuentas contables</strong>
+              <span class="muted" id="action-cuentas-sub">Consultar el plan de cuentas</span>
             </button>
-            <button type="button" class="action-card" id="action-open-entities">
-              <strong id="action-open-entities-title">Entidades</strong>
-              <span class="muted" id="action-open-entities-sub">Abrir la gestión de entidades</span>
+            <button type="button" class="action-card" id="action-registrar-pago">
+              <strong id="action-registrar-pago-title">Registrar pago</strong>
+              <span class="muted" id="action-registrar-pago-sub">Registrar un pago o cobro</span>
             </button>
-            <button type="button" class="action-card" id="action-find">
-              <strong id="action-find-title">Buscar registros</strong>
-              <span class="muted" id="action-find-sub">Buscar entidades</span>
+            <button type="button" class="action-card" id="action-ver-reportes">
+              <strong id="action-ver-reportes-title">Ver reportes</strong>
+              <span class="muted" id="action-ver-reportes-sub">Consultar los reportes financieros</span>
             </button>
           </div>
         </section>
@@ -256,6 +294,340 @@
             <h2 id="results-heading">Resultados</h2>
             <div id="search-empty" class="empty" hidden>Sin coincidencias para tu búsqueda.</div>
             <ul id="search-results-list" aria-live="polite"></ul>
+          </section>
+        </section>
+
+        <section id="view-resumen" aria-labelledby="resumen-view-heading" hidden>
+          <h1 id="resumen-view-heading">Resumen financiero</h1>
+          <section class="card" aria-labelledby="resumen-panel-heading">
+            <h2 id="resumen-panel-heading">Indicadores del periodo</h2>
+            <div class="field-row">
+              <div>
+                <label for="resumen-periodo">Periodo contable</label>
+                <select id="resumen-periodo"></select>
+                <div class="error" id="error-resumen-periodo" aria-live="polite"></div>
+              </div>
+              <div class="form-actions form-actions-end">
+                <button type="button" id="resumen-reset" class="secondary">Restaurar datos de ejemplo</button>
+              </div>
+            </div>
+            <div id="resumen-empty" class="empty" hidden></div>
+            <div class="stat-grid">
+              <div class="stat-card">
+                <span class="stat-value" id="resumen-ingresos">$0.00</span>
+                <span class="stat-label">Ingresos</span>
+              </div>
+              <div class="stat-card">
+                <span class="stat-value" id="resumen-gastos">$0.00</span>
+                <span class="stat-label">Gastos</span>
+              </div>
+              <div class="stat-card">
+                <span class="stat-value" id="resumen-resultado">$0.00</span>
+                <span class="stat-label">Resultado financiero</span>
+              </div>
+            </div>
+          </section>
+        </section>
+
+        <section id="view-cuentas" aria-labelledby="cuentas-view-heading" hidden>
+          <h1 id="cuentas-view-heading">Cuentas contables</h1>
+          <section class="card" aria-labelledby="cuenta-form-heading">
+            <h2 id="cuenta-form-heading">Agregar / Editar cuenta contable</h2>
+            <form id="cuenta-form">
+              <input type="hidden" id="cuenta-id" />
+              <div class="field-row">
+                <div>
+                  <label for="cuenta-code">Código *</label>
+                  <input id="cuenta-code" name="cuenta-code" required />
+                  <div class="error" id="error-cuenta-code" aria-live="polite"></div>
+                </div>
+                <div>
+                  <label for="cuenta-name">Nombre *</label>
+                  <input id="cuenta-name" name="cuenta-name" required />
+                  <div class="error" id="error-cuenta-name" aria-live="polite"></div>
+                </div>
+              </div>
+              <div>
+                <label for="cuenta-type">Tipo *</label>
+                <select id="cuenta-type" name="cuenta-type">
+                  <option value="activo">Activo</option>
+                  <option value="pasivo">Pasivo</option>
+                  <option value="patrimonio">Patrimonio</option>
+                  <option value="ingreso">Ingreso</option>
+                  <option value="gasto">Gasto</option>
+                </select>
+                <div class="error" id="error-cuenta-type" aria-live="polite"></div>
+              </div>
+              <div>
+                <label for="cuenta-parent">Cuenta padre</label>
+                <select id="cuenta-parent" name="cuenta-parent"></select>
+                <div class="error" id="error-cuenta-parent" aria-live="polite"></div>
+              </div>
+              <div>
+                <label for="cuenta-status">Estado</label>
+                <select id="cuenta-status" name="cuenta-status">
+                  <option value="activa">Activa</option>
+                  <option value="inactiva">Inactiva</option>
+                </select>
+                <div class="error" id="error-cuenta-status" aria-live="polite"></div>
+              </div>
+              <div class="form-actions">
+                <button type="submit" id="cuenta-submit" class="primary">Guardar cuenta</button>
+                <button type="button" id="cuenta-cancel-edit" class="secondary" hidden>Cancelar edición</button>
+              </div>
+            </form>
+          </section>
+          <section class="card card-wide" aria-labelledby="cuentas-lista-heading">
+            <h2 id="cuentas-lista-heading">Plan de cuentas</h2>
+            <div id="cuentas-empty" class="empty" hidden>No hay cuentas contables registradas.</div>
+            <div id="cuentas-lista"></div>
+          </section>
+        </section>
+
+        <section id="view-asientos" aria-labelledby="asientos-view-heading" hidden>
+          <h1 id="asientos-view-heading">Asientos contables</h1>
+          <section class="card card-wide" aria-labelledby="asiento-form-heading">
+            <h2 id="asiento-form-heading">Registrar asiento contable</h2>
+            <form id="asiento-form">
+              <input type="hidden" id="asiento-id" />
+              <div class="field-row">
+                <div>
+                  <label for="asiento-series">Serie</label>
+                  <input id="asiento-series" name="asiento-series" placeholder="p. ej., DI" />
+                  <div class="error" id="error-asiento-series" aria-live="polite"></div>
+                </div>
+                <div>
+                  <label for="asiento-folio">Folio *</label>
+                  <input id="asiento-folio" name="asiento-folio" type="number" min="1" step="1" placeholder="Se asigna automáticamente" />
+                  <div class="error" id="error-asiento-folio" aria-live="polite"></div>
+                </div>
+              </div>
+              <div class="field-row">
+                <div>
+                  <label for="asiento-date">Fecha *</label>
+                  <input id="asiento-date" name="asiento-date" type="date" required />
+                  <div class="error" id="error-asiento-date" aria-live="polite"></div>
+                </div>
+                <div>
+                  <label for="asiento-periodo">Periodo contable *</label>
+                  <select id="asiento-periodo" name="asiento-periodo"></select>
+                  <div class="error" id="error-asiento-periodo" aria-live="polite"></div>
+                </div>
+              </div>
+              <div>
+                <label for="asiento-concept">Concepto *</label>
+                <input id="asiento-concept" name="asiento-concept" required />
+                <div class="error" id="error-asiento-concept" aria-live="polite"></div>
+              </div>
+              <div>
+                <label for="asiento-entity">Entidad</label>
+                <select id="asiento-entity" name="asiento-entity"></select>
+              </div>
+              <div class="lineas-cabecera">
+                <h3>Líneas contables</h3>
+                <button type="button" id="asiento-agregar-linea" class="secondary">Agregar línea</button>
+              </div>
+              <div id="asiento-lineas"></div>
+              <div class="error" id="error-asiento-lineas" aria-live="polite"></div>
+              <div class="totales-asiento">
+                <span>Débitos: <strong id="asiento-total-debitos">$0.00</strong></span>
+                <span>Créditos: <strong id="asiento-total-creditos">$0.00</strong></span>
+                <span>Diferencia: <strong id="asiento-diferencia">$0.00</strong></span>
+              </div>
+              <div class="form-actions">
+                <button type="submit" id="asiento-submit" class="primary">Guardar asiento</button>
+                <button type="button" id="asiento-cancel-edit" class="secondary" hidden>Cancelar edición</button>
+              </div>
+            </form>
+          </section>
+          <section class="card card-wide" aria-labelledby="asientos-lista-heading">
+            <h2 id="asientos-lista-heading">Asientos registrados</h2>
+            <div id="asientos-empty" class="empty" hidden>No hay asientos contables registrados.</div>
+            <div id="asientos-lista"></div>
+          </section>
+        </section>
+
+        <section id="view-pagos" aria-labelledby="pagos-view-heading" hidden>
+          <h1 id="pagos-view-heading">Pagos y cobros</h1>
+          <section class="card card-wide" aria-labelledby="pago-form-heading">
+            <h2 id="pago-form-heading">Registrar pago o cobro</h2>
+            <form id="pago-form">
+              <input type="hidden" id="pago-id" />
+              <div class="field-row">
+                <div>
+                  <label for="pago-date">Fecha *</label>
+                  <input id="pago-date" name="pago-date" type="date" required />
+                  <div class="error" id="error-pago-date" aria-live="polite"></div>
+                </div>
+                <div>
+                  <label for="pago-amount">Monto *</label>
+                  <input id="pago-amount" name="pago-amount" type="number" min="0" step="0.01" required />
+                  <div class="error" id="error-pago-amount" aria-live="polite"></div>
+                </div>
+              </div>
+              <div class="field-row">
+                <div>
+                  <label for="pago-tipo">Tipo de operación *</label>
+                  <select id="pago-tipo" name="pago-tipo">
+                    <option value="pago">Pago</option>
+                    <option value="cobro">Cobro</option>
+                  </select>
+                  <div class="error" id="error-pago-tipo" aria-live="polite"></div>
+                </div>
+                <div>
+                  <label for="pago-method">Método</label>
+                  <select id="pago-method" name="pago-method">
+                    <option value="">--</option>
+                    <option value="efectivo">Efectivo</option>
+                    <option value="transferencia">Transferencia</option>
+                    <option value="cheque">Cheque</option>
+                    <option value="tarjeta">Tarjeta</option>
+                  </select>
+                  <div class="error" id="error-pago-method" aria-live="polite"></div>
+                </div>
+              </div>
+              <div>
+                <label for="pago-entity">Entidad *</label>
+                <select id="pago-entity" name="pago-entity"></select>
+                <div class="error" id="error-pago-entity" aria-live="polite"></div>
+              </div>
+              <div class="field-row">
+                <div>
+                  <label for="pago-document">Documento</label>
+                  <select id="pago-document" name="pago-document"></select>
+                  <div class="error" id="error-pago-document" aria-live="polite"></div>
+                </div>
+                <div>
+                  <label for="pago-asiento">Asiento</label>
+                  <select id="pago-asiento" name="pago-asiento"></select>
+                  <div class="error" id="error-pago-asiento" aria-live="polite"></div>
+                </div>
+              </div>
+              <div class="field-row">
+                <div>
+                  <label for="pago-series">Serie</label>
+                  <input id="pago-series" name="pago-series" placeholder="p. ej., COB" />
+                  <div class="error" id="error-pago-series" aria-live="polite"></div>
+                </div>
+                <div>
+                  <label for="pago-folio">Folio</label>
+                  <input id="pago-folio" name="pago-folio" type="number" min="1" step="1" placeholder="Se asigna automáticamente" />
+                  <div class="error" id="error-pago-folio" aria-live="polite"></div>
+                </div>
+              </div>
+              <div>
+                <label for="pago-status">Estado</label>
+                <select id="pago-status" name="pago-status">
+                  <option value="pendiente">Pendiente</option>
+                  <option value="aplicado">Aplicado</option>
+                  <option value="cancelado">Cancelado</option>
+                </select>
+                <div class="error" id="error-pago-status" aria-live="polite"></div>
+              </div>
+              <div>
+                <label for="pago-notes">Notas</label>
+                <textarea id="pago-notes" name="pago-notes" rows="2"></textarea>
+              </div>
+              <div class="form-actions">
+                <button type="submit" id="pago-submit" class="primary">Guardar pago</button>
+                <button type="button" id="pago-cancel-edit" class="secondary" hidden>Cancelar edición</button>
+              </div>
+            </form>
+          </section>
+          <section class="card card-wide" aria-labelledby="pagos-lista-heading">
+            <h2 id="pagos-lista-heading">Pagos y cobros registrados</h2>
+            <div class="field-row">
+              <div>
+                <label for="pagos-filtro-tipo">Tipo</label>
+                <select id="pagos-filtro-tipo">
+                  <option value="">Todos</option>
+                  <option value="pago">Pagos</option>
+                  <option value="cobro">Cobros</option>
+                </select>
+              </div>
+              <div>
+                <label for="pagos-filtro-entidad">Entidad</label>
+                <select id="pagos-filtro-entidad"></select>
+              </div>
+            </div>
+            <div id="pagos-empty" class="empty" hidden>No hay pagos o cobros registrados.</div>
+            <div id="pagos-lista"></div>
+            <div id="pago-detalle" class="detalle-card" hidden></div>
+          </section>
+        </section>
+
+        <section id="view-periodos" aria-labelledby="periodos-view-heading" hidden>
+          <h1 id="periodos-view-heading">Periodos contables</h1>
+          <section class="card" aria-labelledby="periodo-form-heading">
+            <h2 id="periodo-form-heading">Agregar / Editar periodo contable</h2>
+            <form id="periodo-form">
+              <input type="hidden" id="periodo-id" />
+              <div>
+                <label for="periodo-name">Nombre *</label>
+                <input id="periodo-name" name="periodo-name" placeholder="p. ej., 2026-11" required />
+                <div class="error" id="error-periodo-name" aria-live="polite"></div>
+              </div>
+              <div class="field-row">
+                <div>
+                  <label for="periodo-start">Fecha de inicio *</label>
+                  <input id="periodo-start" name="periodo-start" type="date" required />
+                  <div class="error" id="error-periodo-start" aria-live="polite"></div>
+                </div>
+                <div>
+                  <label for="periodo-end">Fecha de término *</label>
+                  <input id="periodo-end" name="periodo-end" type="date" required />
+                  <div class="error" id="error-periodo-end" aria-live="polite"></div>
+                </div>
+              </div>
+              <div>
+                <label for="periodo-status">Estado</label>
+                <select id="periodo-status" name="periodo-status">
+                  <option value="abierto">Abierto</option>
+                  <option value="cerrado">Cerrado</option>
+                </select>
+                <div class="error" id="error-periodo-status" aria-live="polite"></div>
+              </div>
+              <div class="form-actions">
+                <button type="submit" id="periodo-submit" class="primary">Guardar periodo</button>
+                <button type="button" id="periodo-cancel-edit" class="secondary" hidden>Cancelar edición</button>
+              </div>
+            </form>
+          </section>
+          <section class="card card-wide" aria-labelledby="periodos-lista-heading">
+            <h2 id="periodos-lista-heading">Periodos registrados</h2>
+            <div id="periodos-empty" class="empty" hidden>No hay periodos contables registrados.</div>
+            <div id="periodos-lista"></div>
+          </section>
+        </section>
+
+        <section id="view-reportes" aria-labelledby="reportes-view-heading" hidden>
+          <h1 id="reportes-view-heading">Reportes financieros</h1>
+          <section class="card card-wide" aria-labelledby="reportes-panel-heading">
+            <h2 id="reportes-panel-heading">Movimientos por periodo</h2>
+            <div>
+              <label for="reportes-periodo">Periodo contable</label>
+              <select id="reportes-periodo"></select>
+            </div>
+            <div id="reportes-empty" class="empty" hidden></div>
+            <table class="tabla-financiera" id="reportes-tabla" aria-describedby="reportes-empty">
+              <thead>
+                <tr>
+                  <th scope="col">Fecha</th>
+                  <th scope="col">Concepto</th>
+                  <th scope="col">Cuenta</th>
+                  <th scope="col" class="num">Débito</th>
+                  <th scope="col" class="num">Crédito</th>
+                </tr>
+              </thead>
+              <tbody id="reportes-movimientos"></tbody>
+              <tfoot>
+                <tr>
+                  <th scope="row" colspan="3">Totales del periodo</th>
+                  <th scope="col" class="num" id="reportes-total-debitos">$0.00</th>
+                  <th scope="col" class="num" id="reportes-total-creditos">$0.00</th>
+                </tr>
+              </tfoot>
+            </table>
           </section>
         </section>
       </main>

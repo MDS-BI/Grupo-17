@@ -161,6 +161,7 @@ erDiagram
         string numero UK
         string series "parte de UK(series, folio)"
         number folio "parte de UK(series, folio)"
+        string tipo "cobro | pago"
         string date
         string entity_id FK
         string document_id FK

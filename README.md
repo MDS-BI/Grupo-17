@@ -1,15 +1,14 @@
 # ERP Software Base Module (Vite + Vanilla JS)
 
-Minimal single-page app serving as an Enterprise Resource Planning (ERP) software base module. It provides the common foundation for building custom ERP modules: master data management (Entities) and linked transactional documents (Documents) with create/edit/delete/search, validation, and browser localStorage persistence — using Vite and vanilla HTML, CSS, and JavaScript.
-
-The user interface is fully in **Spanish** (default terms: Entidad / Documento; module name: Módulo Base ERP), including labels, validation messages, empty states, and dialogs.
+A single-page ERP application focused on the Accounting and Finance module. It provides tools for managing chart of accounts, accounting journal entries, payments and receipts, and accounting periods. It also includes a financial dashboard with key indicators and financial reports to monitor income, expenses, and financial results. The module incorporates accounting validations, data consistency rules, and browser localStorage persistence, using Vite and vanilla HTML, CSS, and JavaScript.
 
 Entities carry standard ERP master-data fields (name, code, tax ID, email, phone, address, category, target date, credit limit, payment terms). Documents use series + folio numbering and carry a monetary breakdown (subtotal, discount, tax, total), currency, payment terms, notes, quantity, dates, and status.
 
 The app presents itself as a coherent ERP workspace:
 
-- **Workspace shell** — every screen lives inside a branded chrome: a top bar with a logo (an SVG monogram derived from the module name) and module name, plus a persistent sidebar of module buttons (Panel, Entidades, Documentos, Búsqueda). The active module is highlighted (`aria-current="page"`), and the sidebar collapses to an icon rail on narrow viewports.
-- **Home dashboard** — the entry screen offers quick-action buttons for key ERP tasks (new entity, new document, open management areas, find records) and live statistic cards showing record counts.
+- **Workspace shell** — every screen lives inside a branded chrome: a top bar with a logo (an SVG monogram derived from the module name) and module name, plus a persistent sidebar of module buttons (Panel, Entidades, Documentos, Búsqueda, Resumen financiero, Cuentas contables, Asientos contables, Pagos, Periodos contables, Reportes financieros). The active module is highlighted (`aria-current="page"`), and the sidebar collapses to an icon rail on narrow viewports.
+- **Home dashboard** — the entry screen shows period-filtered financial indicators (income, expenses, net result, and registered journal entries) plus quick actions for creating journal entries, opening the chart of accounts, recording payments, and viewing reports. Entity and document management remain available from the sidebar.
+- **Accounting and finance module** — double-entry ledger with hierarchical chart of accounts, journal entries (draft → approved → cancelled), payments and collections, accounting periods, and period-based financial reports.
 - **Design tokens** — styling is driven by CSS custom properties in `src/styles.css`, so branding changes apply globally.
 
 ## Setup
@@ -37,6 +36,21 @@ Or a one-off run without watch mode:
 npx vitest run
 ```
 
+## Accounting and Finance Module
+
+The `002-contabilidad-finanzas` feature extends the base app with:
+
+- **Resumen financiero** — income, expenses, and net result for the selected period, with a clear empty state.
+- **Cuentas contables** — hierarchical chart of accounts (asset, liability, equity, income, expense) with leaf-account rules and safe deletion/inactivation.
+- **Asientos contables** — balanced journal entries with dynamic debit/credit lines, exact integer-cent validation, and draft → approved → cancelled lifecycle. Closed periods reject new entries.
+- **Pagos y cobros** — payments and collections linked to an entity and optionally to a document and journal entry, with type/entity filters and detail view.
+- **Periodos contables** — non-overlapping periods that can be opened or closed; periods with entries are closed instead of deleted.
+- **Reportes financieros** — period-filtered movements with debit/credit totals and empty states.
+
+All amounts are stored as integer cents and formatted as MXN. The first time an accounting view opens, deterministic example data is seeded (chart of accounts, four periods, journal entries, payments, and two demo entities/documents). Use **Restaurar datos de ejemplo** on the summary screen to reset the accounting data to that seed at any time.
+
+Accounting data is stored under the `erp_contabilidad:` prefix (`cuentas`, `asientos`, `lineas`, `pagos`, `periodos`); base entities and documents remain under `erp_base_module:`.
+
 ## Building Custom Modules
 
 Custom ERP modules built on this base define:
@@ -61,6 +75,7 @@ If the configuration is invalid (unknown types, bad keys, transitions referencin
 
 ## Notes
 
-- Data is persisted to `localStorage` under the keys `erp_base_module:entities` and `erp_base_module:documents`.
+- Data is persisted to `localStorage` under the keys `erp_base_module:entities` and `erp_base_module:documents`, plus the accounting keys prefixed `erp_contabilidad:`.
 - Deleting an entity also deletes its documents (cascade).
+- Accounting entries in approved or cancelled states are voided logically; only draft entries can be deleted physically.
 - This project intentionally uses vanilla HTML, CSS, and JavaScript for simplicity.

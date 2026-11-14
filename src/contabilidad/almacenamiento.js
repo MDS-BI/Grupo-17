@@ -1,0 +1,80 @@
+import { loadEntities, saveEntities, loadDocuments, saveDocuments } from '../storage.js';
+import { generarSemilla, generarSemillaBase } from './semilla.js';
+
+const PREFIJO = 'erp_contabilidad:';
+
+export const CLAVES = Object.freeze({
+  cuentas: `${PREFIJO}cuentas`,
+  asientos: `${PREFIJO}asientos`,
+  lineas: `${PREFIJO}lineas`,
+  pagos: `${PREFIJO}pagos`,
+  periodos: `${PREFIJO}periodos`
+});
+
+function leerLista(clave) {
+  try {
+    const crudo = localStorage.getItem(clave);
+    if (!crudo) return [];
+    const valor = JSON.parse(crudo);
+    return Array.isArray(valor) ? valor : [];
+  } catch (error) {
+    console.error(`No se pudo leer ${clave} del almacenamiento`, error);
+    return [];
+  }
+}
+
+function escribirLista(clave, lista) {
+  localStorage.setItem(clave, JSON.stringify(Array.isArray(lista) ? lista : []));
+}
+
+export function loadCuentas() { return leerLista(CLAVES.cuentas); }
+export function saveCuentas(lista) { escribirLista(CLAVES.cuentas, lista); }
+export function loadAsientos() { return leerLista(CLAVES.asientos); }
+export function saveAsientos(lista) { escribirLista(CLAVES.asientos, lista); }
+export function loadLineas() { return leerLista(CLAVES.lineas); }
+export function saveLineas(lista) { escribirLista(CLAVES.lineas, lista); }
+export function loadPagos() { return leerLista(CLAVES.pagos); }
+export function savePagos(lista) { escribirLista(CLAVES.pagos, lista); }
+export function loadPeriodos() { return leerLista(CLAVES.periodos); }
+export function savePeriodos(lista) { escribirLista(CLAVES.periodos, lista); }
+
+export function limpiarContabilidad() {
+  Object.values(CLAVES).forEach((clave) => localStorage.removeItem(clave));
+}
+
+export function hayDatosContables() {
+  return loadCuentas().length > 0
+    || loadAsientos().length > 0
+    || loadPagos().length > 0
+    || loadPeriodos().length > 0;
+}
+
+function asegurarDatosBase() {
+  let entidades = loadEntities();
+  let documentos = loadDocuments();
+  if (entidades.length === 0) {
+    const base = generarSemillaBase();
+    entidades = base.entidades;
+    documentos = base.documentos;
+    saveEntities(entidades);
+    saveDocuments(documentos);
+  }
+  return { entidades, documentos };
+}
+
+export function inicializarContabilidad({ forzar = false } = {}) {
+  if (!forzar && hayDatosContables()) return false;
+  const { entidades, documentos } = asegurarDatosBase();
+  const datos = generarSemilla({ entidades, documentos });
+  saveCuentas(datos.cuentas);
+  savePeriodos(datos.periodos);
+  saveAsientos(datos.asientos);
+  saveLineas(datos.lineas);
+  savePagos(datos.pagos);
+  return true;
+}
+
+export function reiniciarDatosEjemplo() {
+  limpiarContabilidad();
+  return inicializarContabilidad({ forzar: true });
+}

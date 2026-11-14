@@ -65,7 +65,7 @@ describe('User Story 13 - branded ERP workspace shell', () => {
     expect(qs('nav-entities-label').textContent).toBe('Entidades');
     expect(qs('nav-documents-label').textContent).toBe('Documentos');
     expect(qs('nav-search-label').textContent).toBe('Búsqueda');
-    expect(document.querySelectorAll('.nav-module').length).toBe(4);
+    expect(document.querySelectorAll('.nav-module').length).toBe(10);
   });
 
   it('uses remapped terms on the sidebar for tailored modules', async () => {
@@ -130,6 +130,6 @@ describe('User Story 13 - branded ERP workspace shell', () => {
 
   it('falls back to the default accent when the color is invalid', async () => {
     await bootWith({ moduleName: 'X', theme: { accentColor: 'not-a-color' } });
-    expect(document.documentElement.style.getPropertyValue('--accent')).toBe('#2563eb');
+    expect(document.documentElement.style.getPropertyValue('--accent')).toBe('#0f766e');
   });
 });

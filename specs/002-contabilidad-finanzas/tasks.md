@@ -26,11 +26,11 @@
 
 **Propósito**: Preparar la estructura, navegación y estilos base del módulo contable dentro de la aplicación Vite existente.
 
-- [ ] T001 Crear la estructura de carpetas del módulo contable en `src/contabilidad/`, `src/components/contabilidad/`, `tests/unit/contabilidad/` y `tests/integration/contabilidad/`
-- [ ] T002 [P] Agregar los botones de navegación y contenedores de vista de Resumen, Cuentas, Asientos, Pagos, Periodos y Reportes en `index.html`
-- [ ] T003 [P] Extender las etiquetas y el nombre del módulo contable en `src/module-config.js` y `src/components/shell.js`
-- [ ] T004 [P] Agregar tokens de diseño, estilos de tablas financieras, formularios y estados vacíos contables en `src/styles.css`
-- [ ] T005 [P] Crear ayudantes de prueba y utilidades de reinicio del almacenamiento contable en `tests/setup/contabilidad.js`
+- [X] T001 Crear la estructura de carpetas del módulo contable en `src/contabilidad/`, `src/components/contabilidad/`, `tests/unit/contabilidad/` y `tests/integration/contabilidad/`
+- [X] T002 [P] Agregar los botones de navegación y contenedores de vista de Resumen, Cuentas, Asientos, Pagos, Periodos y Reportes en `index.html`
+- [X] T003 [P] Extender las etiquetas y el nombre del módulo contable en `src/module-config.js` y `src/components/shell.js`
+- [X] T004 [P] Agregar tokens de diseño, estilos de tablas financieras, formularios y estados vacíos contables en `src/styles.css`
+- [X] T005 [P] Crear ayudantes de prueba y utilidades de reinicio del almacenamiento contable en `tests/setup/contabilidad.js`
 
 ---
 
@@ -40,16 +40,16 @@
 
 **CRÍTICO**: Ninguna historia de usuario puede comenzar hasta completar esta fase.
 
-- [ ] T006 [P] Implementar la utilidad monetaria exacta en centavos y el formateo MXN en `src/contabilidad/dinero.js`
-- [ ] T007 [P] Implementar la validación, comparación y formateo de fechas y periodos en `src/contabilidad/fechas.js`
-- [ ] T008 [P] Implementar ayudantes compartidos de interfaz contable (errores de formulario, formato de moneda/fecha y renderizado de tablas) en `src/components/contabilidad/comun.js`
-- [ ] T009 Implementar la capa central de almacenamiento contable con claves, lectura/escritura, reinicio y orquestación de semilla en `src/contabilidad/almacenamiento.js`
-- [ ] T010 Implementar la semilla determinista de cuentas, periodos, asientos y pagos vinculados a Entity y Document en `src/contabilidad/semilla.js`
-- [ ] T011 Implementar las validaciones compartidas de cuentas, asientos, líneas, pagos y periodos en `src/contabilidad/validaciones-cuentas.js`, `src/contabilidad/validaciones-asientos.js`, `src/contabilidad/validaciones-pagos.js` y `src/contabilidad/validaciones-periodos.js`
-- [ ] T012 Implementar los cálculos de resumen, movimientos y totales de reportes en `src/contabilidad/reportes.js`
-- [ ] T013 Extender `src/app.js` con el registro de módulos contables, el cambio de vista y la inicialización de la semilla contable
-- [ ] T014 Extender `src/components/shell.js` y `src/app.js` para aplicar las etiquetas contables y el estado activo de la navegación
-- [ ] T015 Agregar pruebas fundacionales de almacenamiento, semilla determinista y utilidades de dinero/fechas en `tests/unit/contabilidad/almacenamiento.test.js` y `tests/integration/contabilidad/base.test.js`
+- [X] T006 [P] Implementar la utilidad monetaria exacta en centavos y el formateo MXN en `src/contabilidad/dinero.js`
+- [X] T007 [P] Implementar la validación, comparación y formateo de fechas y periodos en `src/contabilidad/fechas.js`
+- [X] T008 [P] Implementar ayudantes compartidos de interfaz contable (errores de formulario, formato de moneda/fecha y renderizado de tablas) en `src/components/contabilidad/comun.js`
+- [X] T009 Implementar la capa central de almacenamiento contable con claves, lectura/escritura, reinicio y orquestación de semilla en `src/contabilidad/almacenamiento.js`
+- [X] T010 Implementar la semilla determinista de cuentas, periodos, asientos y pagos vinculados a Entity y Document en `src/contabilidad/semilla.js`
+- [X] T011 Implementar las validaciones compartidas de cuentas, asientos, líneas, pagos y periodos en `src/contabilidad/validaciones-cuentas.js`, `src/contabilidad/validaciones-asientos.js`, `src/contabilidad/validaciones-pagos.js` y `src/contabilidad/validaciones-periodos.js`
+- [X] T012 Implementar los cálculos de resumen, movimientos y totales de reportes en `src/contabilidad/reportes.js`
+- [X] T013 Extender `src/app.js` con el registro de módulos contables, el cambio de vista y la inicialización de la semilla contable
+- [X] T014 Extender `src/components/shell.js` y `src/app.js` para aplicar las etiquetas contables y el estado activo de la navegación
+- [X] T015 Agregar pruebas fundacionales de almacenamiento, semilla determinista y utilidades de dinero/fechas en `tests/unit/contabilidad/almacenamiento.test.js` y `tests/integration/contabilidad/base.test.js`
 
 **Punto de control**: La infraestructura contable está lista y las historias de usuario pueden comenzar.
 
@@ -63,14 +63,14 @@
 
 ### Pruebas para la Historia de Usuario 1
 
-- [ ] T016 [P] [US1] Agregar pruebas unitarias de cálculo del resumen financiero en `tests/unit/contabilidad/reportes-resumen.test.js`
-- [ ] T017 [P] [US1] Agregar pruebas de integración del panel de resumen, filtro por periodo y estado vacío en `tests/integration/contabilidad/resumen.test.js`
+- [X] T016 [P] [US1] Agregar pruebas unitarias de cálculo del resumen financiero en `tests/unit/contabilidad/reportes-resumen.test.js`
+- [X] T017 [P] [US1] Agregar pruebas de integración del panel de resumen, filtro por periodo y estado vacío en `tests/integration/contabilidad/resumen.test.js`
 
 ### Implementación para la Historia de Usuario 1
 
-- [ ] T018 [P] [US1] Crear el componente del panel de resumen con indicadores, selector de periodo y estado vacío en `src/components/contabilidad/resumen.js`
-- [ ] T019 [US1] Conectar el panel de resumen con `src/contabilidad/reportes.js` y el selector de periodo en `src/app.js`
-- [ ] T020 [US1] Agregar estilos de tarjetas e indicadores del resumen financiero en `src/styles.css`
+- [X] T018 [P] [US1] Crear el componente del panel de resumen con indicadores, selector de periodo y estado vacío en `src/components/contabilidad/resumen.js`
+- [X] T019 [US1] Conectar el panel de resumen con `src/contabilidad/reportes.js` y el selector de periodo en `src/app.js`
+- [X] T020 [US1] Agregar estilos de tarjetas e indicadores del resumen financiero en `src/styles.css`
 
 **Punto de control**: El resumen financiero funciona de forma independiente con datos de ejemplo.
 
@@ -84,16 +84,16 @@
 
 ### Pruebas para la Historia de Usuario 2
 
-- [ ] T021 [P] [US2] Agregar pruebas unitarias de validación de cuentas, jerarquía y código duplicado en `tests/unit/contabilidad/validaciones-cuentas.test.js`
-- [ ] T022 [P] [US2] Agregar pruebas de integración de alta, edición, listado y jerarquía de cuentas en `tests/integration/contabilidad/cuentas.test.js`
+- [X] T021 [P] [US2] Agregar pruebas unitarias de validación de cuentas, jerarquía y código duplicado en `tests/unit/contabilidad/validaciones-cuentas.test.js`
+- [X] T022 [P] [US2] Agregar pruebas de integración de alta, edición, listado y jerarquía de cuentas en `tests/integration/contabilidad/cuentas.test.js`
 
 ### Implementación para la Historia de Usuario 2
 
-- [ ] T023 [P] [US2] Crear el formulario de cuentas contables con código, nombre, tipo, cuenta padre y estado en `src/components/contabilidad/cuenta-form.js`
-- [ ] T024 [P] [US2] Crear el listado jerárquico de cuentas con identificación de cuentas principales y subcuentas en `src/components/contabilidad/cuenta-list.js`
-- [ ] T025 [US2] Implementar el CRUD y la persistencia de la jerarquía de cuentas en `src/contabilidad/cuentas.js`
-- [ ] T026 [US2] Conectar el formulario y listado de cuentas con la validación y el almacenamiento en `src/app.js`
-- [ ] T027 [US2] Agregar estilos de formulario, árbol y estados de cuenta en `src/styles.css`
+- [X] T023 [P] [US2] Crear el formulario de cuentas contables con código, nombre, tipo, cuenta padre y estado en `src/components/contabilidad/cuenta-form.js`
+- [X] T024 [P] [US2] Crear el listado jerárquico de cuentas con identificación de cuentas principales y subcuentas en `src/components/contabilidad/cuenta-list.js`
+- [X] T025 [US2] Implementar el CRUD y la persistencia de la jerarquía de cuentas en `src/contabilidad/cuentas.js`
+- [X] T026 [US2] Conectar el formulario y listado de cuentas con la validación y el almacenamiento en `src/app.js`
+- [X] T027 [US2] Agregar estilos de formulario, árbol y estados de cuenta en `src/styles.css`
 
 **Punto de control**: El plan de cuentas es completamente funcional y verificable de forma independiente.
 
@@ -107,17 +107,17 @@
 
 ### Pruebas para la Historia de Usuario 3
 
-- [ ] T028 [P] [US3] Agregar pruebas unitarias de partida doble, líneas mínimas, monto en un solo lado y bloqueo por periodo cerrado en `tests/unit/contabilidad/validaciones-asientos.test.js`
-- [ ] T029 [P] [US3] Agregar pruebas de integración de alta de asiento, líneas, desbalance, aprobación, cancelación y periodo cerrado en `tests/integration/contabilidad/asientos.test.js`
+- [X] T028 [P] [US3] Agregar pruebas unitarias de partida doble, líneas mínimas, monto en un solo lado y bloqueo por periodo cerrado en `tests/unit/contabilidad/validaciones-asientos.test.js`
+- [X] T029 [P] [US3] Agregar pruebas de integración de alta de asiento, líneas, desbalance, aprobación, cancelación y periodo cerrado en `tests/integration/contabilidad/asientos.test.js`
 
 ### Implementación para la Historia de Usuario 3
 
-- [ ] T030 [P] [US3] Crear el formulario de asiento con cabecera y líneas dinámicas de cuenta, débito y crédito en `src/components/contabilidad/asiento-form.js`
-- [ ] T031 [P] [US3] Crear el listado y detalle de asientos con totales, estado y acciones de aprobar/cancelar en `src/components/contabilidad/asiento-list.js`
-- [ ] T032 [US3] Implementar el CRUD de asientos y líneas, el recálculo de totales y el ciclo de estados en `src/contabilidad/asientos.js`
-- [ ] T033 [US3] Implementar las validaciones de asiento y línea, incluyendo periodo abierto y bloqueo tras aprobación, en `src/contabilidad/validaciones-asientos.js`
-- [ ] T034 [US3] Conectar las vistas de asientos, el alta/eliminación de líneas y las acciones de guardar, aprobar y cancelar en `src/app.js`
-- [ ] T035 [US3] Agregar estilos de formulario, tabla de líneas, totales y estados de asiento en `src/styles.css`
+- [X] T030 [P] [US3] Crear el formulario de asiento con cabecera y líneas dinámicas de cuenta, débito y crédito en `src/components/contabilidad/asiento-form.js`
+- [X] T031 [P] [US3] Crear el listado y detalle de asientos con totales, estado y acciones de aprobar/cancelar en `src/components/contabilidad/asiento-list.js`
+- [X] T032 [US3] Implementar el CRUD de asientos y líneas, el recálculo de totales y el ciclo de estados en `src/contabilidad/asientos.js`
+- [X] T033 [US3] Implementar las validaciones de asiento y línea, incluyendo periodo abierto y bloqueo tras aprobación, en `src/contabilidad/validaciones-asientos.js`
+- [X] T034 [US3] Conectar las vistas de asientos, el alta/eliminación de líneas y las acciones de guardar, aprobar y cancelar en `src/app.js`
+- [X] T035 [US3] Agregar estilos de formulario, tabla de líneas, totales y estados de asiento en `src/styles.css`
 
 **Punto de control**: Los asientos contables funcionan de forma independiente con cuentas y periodos de la semilla.
 
@@ -131,16 +131,16 @@
 
 ### Pruebas para la Historia de Usuario 4
 
-- [ ] T036 [P] [US4] Agregar pruebas unitarias de validación de pagos, monto positivo y vínculos a entidad/documento/asiento en `tests/unit/contabilidad/validaciones-pagos.test.js`
-- [ ] T037 [P] [US4] Agregar pruebas de integración de registro, listado, detalle y validación de pagos en `tests/integration/contabilidad/pagos.test.js`
+- [X] T036 [P] [US4] Agregar pruebas unitarias de validación de pagos, monto positivo y vínculos a entidad/documento/asiento en `tests/unit/contabilidad/validaciones-pagos.test.js`
+- [X] T037 [P] [US4] Agregar pruebas de integración de registro, listado, detalle y validación de pagos en `tests/integration/contabilidad/pagos.test.js`
 
 ### Implementación para la Historia de Usuario 4
 
-- [ ] T038 [P] [US4] Crear el formulario de pagos y cobros con fecha, monto, tipo, método, entidad, documento y asiento opcional en `src/components/contabilidad/pago-form.js`
-- [ ] T039 [P] [US4] Crear el listado y detalle de pagos y cobros con filtros por tipo y entidad en `src/components/contabilidad/pago-list.js`
-- [ ] T040 [US4] Implementar el CRUD de pagos y los vínculos con Entity, Document y AsientoContable en `src/contabilidad/pagos.js`
-- [ ] T041 [US4] Conectar las vistas de pagos y los selectores de entidad, documento y asiento en `src/app.js`
-- [ ] T042 [US4] Agregar estilos de formulario, listado, detalle e insignias de tipo de pago en `src/styles.css`
+- [X] T038 [P] [US4] Crear el formulario de pagos y cobros con fecha, monto, tipo, método, entidad, documento y asiento opcional en `src/components/contabilidad/pago-form.js`
+- [X] T039 [P] [US4] Crear el listado y detalle de pagos y cobros con filtros por tipo y entidad en `src/components/contabilidad/pago-list.js`
+- [X] T040 [US4] Implementar el CRUD de pagos y los vínculos con Entity, Document y AsientoContable en `src/contabilidad/pagos.js`
+- [X] T041 [US4] Conectar las vistas de pagos y los selectores de entidad, documento y asiento en `src/app.js`
+- [X] T042 [US4] Agregar estilos de formulario, listado, detalle e insignias de tipo de pago en `src/styles.css`
 
 **Punto de control**: Los pagos y cobros funcionan de forma independiente con las entidades y documentos base.
 
@@ -154,16 +154,16 @@
 
 ### Pruebas para la Historia de Usuario 5
 
-- [ ] T043 [P] [US5] Agregar pruebas unitarias de validación de fechas, solapamiento y bloqueo de periodos cerrados en `tests/unit/contabilidad/validaciones-periodos.test.js`
-- [ ] T044 [P] [US5] Agregar pruebas de integración de alta, listado, cierre y bloqueo de asientos por periodo en `tests/integration/contabilidad/periodos.test.js`
+- [X] T043 [P] [US5] Agregar pruebas unitarias de validación de fechas, solapamiento y bloqueo de periodos cerrados en `tests/unit/contabilidad/validaciones-periodos.test.js`
+- [X] T044 [P] [US5] Agregar pruebas de integración de alta, listado, cierre y bloqueo de asientos por periodo en `tests/integration/contabilidad/periodos.test.js`
 
 ### Implementación para la Historia de Usuario 5
 
-- [ ] T045 [P] [US5] Crear el formulario de periodos contables con nombre, fecha de inicio, fecha de término y estado en `src/components/contabilidad/periodo-form.js`
-- [ ] T046 [P] [US5] Crear el listado de periodos con identificación visual de abiertos y cerrados en `src/components/contabilidad/periodo-list.js`
-- [ ] T047 [US5] Implementar el CRUD de periodos, la validación de solapamiento y el cambio de estado abierto/cerrado en `src/contabilidad/periodos.js`
-- [ ] T048 [US5] Conectar las vistas de periodos y la validación de fechas en `src/app.js`
-- [ ] T049 [US5] Agregar estilos de formulario, listado e insignias de estado de periodo en `src/styles.css`
+- [X] T045 [P] [US5] Crear el formulario de periodos contables con nombre, fecha de inicio, fecha de término y estado en `src/components/contabilidad/periodo-form.js`
+- [X] T046 [P] [US5] Crear el listado de periodos con identificación visual de abiertos y cerrados en `src/components/contabilidad/periodo-list.js`
+- [X] T047 [US5] Implementar el CRUD de periodos, la validación de solapamiento y el cambio de estado abierto/cerrado en `src/contabilidad/periodos.js`
+- [X] T048 [US5] Conectar las vistas de periodos y la validación de fechas en `src/app.js`
+- [X] T049 [US5] Agregar estilos de formulario, listado e insignias de estado de periodo en `src/styles.css`
 
 **Punto de control**: La gestión de periodos funciona de forma independiente y bloquea asientos cuando corresponde.
 
@@ -177,14 +177,14 @@
 
 ### Pruebas para la Historia de Usuario 6
 
-- [ ] T050 [P] [US6] Agregar pruebas unitarias de totales, filtrado por periodo y periodo vacío en `tests/unit/contabilidad/reportes.test.js`
-- [ ] T051 [P] [US6] Agregar pruebas de integración de selección de periodo, movimientos, totales y estado vacío en `tests/integration/contabilidad/reportes.test.js`
+- [X] T050 [P] [US6] Agregar pruebas unitarias de totales, filtrado por periodo y periodo vacío en `tests/unit/contabilidad/reportes.test.js`
+- [X] T051 [P] [US6] Agregar pruebas de integración de selección de periodo, movimientos, totales y estado vacío en `tests/integration/contabilidad/reportes.test.js`
 
 ### Implementación para la Historia de Usuario 6
 
-- [ ] T052 [P] [US6] Crear la vista de reportes con selector de periodo, tabla de movimientos, totales y estado vacío en `src/components/contabilidad/reportes.js`
-- [ ] T053 [US6] Conectar la vista de reportes con los cálculos de `src/contabilidad/reportes.js` y el cambio de periodo en `src/app.js`
-- [ ] T054 [US6] Agregar estilos de tabla financiera, alineación numérica y totales en `src/styles.css`
+- [X] T052 [P] [US6] Crear la vista de reportes con selector de periodo, tabla de movimientos, totales y estado vacío en `src/components/contabilidad/reportes.js`
+- [X] T053 [US6] Conectar la vista de reportes con los cálculos de `src/contabilidad/reportes.js` y el cambio de periodo en `src/app.js`
+- [X] T054 [US6] Agregar estilos de tabla financiera, alineación numérica y totales en `src/styles.css`
 
 **Punto de control**: Los reportes financieros funcionan de forma independiente con los asientos de la semilla.
 
@@ -194,13 +194,13 @@
 
 **Propósito**: Mejorar accesibilidad, rendimiento, documentación y verificación final de todas las historias.
 
-- [ ] T055 [P] Agregar una acción de reinicio de datos de ejemplo y restauración de la semilla en `src/components/contabilidad/resumen.js` y `src/contabilidad/almacenamiento.js`
-- [ ] T056 [P] Agregar etiquetas accesibles, foco de teclado, `aria-live` y estructura semántica a las vistas contables en `index.html` y `src/components/contabilidad/`
-- [ ] T057 Verificar y optimizar el renderizado de listas y reportes con 500 registros en `src/contabilidad/almacenamiento.js` y los componentes contables
-- [ ] T058 Ejecutar `npm test` y corregir las pruebas contables que fallen
-- [ ] T059 Ejecutar `npm run build` y corregir los errores de compilación
-- [ ] T060 Actualizar `README.md` con el uso del módulo contable, los datos de ejemplo y las instrucciones de reinicio
-- [ ] T061 [P] Actualizar `specs/002-contabilidad-finanzas/data-model.md` y `er-diagram.md` si la implementación revela cambios en formas de datos o reglas
+- [X] T055 [P] Agregar una acción de reinicio de datos de ejemplo y restauración de la semilla en `src/components/contabilidad/resumen.js` y `src/contabilidad/almacenamiento.js`
+- [X] T056 [P] Agregar etiquetas accesibles, foco de teclado, `aria-live` y estructura semántica a las vistas contables en `index.html` y `src/components/contabilidad/`
+- [X] T057 Verificar y optimizar el renderizado de listas y reportes con 500 registros en `src/contabilidad/almacenamiento.js` y los componentes contables
+- [X] T058 Ejecutar `npm test` y corregir las pruebas contables que fallen
+- [X] T059 Ejecutar `npm run build` y corregir los errores de compilación
+- [X] T060 Actualizar `README.md` con el uso del módulo contable, los datos de ejemplo y las instrucciones de reinicio
+- [X] T061 [P] Actualizar `specs/002-contabilidad-finanzas/data-model.md` y `er-diagram.md` si la implementación revela cambios en formas de datos o reglas
 - [ ] T062 Validar manualmente las seis historias de usuario con `npm run dev`
 
 ---

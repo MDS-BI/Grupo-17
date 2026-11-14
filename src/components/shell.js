@@ -2,9 +2,13 @@ import { getConfig } from '../module-config.js';
 
 function escapeHtml(s){ return String(s ?? '').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
 
+const CONNECTOR_WORDS = new Set(['y', 'e', 'o', 'u', 'de', 'del', 'la', 'las', 'el', 'los', 'en', 'para', 'por', 'con', 'and', 'of', 'for', 'the', '&']);
+
 export function monogramFor(name){
   const words = String(name || '').trim().split(/\s+/).filter(Boolean);
-  const letters = words.length > 0 ? words.map(w => w[0]).slice(0, 2).join('') : 'E';
+  const significant = words.filter(w => !CONNECTOR_WORDS.has(w.toLowerCase()));
+  const source = significant.length > 0 ? significant : words;
+  const letters = source.length > 0 ? source.map(w => w[0]).slice(0, 2).join('') : 'E';
   return letters.toUpperCase();
 }
 
@@ -19,7 +23,13 @@ export function applyShellLabels(){
     'nav-dashboard-label': 'Panel',
     'nav-entities-label': getConfig().labels.entities,
     'nav-documents-label': getConfig().labels.documents,
-    'nav-search-label': 'Búsqueda'
+    'nav-search-label': 'Búsqueda',
+    'nav-resumen-label': getConfig().labels.resumen,
+    'nav-cuentas-label': getConfig().labels.cuentas,
+    'nav-asientos-label': getConfig().labels.asientos,
+    'nav-pagos-label': getConfig().labels.pagos,
+    'nav-periodos-label': getConfig().labels.periodos,
+    'nav-reportes-label': getConfig().labels.reportes
   };
   Object.entries(labels).forEach(([id, text]) => {
     const el = document.getElementById(id);
