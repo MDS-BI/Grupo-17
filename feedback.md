@@ -21,3 +21,13 @@ Proximos pasos:
 - hacer primera implmentacion, registar modificaciones/incremental y volver al spec
 - dividir el grupo entre modificaciones (ajustes previos) e incremental (nueva funcionalidad)
 - integrar nueva version en 2 semanas
+
+Feedback Avance 03 (16/11/26)
+
+Cambios en la especificación:
+
+- Se agregan spec.md (con Clarifications del 2/11 y FR-031 a FR-034) y tasks.md (T001–T062, solo T062 pendiente). Ambos son claros y coherentes entre sí.
+- El rediseño del panel de inicio (14/11) no aparece en spec.md ni en tasks.md.
+- Buen trabajo con la interfaz. hacer mejoras de funcionalidad e interfaz de usuario, incluir mas data simulada para probar campos y funcionalidad, incluir mejoras de estilo, transicion, navegacion, simular login y roles, etcetera.
+
+Presentacion de MVP final en 2 semanas.
