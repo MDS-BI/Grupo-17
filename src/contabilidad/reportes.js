@@ -4,8 +4,12 @@ function asientosDelPeriodo(periodoId) {
   return loadAsientos().filter((a) => !periodoId || a.period_id === periodoId);
 }
 
-function asientosVigentes(asientos) {
-  return asientos.filter((a) => a.status !== 'cancelado');
+function asientosAprobados(asientos) {
+  return asientos.filter((a) => a.status === 'aprobado');
+}
+
+export function asientosAprobadosDelPeriodo(periodoId = null) {
+  return asientosAprobados(asientosDelPeriodo(periodoId));
 }
 
 function lineasDe(asientos) {
@@ -14,7 +18,7 @@ function lineasDe(asientos) {
 }
 
 export function calcularResumen(periodoId = null) {
-  const asientos = asientosVigentes(asientosDelPeriodo(periodoId));
+  const asientos = asientosAprobadosDelPeriodo(periodoId);
   const lineas = lineasDe(asientos);
   const cuentas = new Map(loadCuentas().map((c) => [c.id, c]));
   let ingresos = 0;
@@ -47,7 +51,7 @@ export function calcularResumen(periodoId = null) {
 }
 
 export function obtenerMovimientos(periodoId = null) {
-  const asientos = asientosVigentes(asientosDelPeriodo(periodoId));
+  const asientos = asientosAprobadosDelPeriodo(periodoId);
   const lineas = lineasDe(asientos);
   const cuentas = new Map(loadCuentas().map((c) => [c.id, c]));
   const asientosPorId = new Map(asientos.map((a) => [a.id, a]));
@@ -96,7 +100,7 @@ export function obtenerMovimientos(periodoId = null) {
 }
 
 export function calcularSaldosCuentas(periodoId = null) {
-  const asientos = asientosVigentes(asientosDelPeriodo(periodoId));
+  const asientos = asientosAprobadosDelPeriodo(periodoId);
   const lineas = lineasDe(asientos);
   const cuentas = loadCuentas();
   const saldos = new Map(cuentas.map((c) => [c.id, 0]));

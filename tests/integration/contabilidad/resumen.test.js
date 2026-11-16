@@ -22,8 +22,8 @@ describe('panel de resumen financiero', () => {
     expect(qs('resumen-periodo').options).toHaveLength(4);
     expect(qs('resumen-periodo').value).toBe('per-2026-10');
     expect(qs('resumen-ingresos').textContent).toBe(formatearMXN(100000));
-    expect(qs('resumen-gastos').textContent).toBe(formatearMXN(308000));
-    expect(qs('resumen-resultado').textContent).toBe(formatearMXN(-208000));
+    expect(qs('resumen-gastos').textContent).toBe(formatearMXN(250000));
+    expect(qs('resumen-resultado').textContent).toBe(formatearMXN(-150000));
     expect(qs('resumen-resultado').classList.contains('negative')).toBe(true);
     expect(qs('resumen-empty').hidden).toBe(true);
   });

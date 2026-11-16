@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { crearDom, bootContabilidad, qs, elegir, enviar } from '../../setup/contabilidad.js';
 import { formatearMXN } from '../../../src/contabilidad/dinero.js';
+import { loadAsientos } from '../../../src/contabilidad/almacenamiento.js';
 
 let dom;
 
@@ -20,10 +21,10 @@ describe('panel de inicio de Contabilidad y Finanzas', () => {
 
     expect(qs('dashboard-periodo').value).toBe('per-2026-10');
     expect(qs('stat-ingresos').textContent).toBe(formatearMXN(100000));
-    expect(qs('stat-gastos').textContent).toBe(formatearMXN(308000));
-    expect(qs('stat-resultado').textContent).toBe(formatearMXN(-208000));
+    expect(qs('stat-gastos').textContent).toBe(formatearMXN(250000));
+    expect(qs('stat-resultado').textContent).toBe(formatearMXN(-150000));
     expect(qs('stat-resultado').classList.contains('negative')).toBe(true);
-    expect(qs('stat-asientos').textContent).toBe('3');
+    expect(qs('stat-asientos').textContent).toBe('2');
     expect(qs('dashboard-empty').hidden).toBe(true);
   });
 
@@ -61,7 +62,7 @@ describe('panel de inicio de Contabilidad y Finanzas', () => {
     expect(qs('view-reportes').hidden).toBe(false);
   });
 
-  it('actualiza los indicadores al registrar un nuevo asiento', async () => {
+  it('actualiza los indicadores al aprobar un nuevo asiento', async () => {
     await bootContabilidad();
     qs('nav-asientos').click();
 
@@ -74,11 +75,14 @@ describe('panel de inicio de Contabilidad y Finanzas', () => {
     qs('linea-credit-1').value = '100';
     enviar(qs('asiento-form'));
 
+    const creado = loadAsientos().find((asiento) => asiento.concept === 'Ingreso adicional');
+    document.querySelector(`[data-action="aprobar-asiento"][data-id="${creado.id}"]`).click();
+
     qs('nav-dashboard').click();
 
     expect(qs('stat-ingresos').textContent).toBe(formatearMXN(110000));
-    expect(qs('stat-gastos').textContent).toBe(formatearMXN(308000));
-    expect(qs('stat-resultado').textContent).toBe(formatearMXN(-198000));
-    expect(qs('stat-asientos').textContent).toBe('4');
+    expect(qs('stat-gastos').textContent).toBe(formatearMXN(250000));
+    expect(qs('stat-resultado').textContent).toBe(formatearMXN(-140000));
+    expect(qs('stat-asientos').textContent).toBe('3');
   });
 });

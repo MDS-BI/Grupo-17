@@ -13,11 +13,11 @@ describe('resumen financiero', () => {
   it('calcula ingresos, gastos y resultado del periodo con montos en centavos', () => {
     const resumen = calcularResumen('per-2026-10');
     expect(resumen.ingresos).toBe(100000);
-    expect(resumen.gastos).toBe(308000);
-    expect(resumen.resultado).toBe(-208000);
-    expect(resumen.totalDebit).toBe(424000);
-    expect(resumen.totalCredit).toBe(424000);
-    expect(resumen.movimientos).toBe(3);
+    expect(resumen.gastos).toBe(250000);
+    expect(resumen.resultado).toBe(-150000);
+    expect(resumen.totalDebit).toBe(366000);
+    expect(resumen.totalCredit).toBe(366000);
+    expect(resumen.movimientos).toBe(2);
     expect(resumen.hayMovimientos).toBe(true);
   });
 

@@ -88,7 +88,7 @@ function datosContabilidad(){
 
 function elegirPeriodo(periodos, preferido = ''){
   if(preferido && periodos.some(p => p.id === preferido)) return preferido;
-  const asientos = Almacen.loadAsientos();
+  const asientos = Reportes.asientosAprobadosDelPeriodo();
   const conMovimientos = [...periodos].reverse().find(p => asientos.some(a => a.period_id === p.id));
   const elegido = conMovimientos || periodos[0];
   return elegido ? elegido.id : '';

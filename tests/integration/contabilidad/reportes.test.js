@@ -20,9 +20,9 @@ describe('vista de reportes financieros', () => {
     expect(qs('view-reportes').hidden).toBe(false);
     expect(qs('reportes-periodo').options).toHaveLength(4);
     expect(qs('reportes-periodo').value).toBe('per-2026-10');
-    expect(qs('reportes-movimientos').querySelectorAll('tr')).toHaveLength(7);
-    expect(qs('reportes-total-debitos').textContent).toBe(formatearMXN(424000));
-    expect(qs('reportes-total-creditos').textContent).toBe(formatearMXN(424000));
+    expect(qs('reportes-movimientos').querySelectorAll('tr')).toHaveLength(5);
+    expect(qs('reportes-total-debitos').textContent).toBe(formatearMXN(366000));
+    expect(qs('reportes-total-creditos').textContent).toBe(formatearMXN(366000));
     expect(qs('reportes-empty').hidden).toBe(true);
   });
 
