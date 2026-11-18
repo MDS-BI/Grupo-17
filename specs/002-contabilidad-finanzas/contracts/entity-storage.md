@@ -2,7 +2,7 @@
 
 ## Propósito
 
-La aplicación almacena los registros de entidad localmente en el navegador usando `localStorage`.
+La aplicación almacena los registros de entidad localmente en la sesión del navegador usando `sessionStorage` a través de la capa centralizada del módulo.
 
 ## Forma de los Datos
 

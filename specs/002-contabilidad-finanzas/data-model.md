@@ -1,6 +1,6 @@
 # Modelo de Datos: Módulo de Contabilidad y Finanzas
 
-**Especificación base**: [001-erp-base-module/data-model.md](../001-erp-base-module/data-model.md) (no se modifica)
+**Especificación base**: [002-contabilidad-finanzas/data-model.md](../002-contabilidad-finanzas/data-model.md) (no se modifica)
 **Diagrama ER**: [er-diagram.md](er-diagram.md)
 
 ## Resumen
@@ -243,3 +243,27 @@ No se elimina ninguna de las cinco entidades; solo se prioriza su implementació
 - `ModuleConfig` puede renombrar términos (`labels`: asiento, cuenta, pago), añadir campos personalizados (`customFields` con `target: "document"` o `"entity"`) y definir el ciclo de vida de `status` para asientos y pagos (`statusLifecycle`).
 - La numeración por serie y folio sigue la convención del módulo base; la numeración automática queda como punto de extensión de implementación.
 - El cierre de ejercicio, los comprobantes de reportes (balance general, estado de resultados) y el ajuste por tipo de cambio son puntos de extensión posteriores.
+
+## Vistas Derivadas del Panel (Historia de Usuario 7)
+
+Las gráficas no introducen entidades persistentes nuevas: son proyecciones calculadas en memoria a partir de `CuentaContable`, `AsientoContable`, `LineaAsiento`, `Pago` y `PeriodoContable`. No se almacenan series ni cachés en `sessionStorage`.
+
+| Vista derivada | Origen | Campos calculados | Regla de presentación |
+|---|---|---|---|
+| `SerieIngresosGastos` | `calcularResumen` agrupado por `period_id` | `periodo`, `ingresosCentavos`, `gastosCentavos` | Barras agrupadas; una barra por periodo y tipo |
+| `SerieResultado` | `calcularResumen` agrupado por `period_id` | `periodo`, `resultadoCentavos` | Línea continua; punto por periodo |
+| `DistribucionGastos` | `calcularSaldosCuentas` filtrado por el periodo seleccionado | `cuentaId`, `codigo`, `nombre`, `gastoCentavos`, `porcentaje` | Dona; segmentos ordenados de mayor a menor gasto |
+| `EstadoVacioGraficas` | Ausencia de periodos, movimientos aprobados o gastos | `mensaje` | Texto en español en lugar de SVG vacío |
+
+### Reglas de Coherencia
+
+- Toda serie se deriva de importes en centavos y se convierte a MXN solo en la capa de formato compartida.
+- `SerieResultado` debe cuadrar con `ingresosCentavos - gastosCentavos` del mismo periodo y con el total del reporte.
+- `DistribucionGastos` excluye cuentas con saldo cero y solo considera asientos en estado `aprobado`.
+- Cambiar el periodo recalcula las vistas derivadas sin mutar las entidades base.
+
+## Decisiones de Persistencia Actualizadas
+
+- El mecanismo por defecto es `sessionStorage` para todas las colecciones del módulo, incluidas las estructuras base `Entity` y `Document` que utilice el módulo.
+- No se persisten agregaciones ni resultados de gráficas; se recomputan desde el estado de la sesión.
+- La migración desde `localStorage` y las garantías de integridad referencial quedan trazadas en `tasks.md` como T063 y T064.

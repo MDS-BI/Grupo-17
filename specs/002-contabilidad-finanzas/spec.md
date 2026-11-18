@@ -131,6 +131,24 @@ Como analista financiero o contador, quiero generar y consultar reportes de los 
 
 ---
 
+### Historia de Usuario 7 - Consultar el análisis financiero visual del panel (Prioridad: P2)
+
+Como gerente o analista financiero, quiero visualizar gráficas de ingresos, gastos, resultado y distribución de gastos por cuenta en el panel principal, para interpretar rápidamente la evolución y la composición de las operaciones de la empresa.
+
+**Por qué esta prioridad**: Las gráficas complementan los indicadores del resumen y hacen más evidentes las tendencias y la concentración de gastos sin sustituir las tablas ni los reportes financieros.
+
+**Prueba Independiente**: Un usuario abre el panel, selecciona un periodo contable y observa las gráficas de barras, de línea y de dona actualizadas con los movimientos aprobados de ese periodo, además de mensajes cuando no hay datos.
+
+**Escenarios de Aceptación**:
+
+1. **Dado** que el usuario abre el panel principal, **cuando** se cargan las gráficas, **entonces** se muestran la comparación de ingresos y gastos por periodo, la evolución del resultado y la distribución de gastos por cuenta.
+2. **Dado** que el panel está visible, **cuando** el usuario selecciona un periodo contable, **entonces** las gráficas se actualizan con la información correspondiente a ese periodo.
+3. **Dado** que existen movimientos contables aprobados, **cuando** se renderizan las gráficas, **entonces** los valores provienen de los mismos cálculos de resumen y saldos utilizados por los reportes.
+4. **Dado** que no existen periodos o movimientos registrados, **cuando** se cargan las gráficas, **entonces** se muestran mensajes de estado vacío en español en lugar de gráficas sin información.
+5. **Dado** que el usuario consulta una gráfica, **cuando** revisa las etiquetas o herramientas de cada punto, **entonces** los importes se muestran en MXN con el mismo formato que el resto del módulo.
+
+---
+
 ### Casos Límite
 
 - ¿Qué ocurre cuando un usuario intenta crear una cuenta contable sin ingresar su código, nombre o tipo?
@@ -151,6 +169,9 @@ Como analista financiero o contador, quiero generar y consultar reportes de los 
 - ¿Qué ocurre cuando no existen cuentas contables, periodos o movimientos registrados al ingresar por primera vez al módulo?
 - ¿Se mantienen los registros contables al navegar entre las distintas secciones del módulo?
 - ¿Qué ocurre cuando el usuario intenta modificar o eliminar un registro que está relacionado con otros movimientos contables?
+- ¿Qué ocurre cuando no existen periodos contables al cargar las gráficas del panel principal?
+- ¿Qué ocurre cuando el periodo seleccionado no tiene gastos registrados?
+- ¿Qué ocurre cuando el número de periodos supera el espacio disponible para las etiquetas del eje de una gráfica?
 
 ## Requisitos 
 
@@ -190,6 +211,11 @@ Como analista financiero o contador, quiero generar y consultar reportes de los 
 - **FR-032**: El sistema DEBE impedir eliminar un documento que tenga asientos contables asociados, conservando la referencia al documento de origen.
 - **FR-033**: El sistema DEBE impedir crear un periodo contable cuyas fechas se superpongan con las de otro periodo existente, independientemente de su estado.
 - **FR-034**: El sistema DEBE operar con una sola moneda (MXN) y NO DEBE realizar conversiones de moneda durante el MVP.
+- **FR-035**: El sistema DEBE mostrar en el panel principal una gráfica de barras con los ingresos y gastos de cada periodo contable.
+- **FR-036**: El sistema DEBE mostrar en el panel principal una gráfica de línea con la evolución del resultado financiero por periodo contable.
+- **FR-037**: El sistema DEBE mostrar en el panel principal una gráfica de distribución de los gastos por cuenta del periodo seleccionado.
+- **FR-038**: El sistema DEBE actualizar las gráficas cuando el usuario seleccione un periodo contable diferente y mostrar mensajes de estado vacío cuando no existan datos.
+- **FR-039**: Los importes presentados en las gráficas DEBEN formatearse en MXN mediante las utilidades compartidas del módulo.
 
 ### Requisitos de Extensibilidad 
 
@@ -226,6 +252,7 @@ El módulo de Contabilidad y Finanzas DEBE:
 - **SC-008**: Los reportes muestran correctamente los totales de débitos y créditos de los movimientos consultados.
 - **SC-009**: Las principales funcionalidades del módulo pueden probarse mediante la interfaz frontend y datos de ejemplo, sin requerir una conexión real a una base de datos.
 - **SC-010**: La navegación entre las distintas secciones permite consultar las funcionalidades del módulo sin perder los datos de ejemplo durante su uso.
+- **SC-011**: Los usuarios pueden interpretar en el panel las gráficas de ingresos, gastos, resultado y gastos por cuenta, coherentes con los cálculos de los reportes financieros.
 
 ## Suposiciones
 

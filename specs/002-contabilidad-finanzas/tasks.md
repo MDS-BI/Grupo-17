@@ -304,3 +304,16 @@ T031 [US3] Listado y detalle de asientos
 - Los periodos no pueden solaparse, sin importar su estado.
 - `AsientoContable.sourceDocumentId` usa `RESTRICT`: no se borra un documento con asientos asociados.
 - El plan.md actual conserva referencias al módulo 001 en su sección de estructura; estas tareas usan la estructura real del repositorio y extienden la aplicación existente.
+
+---
+
+## Phase 10: Convergence
+
+- [ ] T063 CRITICAL: migrar la persistencia de las colecciones contables de `localStorage` a `sessionStorage` a través de la capa centralizada de acceso a datos, actualizando `src/contabilidad/almacenamiento.js`, la capa base compartida y `tests/setup/contabilidad.js` per Constitution II (contradicts)
+- [ ] T064 CRITICAL: impedir eliminar documentos o entidades con asientos/pagos asociados y aplicar RESTRICT/SET NULL en `src/app.js`, `src/storage.js` y `src/contabilidad/asientos.js`, conservando la trazabilidad per FR-032 (contradicts)
+- [ ] T065 Agregar el campo `description` de la cuenta contable al formulario, al modelo de `src/contabilidad/cuentas.js` y al listado jerárquico per US2/AC3 (partial)
+- [ ] T066 Completar la validación manual de las seis historias de usuario mediante `npm run dev` y registrar el resultado per T062 (partial)
+- [ ] T067 Enrutar todas las sumas y saldos monetarios de `src/contabilidad/reportes.js` y `src/contabilidad/validaciones-asientos.js` por la utilidad centralizada `sumarCentavos` de `src/contabilidad/dinero.js` per Constitution I (partial)
+- [ ] T068 Agregar pruebas unitarias dedicadas de `src/contabilidad/dinero.js` y `src/contabilidad/fechas.js` con importes límite, fechas inválidas y solapamientos per Constitution IV (partial)
+- [ ] T069 Indicar la unidad MXN en las tablas financieras y permitir drill-down desde los totales del reporte hasta sus movimientos de origen per Constitution V (partial)
+- [ ] T070 Paginar o filtrar los listados de cuentas, asientos y periodos, y calcular los reportes de forma incremental sin recalcular toda la sesión en cada interacción per plan: restricciones de rendimiento (partial)
