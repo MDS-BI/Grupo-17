@@ -391,6 +391,11 @@
                 <div class="error" id="error-cuenta-type" aria-live="polite"></div>
               </div>
               <div>
+                <label for="cuenta-description">Descripción</label>
+                <textarea id="cuenta-description" name="cuenta-description" rows="2"></textarea>
+                <div class="error" id="error-cuenta-description" aria-live="polite"></div>
+              </div>
+              <div>
                 <label for="cuenta-parent">Cuenta padre</label>
                 <select id="cuenta-parent" name="cuenta-parent"></select>
                 <div class="error" id="error-cuenta-parent" aria-live="polite"></div>
@@ -413,6 +418,12 @@
             <h2 id="cuentas-lista-heading">Plan de cuentas</h2>
             <div id="cuentas-empty" class="empty" hidden>No hay cuentas contables registradas.</div>
             <div id="cuentas-lista"></div>
+          </section>
+          <section class="card card-wide" aria-labelledby="cuenta-detalle-heading">
+            <h2 id="cuenta-detalle-heading">Detalle de la cuenta</h2>
+            <input type="hidden" id="cuenta-detalle-id" />
+            <div id="cuenta-detalle-empty" class="empty" hidden>Selecciona una cuenta para consultar su detalle.</div>
+            <div id="cuenta-detalle"></div>
           </section>
         </section>
 

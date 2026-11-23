@@ -274,3 +274,25 @@ El módulo de Contabilidad y Finanzas DEBE:
 - La información utilizada en el prototipo tiene fines demostrativos y no corresponde a registros financieros reales.
 - Todas las operaciones del módulo se registran en una sola moneda (MXN); no se contemplan conversiones de moneda.
 
+---
+
+### Historia de Usuario 8 - Gestionar cuentas contables (Prioridad: P1)
+
+Como contador, quiero crear, consultar, editar y organizar las cuentas contables de la empresa, para mantener actualizado el plan de cuentas que permite clasificar correctamente las operaciones financieras.
+
+**Por qué esta prioridad**: El plan de cuentas es la base para registrar asientos y generar reportes financieros, por lo que el contador debe poder administrarlo de forma completa y confiable desde el inicio del módulo.
+
+**Prueba Independiente**: Un contador puede ingresar a la sección de cuentas contables, crear una cuenta con sus datos obligatorios, consultarla en el listado, editarla y asociarla a una cuenta principal, verificando cada cambio de forma aislada.
+
+**Escenarios de Aceptación**:
+
+1. **Dado** que el contador se encuentra en la sección de cuentas contables, **cuando** crea una cuenta ingresando su código, nombre y tipo, **entonces** la cuenta se guarda y aparece en el listado.
+2. **Dado** que el contador está creando una cuenta contable, **cuando** omite alguno de los campos obligatorios, **entonces** el sistema impide guardar y muestra un mensaje indicando la información faltante.
+3. **Dado** que el contador intenta registrar una cuenta con un código ya existente, **cuando** confirma el guardado, **entonces** el sistema rechaza la operación y le indica que el código debe ser único.
+4. **Dada** una cuenta contable existente, **cuando** el contador consulta su detalle, **entonces** el sistema muestra su código, nombre, tipo, descripción, estado y cuenta principal cuando aplica.
+5. **Dada** una cuenta contable existente, **cuando** el contador modifica su nombre, descripción o estado, **entonces** los cambios se guardan y se reflejan en el listado.
+6. **Dadas** varias cuentas contables, **cuando** el contador establece una relación jerárquica con una cuenta principal válida, **entonces** el sistema identifica la cuenta principal y sus subcuentas.
+7. **Dado** que el contador intenta asignar como principal una cuenta inexistente, **cuando** confirma la operación, **entonces** el sistema impide la relación y muestra un mensaje de validación.
+
+---
+

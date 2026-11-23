@@ -311,9 +311,43 @@ T031 [US3] Listado y detalle de asientos
 
 - [ ] T063 CRITICAL: migrar la persistencia de las colecciones contables de `localStorage` a `sessionStorage` a través de la capa centralizada de acceso a datos, actualizando `src/contabilidad/almacenamiento.js`, la capa base compartida y `tests/setup/contabilidad.js` per Constitution II (contradicts)
 - [ ] T064 CRITICAL: impedir eliminar documentos o entidades con asientos/pagos asociados y aplicar RESTRICT/SET NULL en `src/app.js`, `src/storage.js` y `src/contabilidad/asientos.js`, conservando la trazabilidad per FR-032 (contradicts)
-- [ ] T065 Agregar el campo `description` de la cuenta contable al formulario, al modelo de `src/contabilidad/cuentas.js` y al listado jerárquico per US2/AC3 (partial)
+- [X] T065 Agregar el campo `description` de la cuenta contable al formulario, al modelo de `src/contabilidad/cuentas.js` y al listado jerárquico per US2/AC3 (partial)
 - [ ] T066 Completar la validación manual de las seis historias de usuario mediante `npm run dev` y registrar el resultado per T062 (partial)
 - [ ] T067 Enrutar todas las sumas y saldos monetarios de `src/contabilidad/reportes.js` y `src/contabilidad/validaciones-asientos.js` por la utilidad centralizada `sumarCentavos` de `src/contabilidad/dinero.js` per Constitution I (partial)
 - [ ] T068 Agregar pruebas unitarias dedicadas de `src/contabilidad/dinero.js` y `src/contabilidad/fechas.js` con importes límite, fechas inválidas y solapamientos per Constitution IV (partial)
 - [ ] T069 Indicar la unidad MXN en las tablas financieras y permitir drill-down desde los totales del reporte hasta sus movimientos de origen per Constitution V (partial)
 - [ ] T070 Paginar o filtrar los listados de cuentas, asientos y periodos, y calcular los reportes de forma incremental sin recalcular toda la sesión en cada interacción per plan: restricciones de rendimiento (partial)
+
+---
+
+## Fase 11: Historia de Usuario 8 - Gestionar cuentas contables (Prioridad: P1)
+
+**Objetivo**: Permitir al contador crear, consultar, editar y organizar jerárquicamente las cuentas contables, con validación de campos obligatorios, código único y cuenta principal existente.
+
+**Prueba Independiente**: Un contador crea una cuenta con código, nombre y tipo, la consulta en detalle, la edita y la asocia a una cuenta principal válida; los campos vacíos, el código duplicado y una cuenta principal inexistente se rechazan con mensajes claros.
+
+### Pruebas para la Historia de Usuario 8
+
+> **NOTA: Escribir estas pruebas primero y verificar que FALLEN antes de la implementación.**
+
+- [X] T071 [P] [US8] Agregar pruebas unitarias de campos obligatorios, código duplicado y cuenta principal existente en `tests/unit/contabilidad/validaciones-cuentas-us8.test.js`
+- [X] T072 [P] [US8] Agregar pruebas de integración de alta, consulta de detalle, edición y jerarquía de cuentas en `tests/integration/contabilidad/cuentas-us8.test.js`
+
+### Implementación para la Historia de Usuario 8
+
+- [X] T073 [P] [US8] Ampliar el formulario de cuentas con descripción, cuenta principal y estado en `src/components/contabilidad/cuenta-form.js`
+- [X] T074 [P] [US8] Ampliar el listado con detalle de código, nombre, tipo, descripción, estado y cuenta principal en `src/components/contabilidad/cuenta-list.js`
+- [X] T075 [US8] Ampliar `src/contabilidad/validaciones-cuentas.js` con las reglas de campos obligatorios, código único y existencia de la cuenta principal (depende de T071)
+- [X] T076 [US8] Ampliar `src/contabilidad/cuentas.js` con la consulta de detalle, la edición y la persistencia de la jerarquía (depende de T075)
+- [X] T077 [US8] Conectar el formulario, el listado, el detalle y los mensajes de validación con `src/app.js` (depende de T073, T074, T076)
+- [X] T078 [P] [US8] Agregar estilos de detalle, selector de cuenta principal y mensajes de validación en `src/styles.css`
+
+**Punto de control**: La Historia de Usuario 8 es completamente funcional y verificable de forma independiente.
+
+---
+
+## Dependencias de la Fase 11
+
+- **Fase 11 (US8)**: Depende de la Fase 2 y reutiliza `src/contabilidad/almacenamiento.js`, `src/contabilidad/cuentas.js` y `src/contabilidad/validaciones-cuentas.js` de US2; no requiere completar otras historias.
+- El orden dentro de la fase es: T071/T072 → T073/T074/T075 → T076 → T077; T078 es independiente.
+- Los archivos compartidos `src/app.js` y `src/styles.css` deben integrarse de forma secuencial con las tareas existentes para evitar conflictos.

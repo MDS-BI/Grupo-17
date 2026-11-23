@@ -26,6 +26,7 @@ Catálogo jerárquico de cuentas del libro mayor. Cada cuenta acumula el saldo r
 | id | string | PK | Identificador interno único de la cuenta | Obligatorio, generado automáticamente |
 | code | string | UK | Código contable ordenable (p. ej., `1010`, `1.01.01`) | Obligatorio, no vacío, único en el plan |
 | name | string | — | Nombre de la cuenta (p. ej., Caja, Bancos, Ventas) | Obligatorio, no vacío |
+| description | string | — | Descripción libre de la cuenta para el detalle del plan | Opcional; se normaliza sin espacios laterales y no supera 500 caracteres |
 | type | string | — | Tipo de cuenta que define el saldo normal: `activo`, `pasivo`, `patrimonio`, `ingreso`, `gasto` | Obligatorio, valor del conjunto cerrado |
 | parent_id | string | FK → CuentaContable | Cuenta padre para la jerarquía | Opcional; debe referenciar una cuenta existente; no debe formar ciclos. Al eliminar la cuenta padre se aplica RESTRICT |
 | isLeaf | boolean | — | Indica si la cuenta admite líneas de asiento | Obligatorio; solo las cuentas hoja (`true`) reciben líneas |

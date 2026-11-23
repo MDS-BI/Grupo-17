@@ -19,7 +19,7 @@ import { validarAsiento } from './contabilidad/validaciones-asientos.js';
 import { validarPago } from './contabilidad/validaciones-pagos.js';
 import { renderResumen } from './components/contabilidad/resumen.js';
 import { populateCuentaParentSelect, clearCuentaForm, startCuentaEdit, collectCuentaPayload, showCuentaErrors } from './components/contabilidad/cuenta-form.js';
-import { renderCuentaList } from './components/contabilidad/cuenta-list.js';
+import { renderCuentaList, renderCuentaDetalle } from './components/contabilidad/cuenta-list.js';
 import { clearAsientoForm, startAsientoEdit, collectAsientoPayload, showAsientoErrors, agregarLinea, quitarLinea, poblarPeriodosAsiento, poblarEntidadesAsiento } from './components/contabilidad/asiento-form.js';
 import { renderAsientoList } from './components/contabilidad/asiento-list.js';
 import { clearPagoForm, startPagoEdit, collectPagoPayload, showPagoErrors, poblarEntidadesPago, poblarDocumentosPago, poblarAsientosPago } from './components/contabilidad/pago-form.js';
@@ -106,6 +106,9 @@ function refrescarCuentas(){
   const hayCuentas = renderCuentaList(qs('cuentas-lista'), cuentas);
   qs('cuentas-empty').hidden = hayCuentas;
   populateCuentaParentSelect(cuentas, { excludeId: qs('cuenta-id').value || null });
+  const detalle = Cuentas.obtenerDetalleCuenta(qs('cuenta-detalle-id').value);
+  const hayDetalle = renderCuentaDetalle(qs('cuenta-detalle'), detalle);
+  qs('cuenta-detalle-empty').hidden = hayDetalle;
 }
 
 function refrescarAsientos(){
@@ -377,6 +380,11 @@ function handleCuentaListClick(ev){
   const boton = ev.target.closest('button[data-action]');
   if(!boton) return;
   const id = boton.dataset.id;
+  if(boton.dataset.action === 'ver-detalle-cuenta'){
+    qs('cuenta-detalle-id').value = id;
+    refrescarCuentas();
+    return;
+  }
   if(boton.dataset.action === 'editar-cuenta'){
     const cuenta = Cuentas.obtenerCuenta(id);
     if(!cuenta) return;

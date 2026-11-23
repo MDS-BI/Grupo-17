@@ -9,6 +9,10 @@ function texto(valor) {
   return typeof valor === 'string' ? valor.trim() : '';
 }
 
+export function normalizarDescripcionCuenta(valor) {
+  return texto(valor);
+}
+
 export function validarCuenta(payload = {}, { cuentas = [], id = null } = {}) {
   const errores = {};
   const code = texto(payload.code);
@@ -30,6 +34,10 @@ export function validarCuenta(payload = {}, { cuentas = [], id = null } = {}) {
 
   if (!ESTADOS_CUENTA.includes(status)) {
     errores.status = `El estado debe ser uno de: ${ESTADOS_CUENTA.join(', ')}`;
+  }
+
+  if (normalizarDescripcionCuenta(payload.description).length > 500) {
+    errores.description = 'La descripción no puede superar 500 caracteres';
   }
 
   if (parentId) {

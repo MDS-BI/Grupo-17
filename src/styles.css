@@ -608,6 +608,47 @@ button.danger:hover { background: #fae3df; }
   font-size: 0.82rem;
 }
 
+.cuenta-identidad {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.cuenta-descripcion,
+.cuenta-padre {
+  color: var(--text-muted, var(--muted, #64748b));
+  font-size: 0.85rem;
+}
+
+.cuenta-detalle {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px 20px;
+  margin: 0;
+}
+
+.cuenta-detalle div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.cuenta-detalle dt {
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted, var(--muted, #64748b));
+}
+
+.cuenta-detalle dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
 .status-badge.status-borrador,
 .status-badge.status-pendiente,
 .status-badge.status-abierto,

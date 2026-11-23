@@ -1,5 +1,5 @@
 import { loadCuentas, saveCuentas, loadLineas } from './almacenamiento.js';
-import { validarCuenta, saldoNormalPara } from './validaciones-cuentas.js';
+import { validarCuenta, saldoNormalPara, normalizarDescripcionCuenta } from './validaciones-cuentas.js';
 
 function generarId() {
   return `cta-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
@@ -22,6 +22,18 @@ export function obtenerCuenta(id) {
   return loadCuentas().find((c) => c.id === id) || null;
 }
 
+export function obtenerDetalleCuenta(id) {
+  const cuenta = obtenerCuenta(id);
+  if (!cuenta) return null;
+  const cuentas = loadCuentas();
+  const padre = cuentas.find((c) => c.id === cuenta.parent_id) || null;
+  return {
+    ...cuenta,
+    parentCode: padre ? padre.code : null,
+    parentName: padre ? padre.name : null
+  };
+}
+
 export function crearCuenta(payload = {}) {
   const cuentas = loadCuentas();
   const revision = validarCuenta(payload, { cuentas });
@@ -32,6 +44,7 @@ export function crearCuenta(payload = {}) {
     code: String(payload.code).trim(),
     name: String(payload.name).trim(),
     type: payload.type,
+    description: normalizarDescripcionCuenta(payload.description),
     parent_id: payload.parent_id || null,
     isLeaf: true,
     entity_id: payload.entity_id || null,
@@ -57,6 +70,7 @@ export function actualizarCuenta(id, cambios = {}) {
     code: String(fusionada.code).trim(),
     name: String(fusionada.name).trim(),
     type: fusionada.type,
+    description: normalizarDescripcionCuenta(fusionada.description),
     parent_id: fusionada.parent_id || null,
     entity_id: fusionada.entity_id || null,
     normalBalance: saldoNormalPara(fusionada.type),
