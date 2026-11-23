@@ -1,7 +1,7 @@
-# Lista de Verificación de Calidad de la Especificación: Módulo Base de Software de Planificación de Recursos Empresariales (ERP)
+# Lista de Verificación de Calidad de la Especificación: Módulo Contabilidad y Finanzas
 
 **Propósito**: Validar la completitud y calidad de la especificación antes de proceder a la planificación
-**Creada**: 2026-07-08
+**Creada**: 2026-11-23
 **Funcionalidad**: [Enlace a spec.md](spec.md)
 
 ## Calidad del Contenido
@@ -31,4 +31,5 @@
 
 ## Notas
 
+- Validación aplicada tras agregar las Historias de Usuario 8 a 12, incluido el resumen de pagos por estado pendiente, pagado y vencido con filtro por estado.
 - La especificación está lista para la planificación y la implementación.

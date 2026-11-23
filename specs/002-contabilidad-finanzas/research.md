@@ -2,7 +2,7 @@
 
 ## Introducción
 
-Registro de decisiones técnicas tomadas durante la fase 0. No quedan puntos `NEEDS CLARIFICATION`: el stack está fijado por la constitución y la Historia de Usuario 7 elimina la ambigüedad sobre las gráficas del panel (finding F9).
+Registro de decisiones técnicas tomadas durante la fase 0. No quedan puntos `NEEDS CLARIFICATION`: el stack está fijado por la constitución, la Historia de Usuario 7 elimina la ambigüedad sobre las gráficas del panel (finding F9) y las Historias de Usuario 8 a 12 definen acceso, permisos, semilla, navegación y estados de pago.
 
 ## Decisiones
 
@@ -44,7 +44,7 @@ Registro de decisiones técnicas tomadas durante la fase 0. No quedan puntos `NE
 
 ### Estrategia de pruebas
 
-- **Decisión**: Vitest + jsdom con una semilla determinista reiniciable por archivo de prueba; pruebas unitarias para dinero/fechas/validaciones/agregaciones y pruebas de integración para los flujos de las siete historias de usuario, incluidos estados vacíos y filtro de periodo del panel.
+- **Decisión**: Vitest + jsdom con una semilla determinista reiniciable por archivo de prueba; pruebas unitarias para dinero/fechas/validaciones/agregaciones, acceso, permisos y estados de pago; pruebas de integración para los flujos de las doce historias de usuario, incluidos estados vacíos, filtro de periodo del panel y filtro de pagos.
 - **Razonamiento**: Cubre el Principio IV y permite verificar que las gráficas y los reportes usan los mismos cálculos sin depender del navegador real.
 - **Alternativas consideradas**: Cypress/Playwright — rechazado por requerir navegador y aumentar la huella de dependencias. Solo pruebas manuales — rechazado porque no da regresión sobre lógica monetaria.
 
@@ -53,3 +53,33 @@ Registro de decisiones técnicas tomadas durante la fase 0. No quedan puntos `NE
 - **Decisión**: Los listados admiten búsqueda y filtros; los reportes y agregaciones se calculan sobre el estado en memoria y se reutilizan entre panel y reportes. La paginación y el cálculo incremental quedan trazados como T070.
 - **Razonamiento**: Con 500 registros, recalcular todo el reporte en cada interacción es innecesario; separar agregación de renderizado mantiene la UI responsiva sin cambiar el modelo de datos.
 - **Alternativas consideradas**: Web Worker — rechazado por complejidad prematura. Precarga de datos en memoria global — rechazado porque ya existe un estado único por sesión.
+
+### Autenticación simulada (HU8)
+
+- **Decisión**: Modelar `Usuario` con `rut`, `rutNormalizado`, `contraseña` y `rol_id`, y mantener una única `Sesion` en `sessionStorage` a través de la capa centralizada. El RUT se normaliza para aceptar formato puntuado o sin puntos/guion.
+- **Razonamiento**: La constitución prohíbe backend y servicios de identidad; cuatro credenciales fijas y deterministas cubren la demostración y hacen repetibles las pruebas. El mensaje de error genérico evita revelar si un RUT existe.
+- **Alternativas consideradas**: `localStorage` para recordar la sesión — rechazado porque la spec no lo exige y la constitución lo restringe. Hash/criptografía real — rechazado porque no aporta seguridad sin un servidor y añadiría dependencias. Diferenciar el error por RUT/contraseña — rechazado por FR-048.
+
+### Panel por rol y permisos (HU8 y HU9)
+
+- **Decisión**: `Rol` contiene `panelInicio`, `permisos` embebidos y `accionesPanel`; `Sesion` copia esos valores al autenticarse. El menú y el panel se derivan de esa copia.
+- **Razonamiento**: congela los permisos durante la sesión, cumple la suposición de que un cambio de rol exige nueva autenticación y evita consultas repetidas al catálogo de roles. Las opciones no permitidas se ocultan, no se deshabilitan (FR-054).
+- **Alternativas consideradas**: calcular permisos desde `Usuario.rol_id` en cada render — rechazado por permitir cambios imprevistos en sesión abierta. Mostrar opciones deshabilitadas — rechazado por contradecir FR-054.
+
+### Carga y restablecimiento de datos (HU10)
+
+- **Decisión**: La semilla es una fábrica pura que reemplaza colecciones financieras completas con valores derivados de índices fijos; el restablecimiento vacía esas colecciones pero conserva `Usuario` y `Rol`.
+- **Razonamiento**: Garantiza FR-069 a FR-076: no duplicados, resultados idénticos en cargas repetidas y estado inicial válido sin referencias rotas. Solo el Administrador financiero ejecuta ambas acciones desde su panel.
+- **Alternativas consideradas**: acumular la semilla sobre datos existentes — rechazado por duplicar periodos y folios. Borrar también usuarios — rechazado por FR-075. Pedir confirmación solo al restablecer — rechazado por FR-077.
+
+### Navegación única y exclusiones (HU11)
+
+- **Decisión**: Un mapa estático define la relación pantalla → único control visible. Entidades, Documentos y Búsqueda quedan fuera del menú y del panel; la selección de entidades/documentos permanece dentro de los formularios que la necesitan.
+- **Razonamiento**: evita rutas duplicadas y reduce ambigüedad (SC-024 a SC-027). Cargar datos, restablecer datos y cerrar sesión se clasifican como acciones, no como accesos a pantallas (FR-084).
+- **Alternativas consideradas**: mantener accesos directos en el panel — rechazado por duplicar destinos del menú. Crear una pantalla de búsqueda global — rechazado por FR-086.
+
+### Estados y resumen de pagos (HU12)
+
+- **Decisión**: Persistir `Pago.status` como `pendiente` o `pagado` y derivar `vencido` en lectura comparando `fechaVencimiento` con la fecha actual. `ResumenPagos` y el filtro usan la misma función `calcularEstadoPago`.
+- **Razonamiento**: evita que un pago quede marcado como vencido en almacenamiento aunque el tiempo avance; cumple FR-092 a FR-101 con una única clasificación. Los totales se suman en centavos y se formatean en MXN con la utilidad compartida.
+- **Alternativas consideradas**: almacenar `vencido` como valor persistido — rechazado por desincronización con la fecha real. Crear una sección de menú para el resumen — rechazado por FR-097. Ocultar los otros totales al filtrar — rechazado por FR-091.

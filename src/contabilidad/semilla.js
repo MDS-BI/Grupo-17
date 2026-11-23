@@ -1,5 +1,77 @@
 const MARCA = '2026-10-01T00:00:00.000Z';
 
+const SECCIONES = ['panel', 'resumen', 'cuentas', 'asientos', 'pagos', 'periodos', 'reportes', 'entidades', 'documentos', 'busqueda', 'datosDemo'];
+const EXCLUIDAS = new Set(['entidades', 'documentos', 'busqueda']);
+
+function permiso(seccion, acceso, acciones = []) {
+  const accionesEfectivas = seccion === 'pagos' && acceso !== 'noDisponible' && !acciones.includes('marcarPagado')
+    ? [...acciones, 'marcarPagado']
+    : acciones;
+  return {
+    seccion,
+    acceso,
+    acciones: acceso === 'noDisponible' ? [] : accionesEfectivas,
+    visibleEnMenu: acceso !== 'noDisponible' && !EXCLUIDAS.has(seccion)
+  };
+}
+
+function rol(id, nombre, panelInicio, accesos, accionesPanel = ['cerrarSesion']) {
+  return {
+    id,
+    nombre,
+    panelInicio,
+    permisos: SECCIONES.map((seccion) => {
+      const acceso = accesos[seccion] || 'noDisponible';
+      const acciones = acceso === 'gestionar'
+        ? ['crear', 'editar', 'eliminar']
+        : acceso === 'registrarConsultar'
+          ? ['crear']
+          : [];
+      return permiso(seccion, acceso, acciones);
+    }),
+    accionesPanel: [...accionesPanel]
+  };
+}
+
+export function generarRoles() {
+  return [
+    rol('administrador', 'Administrador financiero', 'integral', {
+      panel: 'ver',
+      resumen: 'consultar',
+      cuentas: 'gestionar',
+      asientos: 'gestionar',
+      pagos: 'gestionar',
+      periodos: 'gestionar',
+      reportes: 'consultar',
+      datosDemo: 'gestionar'
+    }, ['cargarDatos', 'restablecerDatos', 'cerrarSesion']),
+    rol('contador', 'Contador', 'contable', {
+      panel: 'ver',
+      resumen: 'consultar',
+      cuentas: 'gestionar',
+      asientos: 'gestionar',
+      reportes: 'consultar'
+    }),
+    rol('tesorero', 'Tesorero', 'tesoreria', {
+      panel: 'ver',
+      pagos: 'registrarConsultar'
+    }),
+    rol('auditor', 'Auditor', 'auditoria', {
+      panel: 'ver',
+      reportes: 'consultar'
+    })
+  ];
+}
+
+export function generarUsuarios() {
+  return [
+    { rut: '11.111.111-1', rutNormalizado: '111111111', nombre: 'Administrador financiero', contraseña: 'Admin2026!', rol_id: 'administrador' },
+    { rut: '22.222.222-2', rutNormalizado: '222222222', nombre: 'Contador', contraseña: 'Contador2026!', rol_id: 'contador' },
+    { rut: '33.333.333-3', rutNormalizado: '333333333', nombre: 'Tesorero', contraseña: 'Tesorero2026!', rol_id: 'tesorero' },
+    { rut: '44.444.444-4', rutNormalizado: '444444444', nombre: 'Auditor', contraseña: 'Auditor2026!', rol_id: 'auditor' }
+  ];
+}
+
 export function generarSemillaBase() {
   const entidades = [
     {
@@ -217,13 +289,14 @@ export function generarSemilla({ entidades = [], documentos = [] } = {}) {
       folio: 1001,
       tipo: 'cobro',
       date: '2026-10-05',
+      fechaVencimiento: '2026-12-05',
       entity_id: clienteId,
       document_id: documentoVenta ? documentoVenta.id : null,
       asiento_id: 'asi-0001',
       amount: 116000,
       currency: 'MXN',
       method: 'transferencia',
-      status: 'aplicado',
+      status: 'pagado',
       notes: 'Cobro de la factura FAC-1001',
       createdAt: MARCA,
       updatedAt: MARCA
@@ -235,13 +308,14 @@ export function generarSemilla({ entidades = [], documentos = [] } = {}) {
       folio: 1001,
       tipo: 'pago',
       date: '2026-10-08',
+      fechaVencimiento: '2026-12-08',
       entity_id: proveedorId,
       document_id: documentoCompra ? documentoCompra.id : null,
       asiento_id: 'asi-0002',
       amount: 250000,
       currency: 'MXN',
       method: 'transferencia',
-      status: 'aplicado',
+      status: 'pendiente',
       notes: 'Pago de renta',
       createdAt: MARCA,
       updatedAt: MARCA
@@ -253,6 +327,7 @@ export function generarSemilla({ entidades = [], documentos = [] } = {}) {
       folio: 1002,
       tipo: 'cobro',
       date: '2026-09-25',
+      fechaVencimiento: '2026-10-15',
       entity_id: clienteId,
       document_id: null,
       asiento_id: null,

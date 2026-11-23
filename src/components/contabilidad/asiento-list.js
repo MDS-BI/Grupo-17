@@ -1,4 +1,4 @@
-import { formatoMoneda, formatoFecha, escapeHtml, insigniaEstado } from './comun.js';
+import { formatoMoneda, formatoFecha, escapeHtml, insigniaEstado, filtrarYPaginar } from './comun.js';
 import { lineasDeAsiento } from '../../contabilidad/asientos.js';
 
 function acciones(asiento) {
@@ -14,10 +14,16 @@ function acciones(asiento) {
   return botones.join('');
 }
 
-export function renderAsientoList(container, asientos) {
+export function renderAsientoList(container, asientos, opciones = {}) {
   if (!container) return false;
   container.innerHTML = '';
   if (!asientos || asientos.length === 0) return false;
+  const resultado = filtrarYPaginar(asientos, opciones.filtro, {
+    pagina: opciones.pagina,
+    tamano: opciones.tamano,
+    campos: ['numero', 'series', 'folio', 'concept', 'status']
+  });
+  if (resultado.registros.length === 0) return false;
   const tabla = document.createElement('table');
   tabla.className = 'tabla-financiera';
   tabla.innerHTML = `
@@ -27,7 +33,7 @@ export function renderAsientoList(container, asientos) {
     </thead>
     <tbody></tbody>`;
   const cuerpo = tabla.querySelector('tbody');
-  for (const asiento of asientos) {
+  for (const asiento of resultado.registros) {
     const fila = document.createElement('tr');
     const lineas = lineasDeAsiento(asiento.id).length;
     fila.innerHTML = `
@@ -42,5 +48,8 @@ export function renderAsientoList(container, asientos) {
     cuerpo.appendChild(fila);
   }
   container.appendChild(tabla);
+  container.dataset.paginaActual = String(resultado.pagina);
+  container.dataset.totalPaginas = String(resultado.totalPaginas);
+  container.dataset.totalRegistros = String(resultado.total);
   return true;
 }

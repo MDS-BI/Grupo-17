@@ -56,6 +56,22 @@ export function insigniaEstado(status) {
   return `<span class="status-badge status-${escapeHtml(status)}">${escapeHtml(status)}</span>`;
 }
 
+export function filtrarYPaginar(registros, texto = '', { pagina = 1, tamano = 50, campos = [] } = {}) {
+  const termino = String(texto || '').trim().toLowerCase();
+  const filtrados = termino
+    ? registros.filter((registro) => campos.some((campo) => String(registro[campo] ?? '').toLowerCase().includes(termino)))
+    : [...registros];
+  const totalPaginas = Math.max(1, Math.ceil(filtrados.length / tamano));
+  const paginaSegura = Math.min(Math.max(1, pagina), totalPaginas);
+  const inicio = (paginaSegura - 1) * tamano;
+  return {
+    registros: filtrados.slice(inicio, inicio + tamano),
+    total: filtrados.length,
+    pagina: paginaSegura,
+    totalPaginas
+  };
+}
+
 export function mostrarMensaje(id, mensaje) {
   const elemento = document.getElementById(id);
   if (!elemento) return;

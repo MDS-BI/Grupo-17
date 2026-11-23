@@ -7,6 +7,7 @@ function qs(id) {
 
 const ERRORES = [
   'error-pago-date',
+  'error-pago-fecha-vencimiento',
   'error-pago-amount',
   'error-pago-tipo',
   'error-pago-method',
@@ -42,6 +43,7 @@ export function poblarAsientosPago(asientos = [], valor = '') {
 export function clearPagoForm({ entidades = [], documentos = [], asientos = [] } = {}) {
   qs('pago-id').value = '';
   qs('pago-date').value = '';
+  qs('pago-fecha-vencimiento').value = '';
   qs('pago-amount').value = '';
   qs('pago-tipo').value = 'pago';
   qs('pago-method').value = '';
@@ -60,6 +62,7 @@ export function clearPagoForm({ entidades = [], documentos = [], asientos = [] }
 export function startPagoEdit(pago, { entidades = [], documentos = [], asientos = [] } = {}) {
   qs('pago-id').value = pago.id;
   qs('pago-date').value = pago.date || '';
+  qs('pago-fecha-vencimiento').value = pago.fechaVencimiento || '';
   qs('pago-amount').value = pago.amount === undefined ? '' : desdeCentavos(pago.amount);
   qs('pago-tipo').value = pago.tipo || 'pago';
   qs('pago-method').value = pago.method || '';
@@ -78,6 +81,7 @@ export function startPagoEdit(pago, { entidades = [], documentos = [], asientos 
 export function collectPagoPayload() {
   return {
     date: qs('pago-date').value,
+    fechaVencimiento: qs('pago-fecha-vencimiento').value,
     amount: qs('pago-amount').value,
     tipo: qs('pago-tipo').value,
     method: qs('pago-method').value,
@@ -93,6 +97,7 @@ export function collectPagoPayload() {
 
 export function showPagoErrors(errores = {}) {
   mostrarError('error-pago-date', errores.date);
+  mostrarError('error-pago-fecha-vencimiento', errores.fechaVencimiento);
   mostrarError('error-pago-amount', errores.amount);
   mostrarError('error-pago-tipo', errores.tipo);
   mostrarError('error-pago-method', errores.method);

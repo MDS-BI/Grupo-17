@@ -1,5 +1,5 @@
 import { construirArbol } from '../../contabilidad/cuentas.js';
-import { escapeHtml, insigniaEstado } from './comun.js';
+import { escapeHtml, insigniaEstado, filtrarYPaginar } from './comun.js';
 
 function nodo(cuenta, nivel, porId) {
   const item = document.createElement('li');
@@ -39,16 +39,25 @@ function nodo(cuenta, nivel, porId) {
   return item;
 }
 
-export function renderCuentaList(container, cuentas) {
+export function renderCuentaList(container, cuentas, opciones = {}) {
   if (!container) return false;
   container.innerHTML = '';
   if (!cuentas || cuentas.length === 0) return false;
+  const resultado = filtrarYPaginar(cuentas, opciones.filtro, {
+    pagina: opciones.pagina,
+    tamano: opciones.tamano,
+    campos: ['code', 'name', 'description', 'type']
+  });
+  if (resultado.registros.length === 0) return false;
   const lista = document.createElement('ul');
   lista.className = 'cuenta-arbol';
   lista.setAttribute('role', 'tree');
-  const porId = new Map(cuentas.map((c) => [c.id, c]));
-  for (const raiz of construirArbol(cuentas)) lista.appendChild(nodo(raiz, 0, porId));
+  const porId = new Map(resultado.registros.map((c) => [c.id, c]));
+  for (const raiz of construirArbol(resultado.registros)) lista.appendChild(nodo(raiz, 0, porId));
   container.appendChild(lista);
+  container.dataset.paginaActual = String(resultado.pagina);
+  container.dataset.totalPaginas = String(resultado.totalPaginas);
+  container.dataset.totalRegistros = String(resultado.total);
   return true;
 }
 

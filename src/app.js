@@ -27,6 +27,13 @@ import { renderPagoList, renderPagoDetalle } from './components/contabilidad/pag
 import { clearPeriodoForm, startPeriodoEdit, collectPeriodoPayload, showPeriodoErrors } from './components/contabilidad/periodo-form.js';
 import { renderPeriodoList } from './components/contabilidad/periodo-list.js';
 import { renderReporte } from './components/contabilidad/reportes.js';
+import { renderAcceso, obtenerCredenciales, mostrarErroresAcceso, limpiarFormularioAcceso } from './components/acceso.js';
+import { renderizarMenu, navegar } from './components/menu.js';
+import { renderizarPanelInicio } from './components/panel-por-rol.js';
+import { renderizarResumenPagos } from './components/contabilidad/pago-resumen.js';
+import * as Sesion from './contabilidad/sesion.js';
+import * as Permisos from './contabilidad/permisos.js';
+import * as ResumenPagos from './contabilidad/resumen-pagos.js';
 
 function qs(id){ return document.getElementById(id); }
 
@@ -44,12 +51,15 @@ const articulo = (word) => esFemenina(word) ? 'la' : 'el';
 const demostrativo = (word) => esFemenina(word) ? 'esta' : 'este';
 const seleccionada = (word) => esFemenina(word) ? 'seleccionada' : 'seleccionado';
 
-const MODULES = ['dashboard', 'entities', 'documents', 'search', 'resumen', 'cuentas', 'asientos', 'pagos', 'periodos', 'reportes'];
+const MODULES = ['dashboard', 'entities', 'documents', 'search', 'panel', 'resumen', 'cuentas', 'asientos', 'pagos', 'periodos', 'reportes'];
 const VIEWS = {
+  acceso: 'view-acceso',
+  bloqueo: 'view-bloqueo',
   dashboard: 'view-dashboard',
   entities: 'view-entities',
   documents: 'view-documents',
   search: 'view-search',
+  panel: 'view-panel-inicio',
   resumen: 'view-resumen',
   cuentas: 'view-cuentas',
   asientos: 'view-asientos',
@@ -61,6 +71,8 @@ const MODULOS_CONTABILIDAD = ['resumen', 'cuentas', 'asientos', 'pagos', 'period
 
 let wired = false;
 let contabilidadInicializada = false;
+let modoAcceso = false;
+let filtroEstadoPago = 'todos';
 
 function confirmar(mensaje){
   try{
@@ -75,6 +87,73 @@ function asegurarContabilidad(){
     Almacen.inicializarContabilidad();
     contabilidadInicializada = true;
   }
+}
+
+function sesionActual(){
+  return Sesion.obtenerSesionActiva();
+}
+
+function puede(accion){
+  return !modoAcceso || Permisos.puedeEjecutar(accion, sesionActual());
+}
+
+function puedeSeccion(seccion, accion){
+  if(!modoAcceso) return true;
+  const permiso = Permisos.obtenerPermiso(seccion, sesionActual());
+  return Boolean(permiso && permiso.acciones.includes(accion));
+}
+
+function verificarPermiso(seccion, accion){
+  if(puedeSeccion(seccion, accion)) return true;
+  mostrarBloqueo('No tienes permiso para realizar esta acción.');
+  return false;
+}
+
+function ocultarVistas(){
+  Object.values(VIEWS).forEach(id => { const vista = qs(id); if(vista) vista.hidden = true; });
+}
+
+function mostrarAcceso(mensaje = ''){
+  ocultarVistas();
+  document.querySelectorAll('.nav-module').forEach(boton => { boton.hidden = true; });
+  const vista = qs(VIEWS.acceso);
+  if(vista) vista.hidden = false;
+  if(mensaje) mostrarErroresAcceso({ acceso: mensaje });
+  renderAcceso(vista);
+}
+
+function mostrarBloqueo(mensaje){
+  ocultarVistas();
+  const vista = qs(VIEWS.bloqueo);
+  if(vista) vista.hidden = false;
+  const texto = qs('mensaje-bloqueo');
+  if(texto) texto.textContent = mensaje || 'No tienes acceso a esta sección.';
+}
+
+function datosPanel(){
+  const periodos = Periodos.listarPeriodos();
+  const periodoId = elegirPeriodo(periodos);
+  return {
+    entidades: loadEntities(),
+    documentos: loadDocuments(),
+    cuentas: Cuentas.listarCuentas(),
+    periodos,
+    asientos: Asientos.listarAsientos(),
+    pagos: Pagos.listarPagos(),
+    resumen: periodoId ? Reportes.calcularResumen(periodoId) : { ingresos: 0, gastos: 0, resultado: 0, movimientos: 0 }
+  };
+}
+
+function aplicarSesion(){
+  const sesion = sesionActual();
+  if(!sesion){
+    mostrarAcceso();
+    return false;
+  }
+  const dato = datosPanel();
+  renderizarPanelInicio(sesion, dato);
+  renderizarMenu(sesion.permisos, { ...sesion, pantallaActiva: 'panel' });
+  return showModule('panel');
 }
 
 function datosContabilidad(){
@@ -103,7 +182,7 @@ function refrescarResumen(){
 
 function refrescarCuentas(){
   const cuentas = Cuentas.listarCuentas();
-  const hayCuentas = renderCuentaList(qs('cuentas-lista'), cuentas);
+  const hayCuentas = renderCuentaList(qs('cuentas-lista'), cuentas, { filtro: qs('cuentas-filtro').value });
   qs('cuentas-empty').hidden = hayCuentas;
   populateCuentaParentSelect(cuentas, { excludeId: qs('cuenta-id').value || null });
   const detalle = Cuentas.obtenerDetalleCuenta(qs('cuenta-detalle-id').value);
@@ -112,7 +191,7 @@ function refrescarCuentas(){
 }
 
 function refrescarAsientos(){
-  const hayAsientos = renderAsientoList(qs('asientos-lista'), Asientos.listarAsientos());
+  const hayAsientos = renderAsientoList(qs('asientos-lista'), Asientos.listarAsientos(), { filtro: qs('asientos-filtro').value });
   qs('asientos-empty').hidden = hayAsientos;
 }
 
@@ -133,17 +212,25 @@ function refrescarPagos(){
   });
   if(entidadPrevia && [...filtroEntidad.options].some(o => o.value === entidadPrevia)) filtroEntidad.value = entidadPrevia;
 
-  const hayPagos = renderPagoList(qs('pagos-lista'), Pagos.listarPagos(), {
+  const todosLosPagos = Pagos.listarPagos();
+  const resumen = ResumenPagos.resumirPagos(todosLosPagos);
+  renderizarResumenPagos(qs('pago-resumen-tarjetas'), resumen, filtroEstadoPago, todosLosPagos.length === 0);
+
+  const hayPagos = renderPagoList(qs('pagos-lista'), todosLosPagos, {
     entidades,
     tipo: qs('pagos-filtro-tipo').value,
-    entityId: filtroEntidad.value
+    entityId: filtroEntidad.value,
+    estado: filtroEstadoPago,
+    texto: qs('pagos-filtro-texto').value
   });
-  qs('pagos-empty').hidden = hayPagos;
+  qs('pagos-empty').hidden = todosLosPagos.length > 0;
+  const vacioFiltro = qs('pagos-filtro-empty');
+  if(vacioFiltro) vacioFiltro.hidden = todosLosPagos.length === 0 || hayPagos;
   if(!hayPagos) renderPagoDetalle(qs('pago-detalle'), null, { entidades, documentos, asientos });
 }
 
 function refrescarPeriodos(){
-  const hayPeriodos = renderPeriodoList(qs('periodos-lista'), Periodos.listarPeriodos());
+  const hayPeriodos = renderPeriodoList(qs('periodos-lista'), Periodos.listarPeriodos(), { filtro: qs('periodos-filtro').value });
   qs('periodos-empty').hidden = hayPeriodos;
 }
 
@@ -156,10 +243,32 @@ function refrescarReportes(){
 
 function showModule(name, opts = {}){
   if(!MODULES.includes(name)) name = 'dashboard';
-  MODULES.forEach(m => { qs(VIEWS[m]).hidden = m !== name; });
+  if(modoAcceso){
+    const sesion = sesionActual();
+    if(!sesion){
+      mostrarAcceso();
+      return false;
+    }
+    if(name !== 'panel'){
+      const revision = navegar(name, sesion.permisos);
+      if(!revision.permitido){
+        mostrarBloqueo(revision.mensaje);
+        return false;
+      }
+    }
+    renderizarMenu(sesion.permisos, { ...sesion, pantallaActiva: name });
+  }
+  ocultarVistas();
+  const vista = qs(VIEWS[name]);
+  if(vista) vista.hidden = false;
   setActiveModule(name);
+  if(modoAcceso) sesionActual().pantallaActiva = name;
   if(name === 'dashboard'){
     renderDashboard();
+  }
+  if(name === 'panel'){
+    const sesion = sesionActual();
+    if(sesion) renderizarPanelInicio(sesion, datosPanel());
   }
   if(name === 'entities'){
     populateDocumentEntitySelect();
@@ -220,6 +329,7 @@ function showModule(name, opts = {}){
     refrescarReportes();
   }
   window.scrollTo({ top: 0, behavior: 'smooth' });
+  return true;
 }
 
 function populateDocumentEntitySelect(){
@@ -361,6 +471,7 @@ function handleDocumentSubmit(ev){
 
 function handleCuentaSubmit(ev){
   ev.preventDefault();
+  if(!verificarPermiso('cuentas', qs('cuenta-id').value ? 'editar' : 'crear')) return;
   const id = qs('cuenta-id').value;
   const payload = collectCuentaPayload();
   const revision = validarCuenta(payload, { cuentas: Almacen.loadCuentas(), id: id || null });
@@ -380,6 +491,8 @@ function handleCuentaListClick(ev){
   const boton = ev.target.closest('button[data-action]');
   if(!boton) return;
   const id = boton.dataset.id;
+  const permisosAccion = { 'editar-cuenta': 'editar', 'eliminar-cuenta': 'eliminar' };
+  if(permisosAccion[boton.dataset.action] && !verificarPermiso('cuentas', permisosAccion[boton.dataset.action])) return;
   if(boton.dataset.action === 'ver-detalle-cuenta'){
     qs('cuenta-detalle-id').value = id;
     refrescarCuentas();
@@ -412,6 +525,7 @@ function handleCuentaListClick(ev){
 
 function handleAsientoSubmit(ev){
   ev.preventDefault();
+  if(!verificarPermiso('asientos', qs('asiento-id').value ? 'editar' : 'crear')) return;
   const id = qs('asiento-id').value;
   const payload = collectAsientoPayload();
   const existente = id ? Asientos.obtenerAsiento(id) : null;
@@ -444,6 +558,13 @@ function handleAsientoListClick(ev){
   const id = boton.dataset.id;
   const accion = boton.dataset.action;
   const { periodos, entidades } = datosContabilidad();
+  const permisosAccion = {
+    'editar-asiento': 'editar',
+    'aprobar-asiento': 'editar',
+    'cancelar-asiento': 'editar',
+    'eliminar-asiento': 'eliminar'
+  };
+  if(permisosAccion[accion] && !verificarPermiso('asientos', permisosAccion[accion])) return;
   if(accion === 'editar-asiento'){
     const registro = Asientos.asientoConLineas(id);
     if(!registro) return;
@@ -471,6 +592,7 @@ function handleAsientoListClick(ev){
 
 function handlePagoSubmit(ev){
   ev.preventDefault();
+  if(!verificarPermiso('pagos', qs('pago-id').value ? 'editar' : 'crear')) return;
   const id = qs('pago-id').value;
   const payload = collectPagoPayload();
   const existente = id ? Pagos.obtenerPago(id) : null;
@@ -493,8 +615,8 @@ function handlePagoSubmit(ev){
   showPagoErrors(revision.errores);
   if(!revision.valido) return;
   try{
-    if(id) Pagos.actualizarPago(id, { ...payload, tipo, series, folio, numero });
-    else Pagos.crearPago({ ...payload, tipo, series, folio, numero });
+    if(id) Pagos.actualizarPago(id, { ...payload, tipo, series, folio, numero, status: revision.status });
+    else Pagos.crearPago({ ...payload, tipo, series, folio, numero, status: revision.status });
     const { entidades, documentos, asientos } = datosContabilidad();
     clearPagoForm({ entidades, documentos, asientos });
     refrescarPagos();
@@ -515,12 +637,25 @@ function handlePagoListClick(ev){
     return;
   }
   if(accion === 'editar-pago'){
+    if(!verificarPermiso('pagos', 'editar')) return;
     const pago = Pagos.obtenerPago(id);
     if(!pago) return;
     startPagoEdit(pago, { entidades, documentos, asientos });
     qs('pago-date').focus();
     return;
   }
+  if(accion === 'marcar-pagado'){
+    if(!verificarPermiso('pagos', 'marcarPagado')) return;
+    try{
+      Pagos.marcarPagado(id);
+      refrescarPagos();
+    }catch(e){
+      showPagoErrors({ amount: e.message });
+    }
+    return;
+  }
+  const permisosAccion = { 'editar-pago': 'editar', 'cancelar-pago': 'editar', 'eliminar-pago': 'eliminar' };
+  if(permisosAccion[accion] && !verificarPermiso('pagos', permisosAccion[accion])) return;
   const mensajes = {
     'cancelar-pago': '¿Cancelar el pago seleccionado?',
     'eliminar-pago': '¿Eliminar el pago seleccionado?'
@@ -540,6 +675,7 @@ function handlePagoListClick(ev){
 
 function handlePeriodoSubmit(ev){
   ev.preventDefault();
+  if(!verificarPermiso('periodos', qs('periodo-id').value ? 'editar' : 'crear')) return;
   const id = qs('periodo-id').value;
   const payload = collectPeriodoPayload();
   const revision = validarPeriodo(payload, { periodos: Almacen.loadPeriodos(), id: id || null });
@@ -560,6 +696,8 @@ function handlePeriodoListClick(ev){
   if(!boton) return;
   const id = boton.dataset.id;
   const accion = boton.dataset.action;
+  const permisosAccion = { 'editar-periodo': 'editar', 'alternar-periodo': 'editar', 'eliminar-periodo': 'eliminar' };
+  if(permisosAccion[accion] && !verificarPermiso('periodos', permisosAccion[accion])) return;
   if(accion === 'editar-periodo'){
     const periodo = Periodos.obtenerPeriodo(id);
     if(periodo) startPeriodoEdit(periodo);
@@ -596,10 +734,66 @@ function handlePeriodoListClick(ev){
 }
 
 function handleResetContabilidad(){
+  if(!puede('restablecerDatos')){
+    mostrarBloqueo('No tienes permiso para restablecer los datos de ejemplo.');
+    return;
+  }
   if(!confirmar('¿Restaurar los datos de ejemplo de contabilidad? Se reemplazarán los datos contables actuales.')) return;
   Almacen.reiniciarDatosEjemplo();
   contabilidadInicializada = true;
   refrescarResumen();
+}
+
+function handleAccesoSubmit(ev){
+  ev.preventDefault();
+  const { rut, contraseña } = obtenerCredenciales(qs(VIEWS.acceso));
+  const revision = Sesion.iniciarSesion(rut, contraseña);
+  if(!revision.ok){
+    mostrarErroresAcceso(revision.errores);
+    renderAcceso(qs(VIEWS.acceso), revision.errores);
+    return;
+  }
+  limpiarFormularioAcceso();
+  aplicarSesion();
+}
+
+function handlePanelClick(ev){
+  const boton = ev.target.closest('button[data-accion]');
+  if(!boton) return;
+  const accion = boton.dataset.accion;
+  const mensaje = qs('mensaje-panel');
+  const informar = (texto) => {
+    if(!mensaje) return;
+    mensaje.textContent = texto;
+    mensaje.hidden = !texto;
+  };
+  if(accion === 'cerrar-sesion'){
+    Sesion.cerrarSesion();
+    mostrarAcceso();
+    return;
+  }
+  if(accion === 'cargar-datos'){
+    if(!puede('cargarDatos')){
+      mostrarBloqueo('No tienes permiso para cargar datos de ejemplo.');
+      return;
+    }
+    Almacen.cargarDatosEjemplo();
+    contabilidadInicializada = true;
+    aplicarSesion();
+    informar('Datos de ejemplo cargados correctamente.');
+    return;
+  }
+  if(accion === 'restablecer-datos'){
+    if(!puede('restablecerDatos')){
+      mostrarBloqueo('No tienes permiso para restablecer los datos.');
+      return;
+    }
+    if(!confirmar('¿Restablecer los datos iniciales? Se conservarán los usuarios y los roles.')) return;
+    Almacen.restablecerEstadoInicial();
+    contabilidadInicializada = true;
+    aplicarSesion();
+    informar('Datos restablecidos correctamente.');
+  }
 }
 
 function applyLabels(config){
@@ -697,15 +891,26 @@ function wireEvents(){
   on('pagos-lista', 'click', handlePagoListClick);
   on('pagos-filtro-tipo', 'change', refrescarPagos);
   on('pagos-filtro-entidad', 'change', refrescarPagos);
+  on('pagos-filtro-texto', 'input', refrescarPagos);
+  on('cuentas-filtro', 'input', refrescarCuentas);
+  on('asientos-filtro', 'input', refrescarAsientos);
+  on('periodos-filtro', 'input', refrescarPeriodos);
   on('periodo-form', 'submit', handlePeriodoSubmit);
   on('periodo-cancel-edit', 'click', clearPeriodoForm);
   on('periodos-lista', 'click', handlePeriodoListClick);
+  on('filtro-estado-pago', 'change', (ev) => {
+    filtroEstadoPago = ev.target.value;
+    refrescarPagos();
+  });
   on('resumen-periodo', 'change', refrescarResumen);
   on('resumen-reset', 'click', handleResetContabilidad);
   on('reportes-periodo', 'change', refrescarReportes);
+  on('acceso-formulario', 'submit', handleAccesoSubmit);
+  on('view-panel-inicio', 'click', handlePanelClick);
 }
 
-export function initApp(resolved){
+export function initApp(resolved, opciones = {}){
+  modoAcceso = Boolean(opciones.requireAccess);
   showConfigErrors(resolved.errors);
   setActiveConfig(resolved.config);
   applyTheme(resolved.config);
@@ -717,10 +922,26 @@ export function initApp(resolved){
   clearCuentaForm();
   clearPagoForm();
   clearPeriodoForm();
-  showModule('dashboard');
+  Almacen.inicializarAcceso();
+  if(modoAcceso) asegurarContabilidad();
+  Pagos.normalizarEstadosHeredados();
+  if(modoAcceso){
+    if(sesionActual()) aplicarSesion();
+    else mostrarAcceso();
+  }else{
+    document.querySelectorAll('.nav-module').forEach(boton => { boton.hidden = false; });
+    showModule('dashboard');
+  }
 }
 
-export async function boot(overrideConfig){
+export function iniciarSesionApp(rut, contraseña){
+  const revision = Sesion.iniciarSesion(rut, contraseña);
+  if(!revision.ok) return revision;
+  const aceptada = aplicarSesion();
+  return { ok: aceptada, sesion: revision.sesion };
+}
+
+export async function boot(overrideConfig, opciones = {}){
   const resolved = overrideConfig !== undefined ? normalizeConfig(overrideConfig) : await loadModuleConfig();
-  initApp(resolved);
+  initApp(resolved, opciones);
 }

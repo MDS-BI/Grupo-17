@@ -1,9 +1,15 @@
-import { formatoFecha, escapeHtml, insigniaEstado } from './comun.js';
+import { formatoFecha, escapeHtml, insigniaEstado, filtrarYPaginar } from './comun.js';
 
-export function renderPeriodoList(container, periodos) {
+export function renderPeriodoList(container, periodos, opciones = {}) {
   if (!container) return false;
   container.innerHTML = '';
   if (!periodos || periodos.length === 0) return false;
+  const resultado = filtrarYPaginar(periodos, opciones.filtro, {
+    pagina: opciones.pagina,
+    tamano: opciones.tamano,
+    campos: ['name', 'startDate', 'endDate', 'status']
+  });
+  if (resultado.registros.length === 0) return false;
   const tabla = document.createElement('table');
   tabla.className = 'tabla-financiera';
   tabla.innerHTML = `
@@ -12,7 +18,7 @@ export function renderPeriodoList(container, periodos) {
     </thead>
     <tbody></tbody>`;
   const cuerpo = tabla.querySelector('tbody');
-  for (const periodo of periodos) {
+  for (const periodo of resultado.registros) {
     const fila = document.createElement('tr');
     fila.innerHTML = `
       <td>${escapeHtml(periodo.name)}</td>
@@ -27,5 +33,8 @@ export function renderPeriodoList(container, periodos) {
     cuerpo.appendChild(fila);
   }
   container.appendChild(tabla);
+  container.dataset.paginaActual = String(resultado.pagina);
+  container.dataset.totalPaginas = String(resultado.totalPaginas);
+  container.dataset.totalRegistros = String(resultado.total);
   return true;
 }

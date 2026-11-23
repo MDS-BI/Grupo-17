@@ -3,32 +3,71 @@ import { getConfig } from './module-config.js';
 const ENTITIES_KEY = 'erp_base_module:entities';
 const DOCUMENTS_KEY = 'erp_base_module:documents';
 
+export function obtenerAlmacenSesion(){
+  if (typeof globalThis !== 'undefined' && globalThis.sessionStorage) return globalThis.sessionStorage;
+  if (typeof globalThis !== 'undefined' && globalThis.localStorage) return globalThis.localStorage;
+  return null;
+}
+
+function almacenAnterior(){
+  if (typeof globalThis === 'undefined') return null;
+  return globalThis.localStorage || null;
+}
+
+function migrarClave(clave){
+  const almacen = obtenerAlmacenSesion();
+  const anterior = almacenAnterior();
+  if (!almacen || !anterior || almacen === anterior) return;
+  if (almacen.getItem(clave) === null && anterior.getItem(clave) !== null) {
+    almacen.setItem(clave, anterior.getItem(clave));
+    anterior.removeItem(clave);
+  }
+}
+
+export function leerValor(clave){
+  migrarClave(clave);
+  const almacen = obtenerAlmacenSesion();
+  return almacen ? almacen.getItem(clave) : null;
+}
+
+export function escribirValor(clave, valor){
+  const almacen = obtenerAlmacenSesion();
+  if (almacen) almacen.setItem(clave, valor);
+}
+
+export function eliminarValor(clave){
+  const almacen = obtenerAlmacenSesion();
+  if (almacen) almacen.removeItem(clave);
+  const anterior = almacenAnterior();
+  if (anterior && anterior !== almacen) anterior.removeItem(clave);
+}
+
 export function loadEntities(){
   try{
-    const raw = localStorage.getItem(ENTITIES_KEY);
+    const raw = leerValor(ENTITIES_KEY);
     return raw ? JSON.parse(raw) : [];
   }catch(e){
-    console.error('Failed to parse entities from storage', e);
+    console.error('No se pudieron leer las entidades del almacenamiento', e);
     return [];
   }
 }
 
 export function saveEntities(entities){
-  localStorage.setItem(ENTITIES_KEY, JSON.stringify(entities));
+  escribirValor(ENTITIES_KEY, JSON.stringify(entities));
 }
 
 export function loadDocuments(){
   try{
-    const raw = localStorage.getItem(DOCUMENTS_KEY);
+    const raw = leerValor(DOCUMENTS_KEY);
     return raw ? JSON.parse(raw) : [];
   }catch(e){
-    console.error('Failed to parse documents from storage', e);
+    console.error('No se pudieron leer los documentos del almacenamiento', e);
     return [];
   }
 }
 
 export function saveDocuments(documents){
-  localStorage.setItem(DOCUMENTS_KEY, JSON.stringify(documents));
+  escribirValor(DOCUMENTS_KEY, JSON.stringify(documents));
 }
 
 function generateId(){

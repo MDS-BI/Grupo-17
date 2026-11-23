@@ -3,7 +3,8 @@ import { esFechaValida } from './fechas.js';
 
 export const TIPOS_PAGO = Object.freeze(['cobro', 'pago']);
 export const METODOS_PAGO = Object.freeze(['efectivo', 'transferencia', 'cheque', 'tarjeta']);
-export const ESTADOS_PAGO = Object.freeze(['pendiente', 'aplicado', 'cancelado']);
+export const ESTADOS_PAGO = Object.freeze(['pendiente', 'pagado', 'cancelado']);
+export const ESTADOS_PAGO_LEGADOS = Object.freeze({ aplicado: 'pagado' });
 
 function texto(valor) {
   return typeof valor === 'string' ? valor.trim() : '';
@@ -28,7 +29,9 @@ export function validarPago(payload = {}, {
   const documentId = texto(payload.document_id);
   const asientoId = texto(payload.asiento_id);
   const method = texto(payload.method);
-  const status = texto(payload.status) || 'pendiente';
+  const estadoEntrada = texto(payload.status) || 'pendiente';
+  const status = ESTADOS_PAGO_LEGADOS[estadoEntrada] || estadoEntrada;
+  const vencimiento = texto(payload.fechaVencimiento);
   const series = texto(payload.series);
   const folio = payload.folio === undefined || payload.folio === null || payload.folio === ''
     ? null
@@ -36,6 +39,9 @@ export function validarPago(payload = {}, {
 
   if (!date) errores.date = 'La fecha es obligatoria';
   else if (!esFechaValida(date)) errores.date = 'La fecha debe ser una fecha válida (YYYY-MM-DD)';
+
+  if (!vencimiento) errores.fechaVencimiento = 'La fecha de vencimiento es obligatoria';
+  else if (!esFechaValida(vencimiento)) errores.fechaVencimiento = 'La fecha de vencimiento debe ser válida (YYYY-MM-DD)';
 
   if (!TIPOS_PAGO.includes(tipo)) {
     errores.tipo = `El tipo de operación debe ser uno de: ${TIPOS_PAGO.join(', ')}`;
@@ -94,6 +100,7 @@ export function validarPago(payload = {}, {
     valido: Object.keys(errores).length === 0,
     errores,
     centavos: importe.valido ? importe.centavos : 0,
-    numero
+    numero,
+    status
   };
 }

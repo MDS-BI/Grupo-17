@@ -12,6 +12,7 @@ const asientos = [{ id: 'asi-1' }];
 function pagoBase(cambios = {}){
   return {
     date: '2026-10-10',
+    fechaVencimiento: '2026-11-10',
     amount: '100.50',
     tipo: 'cobro',
     entity_id: 'ent-1',
@@ -39,6 +40,15 @@ describe('validación de pagos y cobros', () => {
     expect(validar(pagoBase({ amount: '0' })).errores.amount).toContain('mayor que cero');
     expect(validar(pagoBase({ amount: '-5' })).errores.amount).toContain('mayor que cero');
     expect(validar(pagoBase({ amount: '10.999' })).errores.amount).toContain('2 decimales');
+  });
+
+  it('exige una fecha de vencimiento válida', () => {
+    expect(validar(pagoBase({ fechaVencimiento: '' })).errores.fechaVencimiento).toContain('obligatoria');
+    expect(validar(pagoBase({ fechaVencimiento: 'no-fecha' })).errores.fechaVencimiento).toContain('válida');
+  });
+
+  it('normaliza el estado heredado aplicado a pagado', () => {
+    expect(validar(pagoBase({ status: 'aplicado' })).status).toBe('pagado');
   });
 
   it('rechaza entidades inexistentes y referencias a documentos o asientos inválidos', () => {

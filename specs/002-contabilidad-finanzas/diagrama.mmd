@@ -1,4 +1,7 @@
 erDiagram
+    Rol ||--|{ Usuario : "rol asignado"
+    Usuario ||--o| Sesion : "autentica"
+    Rol ||--o| Sesion : "permisos vigentes"
     Entity ||--o{ Document : "documentos (base)"
     Entity |o--o{ CuentaContable : "cuenta auxiliar (opcional)"
     Entity |o--o{ AsientoContable : "tercero relacionado (opcional)"
@@ -12,6 +15,29 @@ erDiagram
     AsientoContable ||--|{ LineaAsiento : "contiene (2 o más, cascada)"
     AsientoContable |o--o| Pago : "genera / corresponde (1:1 opcional)"
 
+    Rol {
+        string id PK
+        string nombre
+        string panelInicio
+        object permisos "PermisoRol embebido"
+        string accionesPanel "CSV: cargarDatos, restablecerDatos, cerrarSesion"
+    }
+    Usuario {
+        string rut PK "formato puntuado"
+        string rutNormalizado UK "sin puntos ni guion"
+        string nombre
+        string contraseña "solo demostración"
+        string rol_id FK
+    }
+    Sesion {
+        string id PK
+        string usuarioRut FK
+        string rolId FK
+        object permisos "copia de Rol.permisos"
+        string panelInicio
+        string estado "autenticada o cerrada"
+        string iniciadaEn
+    }
     Entity {
         string entity_id PK
         string name
@@ -81,12 +107,14 @@ erDiagram
         string numero UK
         string series "parte de UK(series, folio)"
         number folio "parte de UK(series, folio)"
+        string tipo
         string date
+        string fechaVencimiento "vencido es derivado"
         string entity_id FK
         string document_id FK
         string asiento_id FK "UK: 1:1 opcional"
         integer amount "centavos"
         string currency
         string method
-        string status
+        string status "pendiente o pagado"
     }

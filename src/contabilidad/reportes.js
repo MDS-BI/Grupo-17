@@ -17,7 +17,11 @@ function lineasDe(asientos) {
   return loadLineas().filter((l) => ids.has(l.asiento_id));
 }
 
+const cacheResumen = new Map();
+
 export function calcularResumen(periodoId = null) {
+  const clave = `${periodoId || '*'}:${JSON.stringify([loadAsientos(), loadLineas(), loadCuentas()])}`;
+  if (cacheResumen.has(clave)) return cacheResumen.get(clave);
   const asientos = asientosAprobadosDelPeriodo(periodoId);
   const lineas = lineasDe(asientos);
   const cuentas = new Map(loadCuentas().map((c) => [c.id, c]));
@@ -38,7 +42,7 @@ export function calcularResumen(periodoId = null) {
     }
   }
 
-  return {
+  const resultado = {
     periodoId: periodoId || null,
     ingresos,
     gastos,
@@ -48,6 +52,9 @@ export function calcularResumen(periodoId = null) {
     movimientos: asientos.length,
     hayMovimientos: asientos.length > 0
   };
+  cacheResumen.set(clave, resultado);
+  if (cacheResumen.size > 50) cacheResumen.delete(cacheResumen.keys().next().value);
+  return resultado;
 }
 
 export function obtenerMovimientos(periodoId = null) {
@@ -119,4 +126,40 @@ export function movimientosDeCuenta(cuentaId, periodoId = null) {
 
 export function periodosDisponibles() {
   return [...loadPeriodos()].sort((a, b) => String(a.startDate).localeCompare(String(b.startDate)));
+}
+
+export function obtenerSeriesDashboard(periodos = periodosDisponibles()) {
+  const ingresosGastos = periodos.map((periodo) => {
+    const resumen = calcularResumen(periodo.id);
+    return {
+      periodoId: periodo.id,
+      periodo: periodo.name,
+      ingresosCentavos: resumen.ingresos,
+      gastosCentavos: resumen.gastos
+    };
+  });
+  const resultado = ingresosGastos.map((punto) => ({
+    periodoId: punto.periodoId,
+    periodo: punto.periodo,
+    resultadoCentavos: punto.ingresosCentavos - punto.gastosCentavos
+  }));
+  const distribucion = calcularSaldosCuentas()
+    .filter((cuenta) => cuenta.type === 'gasto' && cuenta.saldo > 0)
+    .map((cuenta) => ({
+      cuentaId: cuenta.id,
+      codigo: cuenta.code,
+      nombre: cuenta.name,
+      gastoCentavos: cuenta.saldo
+    }))
+    .sort((a, b) => b.gastoCentavos - a.gastoCentavos);
+  const totalGastos = distribucion.reduce((total, cuenta) => total + cuenta.gastoCentavos, 0);
+  return {
+    ingresosGastos,
+    resultado,
+    distribucion: distribucion.map((cuenta) => ({
+      ...cuenta,
+      porcentaje: totalGastos === 0 ? 0 : Math.round((cuenta.gastoCentavos / totalGastos) * 1000) / 10
+    })),
+    vacio: ingresosGastos.every((punto) => punto.ingresosCentavos === 0 && punto.gastosCentavos === 0)
+  };
 }

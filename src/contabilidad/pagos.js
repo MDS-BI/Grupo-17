@@ -72,13 +72,14 @@ export function crearPago(payload = {}) {
     folio,
     tipo,
     date: payload.date,
+    fechaVencimiento: texto(payload.fechaVencimiento),
     entity_id: texto(payload.entity_id),
     document_id: texto(payload.document_id) || null,
     asiento_id: texto(payload.asiento_id) || null,
     amount: revision.centavos,
     currency: 'MXN',
     method: texto(payload.method) || null,
-    status: payload.status || 'pendiente',
+    status: revision.status,
     notes: texto(payload.notes),
     createdAt: marca,
     updatedAt: marca
@@ -110,13 +111,14 @@ export function actualizarPago(id, cambios = {}) {
     folio,
     tipo: texto(fusionado.tipo) || actual.tipo,
     date: fusionado.date,
+    fechaVencimiento: texto(fusionado.fechaVencimiento),
     entity_id: texto(fusionado.entity_id),
     document_id: texto(fusionado.document_id) || null,
     asiento_id: texto(fusionado.asiento_id) || null,
     amount: revision.centavos,
     currency: 'MXN',
     method: texto(fusionado.method) || null,
-    status: fusionado.status || actual.status,
+    status: revision.status,
     notes: texto(fusionado.notes),
     updatedAt: ahora()
   };
@@ -128,6 +130,22 @@ export function actualizarPago(id, cambios = {}) {
 
 export function cancelarPago(id) {
   return actualizarPago(id, { status: 'cancelado' });
+}
+
+export function marcarPagado(id) {
+  return actualizarPago(id, { status: 'pagado' });
+}
+
+export function normalizarEstadosHeredados() {
+  const pagos = loadPagos();
+  const normalizados = pagos.map((pago) => (
+    pago.status === 'aplicado' ? { ...pago, status: 'pagado', updatedAt: ahora() } : pago
+  ));
+  if (pagos.some((pago, indice) => pago.status !== normalizados[indice].status)) {
+    savePagos(normalizados);
+    return true;
+  }
+  return false;
 }
 
 export function eliminarPago(id) {

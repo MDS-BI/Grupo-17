@@ -22,15 +22,15 @@
             <svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="6" height="6" rx="1"></rect><rect x="11" y="3" width="6" height="6" rx="1"></rect><rect x="3" y="11" width="6" height="6" rx="1"></rect><rect x="11" y="11" width="6" height="6" rx="1"></rect></svg>
             <span class="nav-label" id="nav-dashboard-label">Panel</span>
           </button>
-          <button type="button" class="nav-module" data-module="entities" id="nav-entities">
+          <button type="button" class="nav-module" data-module="entities" id="nav-entities" hidden>
             <svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 2.5 3.5 6v8L10 17.5 16.5 14V6L10 2.5z"></path><path d="M3.5 6 10 9.5 16.5 6"></path><path d="M10 9.5v8"></path></svg>
             <span class="nav-label" id="nav-entities-label">Entidades</span>
           </button>
-          <button type="button" class="nav-module" data-module="documents" id="nav-documents">
+          <button type="button" class="nav-module" data-module="documents" id="nav-documents" hidden>
             <svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.5 2.5h6l4 4v11h-10z"></path><path d="M11.5 2.5v4h4"></path><path d="M8 10h5"></path><path d="M8 13h5"></path></svg>
             <span class="nav-label" id="nav-documents-label">Documentos</span>
           </button>
-          <button type="button" class="nav-module" data-module="search" id="nav-search">
+          <button type="button" class="nav-module" data-module="search" id="nav-search" hidden>
             <svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="9" r="5"></circle><path d="m12.8 12.8 4.2 4.2"></path></svg>
             <span class="nav-label" id="nav-search-label">Búsqueda</span>
           </button>
@@ -62,7 +62,41 @@
       </aside>
 
       <main class="content" id="app">
-        <section id="view-dashboard" aria-labelledby="dashboard-heading">
+        <section id="view-acceso" aria-labelledby="acceso-heading">
+          <h1 id="acceso-heading">Acceso al módulo</h1>
+          <form id="acceso-formulario" class="card acceso-card" data-acceso="formulario">
+            <p class="muted">Ingresa tu RUT y contraseña de demostración para continuar.</p>
+            <div>
+              <label for="acceso-rut">RUT *</label>
+              <input id="acceso-rut" name="acceso-rut" data-acceso="rut" autocomplete="username" required />
+              <div class="error" id="error-acceso-rut" aria-live="polite"></div>
+            </div>
+            <div>
+              <label for="acceso-contraseña">Contraseña *</label>
+              <input id="acceso-contraseña" name="acceso-contraseña" data-acceso="contraseña" type="password" autocomplete="current-password" required />
+              <div class="error" id="error-acceso-contraseña" aria-live="polite"></div>
+            </div>
+            <div class="error" id="error-acceso" data-acceso="error" aria-live="polite"></div>
+            <div class="form-actions">
+              <button type="submit" id="acceso-ingresar" class="primary" data-acceso="ingresar">Ingresar</button>
+            </div>
+          </form>
+        </section>
+
+        <section id="view-panel-inicio" aria-labelledby="panel-inicio-heading" data-panel="inicio" hidden>
+          <h1 id="panel-inicio-heading">Panel de inicio</h1>
+          <div id="panel-inicio-contenido"></div>
+          <div class="error" id="mensaje-panel" data-mensaje="resultado" aria-live="polite" hidden></div>
+        </section>
+
+        <section id="view-bloqueo" aria-labelledby="bloqueo-heading" hidden>
+          <h1 id="bloqueo-heading">Acceso restringido</h1>
+          <div class="card bloqueo-card">
+            <p id="mensaje-bloqueo" data-mensaje="acceso"></p>
+          </div>
+        </section>
+
+        <section id="view-dashboard" aria-labelledby="dashboard-heading" hidden>
           <h1 id="dashboard-heading">Contabilidad y Finanzas</h1>
           <p id="dashboard-subtitle" class="muted">Administra cuentas, asientos, pagos, periodos y reportes financieros en un solo lugar.</p>
 
@@ -416,6 +450,10 @@
           </section>
           <section class="card card-wide" aria-labelledby="cuentas-lista-heading">
             <h2 id="cuentas-lista-heading">Plan de cuentas</h2>
+            <div class="filtro-lista">
+              <label for="cuentas-filtro">Filtrar cuentas</label>
+              <input id="cuentas-filtro" type="search" placeholder="Código, nombre o tipo" aria-label="Filtrar cuentas contables" />
+            </div>
             <div id="cuentas-empty" class="empty" hidden>No hay cuentas contables registradas.</div>
             <div id="cuentas-lista"></div>
           </section>
@@ -485,6 +523,10 @@
           </section>
           <section class="card card-wide" aria-labelledby="asientos-lista-heading">
             <h2 id="asientos-lista-heading">Asientos registrados</h2>
+            <div class="filtro-lista">
+              <label for="asientos-filtro">Filtrar asientos</label>
+              <input id="asientos-filtro" type="search" placeholder="Número o concepto" aria-label="Filtrar asientos contables" />
+            </div>
             <div id="asientos-empty" class="empty" hidden>No hay asientos contables registrados.</div>
             <div id="asientos-lista"></div>
           </section>
@@ -492,6 +534,20 @@
 
         <section id="view-pagos" aria-labelledby="pagos-view-heading" hidden>
           <h1 id="pagos-view-heading">Pagos y cobros</h1>
+          <section class="card card-wide" aria-labelledby="pago-resumen-heading" data-resumen-pagos>
+            <h2 id="pago-resumen-heading">Resumen por estado</h2>
+            <div id="pago-resumen-empty" class="empty" data-estado-vacio-resumen hidden>No hay pagos o cobros registrados.</div>
+            <div id="pago-resumen-tarjetas" class="resumen-pagos-grid"></div>
+            <div class="filtro-estado">
+              <label for="filtro-estado-pago">Filtrar por estado</label>
+              <select id="filtro-estado-pago" data-filtro-estado>
+                <option value="todos">Todos</option>
+                <option value="pendiente">Pendiente</option>
+                <option value="pagado">Pagado</option>
+                <option value="vencido">Vencido</option>
+              </select>
+            </div>
+          </section>
           <section class="card card-wide" aria-labelledby="pago-form-heading">
             <h2 id="pago-form-heading">Registrar pago o cobro</h2>
             <form id="pago-form">
@@ -506,6 +562,11 @@
                   <label for="pago-amount">Monto *</label>
                   <input id="pago-amount" name="pago-amount" type="number" min="0" step="0.01" required />
                   <div class="error" id="error-pago-amount" aria-live="polite"></div>
+                </div>
+                <div>
+                  <label for="pago-fecha-vencimiento">Fecha de vencimiento *</label>
+                  <input id="pago-fecha-vencimiento" name="pago-fecha-vencimiento" type="date" required />
+                  <div class="error" id="error-pago-fecha-vencimiento" aria-live="polite"></div>
                 </div>
               </div>
               <div class="field-row">
@@ -562,7 +623,7 @@
                 <label for="pago-status">Estado</label>
                 <select id="pago-status" name="pago-status">
                   <option value="pendiente">Pendiente</option>
-                  <option value="aplicado">Aplicado</option>
+                  <option value="pagado">Pagado</option>
                   <option value="cancelado">Cancelado</option>
                 </select>
                 <div class="error" id="error-pago-status" aria-live="polite"></div>
@@ -593,8 +654,13 @@
                 <select id="pagos-filtro-entidad"></select>
               </div>
             </div>
+            <div class="filtro-lista">
+              <label for="pagos-filtro-texto">Filtrar pagos</label>
+              <input id="pagos-filtro-texto" type="search" placeholder="Número, método o nota" aria-label="Filtrar pagos y cobros" />
+            </div>
             <div id="pagos-empty" class="empty" hidden>No hay pagos o cobros registrados.</div>
-            <div id="pagos-lista"></div>
+            <div id="pagos-filtro-empty" class="empty" data-estado-vacio-filtro hidden>No hay pagos con el estado seleccionado.</div>
+            <div id="pagos-lista" data-lista-pagos></div>
             <div id="pago-detalle" class="detalle-card" hidden></div>
           </section>
         </section>
@@ -638,6 +704,10 @@
           </section>
           <section class="card card-wide" aria-labelledby="periodos-lista-heading">
             <h2 id="periodos-lista-heading">Periodos registrados</h2>
+            <div class="filtro-lista">
+              <label for="periodos-filtro">Filtrar periodos</label>
+              <input id="periodos-filtro" type="search" placeholder="Nombre o estado" aria-label="Filtrar periodos contables" />
+            </div>
             <div id="periodos-empty" class="empty" hidden>No hay periodos contables registrados.</div>
             <div id="periodos-lista"></div>
           </section>

@@ -18,8 +18,9 @@ async function abrirPagos(){
   qs('nav-pagos').click();
 }
 
-function llenarPago({ date = '2026-10-20', amount = '500.50', tipo = 'cobro', entidad = 'ent-cliente-demo' } = {}){
+function llenarPago({ date = '2026-10-20', fechaVencimiento = '2026-11-20', amount = '500.50', tipo = 'cobro', entidad = 'ent-cliente-demo' } = {}){
   qs('pago-date').value = date;
+  qs('pago-fecha-vencimiento').value = fechaVencimiento;
   qs('pago-amount').value = amount;
   qs('pago-tipo').value = tipo;
   qs('pago-method').value = 'transferencia';
