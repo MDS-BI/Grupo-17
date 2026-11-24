@@ -1,7 +1,11 @@
-import { listarPeriodos } from '../contabilidad/periodos.js';
+﻿import { listarPeriodos } from '../contabilidad/periodos.js';
 import { calcularResumen, calcularSaldosCuentas, asientosAprobadosDelPeriodo } from '../contabilidad/reportes.js';
-import { formatearMXN } from '../contabilidad/dinero.js';
+import { formatearMXN, formatearMXNCompacto, sumarCentavos } from '../contabilidad/dinero.js';
+import { formatearFecha } from '../contabilidad/fechas.js';
 import { escapeHtml } from './contabilidad/comun.js';
+import { alertasDeVencimientos } from '../contabilidad/alertas-vencimientos.js';
+import { loadPagos } from '../contabilidad/almacenamiento.js';
+import { loadEntities } from '../storage.js';
 
 const PALETA_GASTOS = ['#0f766e', '#b45309', '#2563eb', '#7c3aed', '#be123c', '#0e7490', '#4d7c0f', '#a16207'];
 const PORCENTAJE = new Intl.NumberFormat('es-MX', { style: 'percent', maximumFractionDigits: 1 });
@@ -47,13 +51,8 @@ function renderPeriodos(periodos, periodoId){
   else if(periodoId) selector.value = periodoId;
 }
 
-function numeroCompacto(centavos){
-  const valor = (Number(centavos) || 0) / 100;
-  const absoluto = Math.abs(valor);
-  if(absoluto >= 1000000) return `$${(valor / 1000000).toLocaleString('es-MX', { maximumFractionDigits: 1 })}M`;
-  if(absoluto >= 1000) return `$${(valor / 1000).toLocaleString('es-MX', { maximumFractionDigits: 1 })}k`;
-  return `$${valor.toLocaleString('es-MX', { maximumFractionDigits: 0 })}`;
-}
+const numeroCompacto = formatearMXNCompacto;
+
 
 function calcularEscala(minimo, maximo, pasos = 4){
   let min = Math.min(0, minimo);
@@ -123,10 +122,10 @@ function renderGraficoBarras(contenedor, series){
       ? `<text class="chart-axis-label" x="${centro.toFixed(1)}" y="${alto - 16}" text-anchor="middle">${escapeHtml(periodo.name)}</text>`
       : '';
     return `<rect class="chart-bar chart-bar-ingresos" x="${xIngresos.toFixed(1)}" y="${Math.min(yIngresos, ceroY).toFixed(1)}" width="${barra.toFixed(1)}" height="${Math.abs(yIngresos - ceroY).toFixed(1)}" rx="2">
-        <title>${escapeHtml(`${periodo.name} · Ingresos: ${formatearMXN(resumen.ingresos)}`)}</title>
+        <title>${escapeHtml(`${periodo.name} — Ingresos: ${formatearMXN(resumen.ingresos)}`)}</title>
       </rect>
       <rect class="chart-bar chart-bar-gastos" x="${xGastos.toFixed(1)}" y="${Math.min(yGastos, ceroY).toFixed(1)}" width="${barra.toFixed(1)}" height="${Math.abs(yGastos - ceroY).toFixed(1)}" rx="2">
-        <title>${escapeHtml(`${periodo.name} · Gastos: ${formatearMXN(resumen.gastos)}`)}</title>
+        <title>${escapeHtml(`${periodo.name} — Gastos: ${formatearMXN(resumen.gastos)}`)}</title>
       </rect>
       ${etiqueta}`;
   }).join('');
@@ -178,7 +177,7 @@ function renderGraficoResultado(contenedor, series){
       ? `<text class="chart-axis-label" x="${punto.x.toFixed(1)}" y="${alto - 16}" text-anchor="middle">${escapeHtml(periodo.name)}</text>`
       : '';
     return `<circle class="chart-dot${negativo ? ' chart-dot-negative' : ''}" cx="${punto.x.toFixed(1)}" cy="${punto.y.toFixed(1)}" r="4">
-        <title>${escapeHtml(`${periodo.name} · Resultado: ${formatearMXN(resumen.resultado)}`)}</title>
+        <title>${escapeHtml(`${periodo.name} — Resultado: ${formatearMXN(resumen.resultado)}`)}</title>
       </circle>
       ${etiqueta}`;
   }).join('');
@@ -197,7 +196,7 @@ function renderGraficoGastos(contenedor, leyenda, cuentas, periodo){
     return;
   }
 
-  const total = cuentas.reduce((suma, cuenta) => suma + cuenta.total, 0);
+  const total = sumarCentavos(cuentas.map((cuenta) => cuenta.total));
   const centro = 100;
   const radio = 70;
   const grosor = 26;
@@ -211,7 +210,7 @@ function renderGraficoGastos(contenedor, leyenda, cuentas, periodo){
     acumulado += longitud;
     const color = PALETA_GASTOS[indice % PALETA_GASTOS.length];
     return `<circle class="chart-donut-segment" cx="${centro}" cy="${centro}" r="${radio}" stroke="${color}" stroke-width="${grosor}" stroke-dasharray="${longitud.toFixed(2)} ${(circunferencia - longitud).toFixed(2)}" stroke-dashoffset="${desplazamiento.toFixed(2)}" transform="rotate(-90 ${centro} ${centro})">
-      <title>${escapeHtml(`${cuenta.code} · ${cuenta.name}: ${formatearMXN(cuenta.total)} (${PORCENTAJE.format(fraccion)})`)}</title>
+      <title>${escapeHtml(`${cuenta.code} — ${cuenta.name}: ${formatearMXN(cuenta.total)} (${PORCENTAJE.format(fraccion)})`)}</title>
     </circle>`;
   }).join('');
 
@@ -226,7 +225,7 @@ function renderGraficoGastos(contenedor, leyenda, cuentas, periodo){
     leyenda.innerHTML = cuentas.map((cuenta, indice) => {
       const color = PALETA_GASTOS[indice % PALETA_GASTOS.length];
       const fraccion = total > 0 ? cuenta.total / total : 0;
-      const etiqueta = `${cuenta.code} · ${cuenta.name}`;
+      const etiqueta = `${cuenta.code} — ${cuenta.name}`;
       return `<li>
         <i class="chart-swatch" style="background:${color}" aria-hidden="true"></i>
         <span class="chart-legend-text" title="${escapeHtml(etiqueta)}">${escapeHtml(etiqueta)}</span>
@@ -236,7 +235,38 @@ function renderGraficoGastos(contenedor, leyenda, cuentas, periodo){
   }
 }
 
-export function renderDashboard(){
+function renderBloqueAlerta(contenedor, alerta, titulo, clase){
+  if(!contenedor) return;
+  const detalles = (alerta.detalles || []).map((detalle) => `
+    <li class="alerta-detalle-item">
+      <span class="alerta-detalle-entidad">${escapeHtml(detalle.entidad)}</span>
+      <span class="alerta-detalle-monto">${formatearMXN(detalle.montoCentavos)}</span>
+      <span class="alerta-detalle-fecha">Vence: ${formatearFecha(detalle.fechaVencimiento)}</span>
+    </li>`).join('');
+  contenedor.className = `alerta-bloque ${clase}${alerta.cantidad === 0 ? ' alerta-vacia' : ''}`;
+  contenedor.innerHTML = `
+    <div class="alerta-cabecera">
+      <h3 class="alerta-titulo">${escapeHtml(titulo)}</h3>
+      <span class="alerta-badge">${alerta.cantidad}</span>
+    </div>
+    <p class="alerta-total">Total: <strong>${formatearMXN(alerta.totalCentavos)}</strong></p>
+    ${alerta.cantidad > 0 ? `<ul class="alerta-detalles">${detalles}</ul>` : '<p class="muted alerta-sin-items">Sin pagos en esta categoría.</p>'}
+    ${alerta.adicionales > 0 ? `<p class="muted alerta-adicionales">+${alerta.adicionales} pago(s) adicional(es) con esta condición.</p>` : ''}`;
+}
+
+export function renderAlertasTesorero(contenedor, { pagos = [], entidades = [], fechaReferencia = new Date(), visible = false } = {}){
+  const raiz = contenedor || document.getElementById('dashboard-alertas');
+  if(!raiz) return;
+  raiz.hidden = !visible;
+  if(!visible) return;
+  const alertas = alertasDeVencimientos(pagos, entidades, fechaReferencia);
+  renderBloqueAlerta(raiz.querySelector('[data-alerta-vencidos]'), alertas.vencido, 'Pagos vencidos', 'alerta-vencidos');
+  renderBloqueAlerta(raiz.querySelector('[data-alerta-semanal]'), alertas.venceEstaSemana, 'Vencen esta semana', 'alerta-semana');
+  const sinAlertas = raiz.querySelector('[data-sin-alertas]') || document.getElementById('dashboard-sin-alertas');
+  if(sinAlertas) sinAlertas.hidden = !(alertas.vencido.cantidad === 0 && alertas.venceEstaSemana.cantidad === 0);
+}
+
+export function renderDashboard(opciones = {}){
   const periodos = listarPeriodos();
   const selector = document.getElementById('dashboard-periodo');
   const periodoId = elegirPeriodoDashboard(periodos, selector ? selector.value : '');
@@ -285,4 +315,13 @@ export function renderDashboard(){
     periodoActual
   );
   renderGraficoResultado(document.getElementById('chart-resultado'), series);
+
+  const pagos = opciones.pagos || loadPagos();
+  const entidades = opciones.entidades || loadEntities();
+  renderAlertasTesorero(document.getElementById('dashboard-alertas'), {
+    pagos,
+    entidades,
+    fechaReferencia: opciones.fechaReferencia || new Date(),
+    visible: Boolean(opciones.mostrarAlertasTesorero)
+  });
 }

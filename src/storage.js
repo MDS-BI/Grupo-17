@@ -2,44 +2,59 @@ import { getConfig } from './module-config.js';
 
 const ENTITIES_KEY = 'erp_base_module:entities';
 const DOCUMENTS_KEY = 'erp_base_module:documents';
+const ALIAS_LEGADOS = Object.freeze({ 'erp_contabilidad_sesion_activa': 'erp_contabilidad:sesion' });
+
+const CLAVES_LEGADAS = Object.freeze([
+  ...Object.keys(ALIAS_LEGADOS),
+  'erp_contabilidad:cuentas',
+  'erp_contabilidad:asientos',
+  'erp_contabilidad:lineas',
+  'erp_contabilidad:pagos',
+  'erp_contabilidad:periodos',
+  'erp_contabilidad:usuarios',
+  'erp_contabilidad:roles',
+  'erp_contabilidad:sesion',
+  'erp_contabilidad:auditoria',
+  ENTITIES_KEY,
+  DOCUMENTS_KEY
+]);
+
+let migracionRealizada = false;
 
 export function obtenerAlmacenSesion(){
-  if (typeof globalThis !== 'undefined' && globalThis.sessionStorage) return globalThis.sessionStorage;
-  if (typeof globalThis !== 'undefined' && globalThis.localStorage) return globalThis.localStorage;
-  return null;
+  return globalThis.sessionStorage || null;
 }
 
-function almacenAnterior(){
-  if (typeof globalThis === 'undefined') return null;
-  return globalThis.localStorage || null;
-}
-
-function migrarClave(clave){
-  const almacen = obtenerAlmacenSesion();
-  const anterior = almacenAnterior();
-  if (!almacen || !anterior || almacen === anterior) return;
-  if (almacen.getItem(clave) === null && anterior.getItem(clave) !== null) {
-    almacen.setItem(clave, anterior.getItem(clave));
-    anterior.removeItem(clave);
+export function migrarAlmacenLegado(){
+  if (migracionRealizada) return false;
+  migracionRealizada = true;
+  const destino = obtenerAlmacenSesion();
+  const origen = typeof globalThis !== 'undefined' ? globalThis.localStorage : null;
+  if (!destino || !origen || destino === origen) return false;
+  let migrado = false;
+  for (const clave of CLAVES_LEGADAS) {
+    const valor = origen.getItem(clave);
+    if (valor === null) continue;
+    const claveDestino = ALIAS_LEGADOS[clave] || clave;
+    if (destino.getItem(claveDestino) === null) {
+      destino.setItem(claveDestino, valor);
+      migrado = true;
+    }
+    origen.removeItem(clave);
   }
+  return migrado;
 }
 
 export function leerValor(clave){
-  migrarClave(clave);
-  const almacen = obtenerAlmacenSesion();
-  return almacen ? almacen.getItem(clave) : null;
+  return obtenerAlmacenSesion().getItem(clave);
 }
 
 export function escribirValor(clave, valor){
-  const almacen = obtenerAlmacenSesion();
-  if (almacen) almacen.setItem(clave, valor);
+  obtenerAlmacenSesion().setItem(clave, valor);
 }
 
 export function eliminarValor(clave){
-  const almacen = obtenerAlmacenSesion();
-  if (almacen) almacen.removeItem(clave);
-  const anterior = almacenAnterior();
-  if (anterior && anterior !== almacen) anterior.removeItem(clave);
+  obtenerAlmacenSesion().removeItem(clave);
 }
 
 export function loadEntities(){

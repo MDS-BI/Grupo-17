@@ -24,8 +24,9 @@ describe('resumen de pagos por estado', () => {
     const tarjetas = qs('pago-resumen-tarjetas');
     expect(tarjetas.textContent).toContain('Pagado');
     expect(tarjetas.textContent).toContain(formatearMXN(116000));
-    expect(tarjetas.textContent).toContain(formatearMXN(250000));
+    expect(tarjetas.textContent).toContain(formatearMXN(283000));
     expect(tarjetas.textContent).toContain(formatearMXN(58000));
+    expect(tarjetas.textContent).not.toContain(formatearMXN(45000));
     expect(qs('pago-resumen-empty').hidden).toBe(true);
   });
 
@@ -39,6 +40,18 @@ describe('resumen de pagos por estado', () => {
     expect(qs('pagos-lista').querySelectorAll('tbody tr')).toHaveLength(1);
   });
 
+  it('anuncia el filtro y restaura el foco de la tarjeta activa con teclado', async () => {
+    await abrirPagos();
+    const tarjeta = qs('pago-resumen-tarjetas').querySelector('[data-estado="pagado"]');
+    tarjeta.focus();
+
+    tarjeta.dispatchEvent(new dom.window.KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+
+    expect(qs('mensaje-confirmacion').textContent).toContain('Filtro aplicado: Pagado');
+    expect(document.activeElement.dataset.estado).toBe('pagado');
+    expect(document.activeElement.getAttribute('aria-pressed')).toBe('true');
+  });
+
   it('marca un cobro vencido como pagado y actualiza el resumen', async () => {
     await abrirPagos();
     const boton = document.querySelector('[data-action="marcar-pagado"][data-id="pag-0003"]');
@@ -46,5 +59,6 @@ describe('resumen de pagos por estado', () => {
     boton.click();
     expect(loadPagos().find((pago) => pago.id === 'pag-0003').status).toBe('pagado');
     expect(qs('pago-resumen-tarjetas').textContent).toContain(formatearMXN(174000));
+    expect(qs('pago-resumen-tarjetas').textContent).toContain(formatearMXN(283000));
   });
 });

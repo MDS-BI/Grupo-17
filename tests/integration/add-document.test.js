@@ -16,6 +16,7 @@ beforeEach(async () => {
   globalThis.window = w;
   globalThis.document = w.document;
   globalThis.localStorage = w.localStorage;
+  globalThis.sessionStorage = w.sessionStorage;
   globalThis.alert = vi.fn();
   globalThis.confirm = vi.fn(() => true);
   w.scrollTo = vi.fn();

@@ -6,7 +6,6 @@ import { actualizarPago, obtenerPago } from '../../../src/contabilidad/pagos.js'
 import { loadEntities } from '../../../src/storage.js';
 
 const entidades = [{ entity_id: 'ent-1', name: 'Cliente' }];
-const documentos = [{ id: 'doc-1' }];
 const asientos = [{ id: 'asi-1' }];
 
 function pagoBase(cambios = {}){
@@ -24,7 +23,7 @@ function pagoBase(cambios = {}){
 }
 
 function validar(payload, opciones = {}){
-  return validarPago(payload, { entidades, documentos, asientos, ...opciones });
+  return validarPago(payload, { entidades, asientos, ...opciones });
 }
 
 describe('validación de pagos y cobros', () => {
@@ -51,10 +50,9 @@ describe('validación de pagos y cobros', () => {
     expect(validar(pagoBase({ status: 'aplicado' })).status).toBe('pagado');
   });
 
-  it('rechaza entidades inexistentes y referencias a documentos o asientos inválidos', () => {
-    expect(validar(pagoBase({ entity_id: '' })).errores.entity_id).toContain('obligatoria');
+  it('rechaza clientes o proveedores inexistentes y referencias a asientos inválidos', () => {
+    expect(validar(pagoBase({ entity_id: '' })).errores.entity_id).toContain('obligatorio');
     expect(validar(pagoBase({ entity_id: 'ent-x' })).errores.entity_id).toContain('no existe');
-    expect(validar(pagoBase({ document_id: 'doc-x' })).errores.document_id).toContain('no existe');
     expect(validar(pagoBase({ asiento_id: 'asi-x' })).errores.asiento_id).toContain('no existe');
   });
 
@@ -81,6 +79,13 @@ describe('actualización de pagos existentes', () => {
     const almacen = instalarAlmacen();
     almacen.clear();
     inicializarContabilidad();
+  });
+
+  it('bloquea la edición de pagos pagados o anulados', () => {
+    const pagado = loadPagos().find((pago) => pago.status === 'pagado');
+    const anulado = loadPagos().find((pago) => pago.anulado);
+    expect(() => actualizarPago(pagado.id, { notes: 'Editado' })).toThrow('pagados solo pueden consultarse');
+    expect(() => actualizarPago(anulado.id, { notes: 'Editado' })).toThrow('anulados solo pueden consultarse');
   });
 
   it('conserva el monto en centavos al cancelar un pago sin reenviar el importe', () => {

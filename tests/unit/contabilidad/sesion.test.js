@@ -16,7 +16,17 @@ describe('sesión de acceso', () => {
     expect(resultado.ok).toBe(true);
     expect(loadSesion().estado).toBe('autenticada');
     expect(resultado.sesion.permisos.length).toBeGreaterThan(0);
+    expect(resultado.sesion.usuarioRut).toBe('44.444.444-4');
+    expect(loadSesion().usuarioRut).toBe('44.444.444-4');
     expect(obtenerPanelInicio()).toBe('auditoria');
+  });
+
+  it('propaga errores por campo cuando faltan credenciales', () => {
+    const resultado = iniciarSesion('', '');
+
+    expect(resultado.ok).toBe(false);
+    expect(resultado.errores.rut).toContain('obligatorio');
+    expect(resultado.errores.contraseña).toContain('obligatoria');
   });
 
   it('devuelve null cuando no hay sesión activa', () => {

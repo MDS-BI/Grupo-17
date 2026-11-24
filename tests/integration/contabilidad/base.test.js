@@ -35,9 +35,12 @@ describe('base del módulo de contabilidad y finanzas', () => {
     expect(qs('view-cuentas').hidden).toBe(false);
     expect(qs('view-dashboard').hidden).toBe(true);
     expect(loadCuentas()).toHaveLength(17);
-    expect(loadAsientos()).toHaveLength(6);
-    expect(loadPagos()).toHaveLength(3);
+    expect(loadAsientos()).toHaveLength(10);
+    expect(loadPagos()).toHaveLength(5);
     expect(document.querySelector('#cuentas-lista .cuenta-arbol')).not.toBeNull();
+    expect(document.querySelector('#pago-document')).toBeNull();
+    expect(document.querySelector('label[for="pago-entity"]').textContent).toContain('Cliente o proveedor');
+    expect(document.querySelector('label[for="asiento-entity"]').textContent).toContain('Cliente o proveedor');
   });
 
   it('cambia entre las seis vistas contables y mantiene una sola activa', async () => {

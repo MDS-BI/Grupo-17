@@ -1,12 +1,13 @@
 import { loadModuleConfig, normalizeConfig, setActiveConfig, labelFor } from './module-config.js';
-import { loadEntities, addEntity, updateEntity, deleteEntity, validateEntity, searchEntities, loadDocuments, addDocument, updateDocument, deleteDocument, validateDocument } from './storage.js';
+import { loadEntities, addEntity, updateEntity, deleteEntity, validateEntity, searchEntities, loadDocuments, addDocument, updateDocument, deleteDocument, validateDocument, migrarAlmacenLegado } from './storage.js';
 import { clearEntityForm, startEntityEdit, collectEntityPayload, showEntityErrors } from './components/entity-form.js';
 import { createEntityItem } from './components/entity-list.js';
 import { clearDocumentForm, startDocumentEdit, collectDocumentPayload, showDocumentErrors } from './components/document-form.js';
 import { folioLabel } from './components/document-list.js';
-import { renderLogo, applyShellLabels, setActiveModule } from './components/shell.js';
-import { renderDashboard } from './components/dashboard.js';
+import { renderLogo, applyShellLabels, setActiveModule, inicializarShellAccesible, cerrarDrawerNavegacion } from './components/shell.js';
+import { renderDashboard, renderAlertasTesorero } from './components/dashboard.js';
 import { setupSearchBar, renderSearchResults } from './components/search-bar.js';
+import { formatearMXN, sumarCentavos } from './contabilidad/dinero.js';
 import * as Almacen from './contabilidad/almacenamiento.js';
 import * as Cuentas from './contabilidad/cuentas.js';
 import * as Periodos from './contabilidad/periodos.js';
@@ -21,19 +22,22 @@ import { renderResumen } from './components/contabilidad/resumen.js';
 import { populateCuentaParentSelect, clearCuentaForm, startCuentaEdit, collectCuentaPayload, showCuentaErrors } from './components/contabilidad/cuenta-form.js';
 import { renderCuentaList, renderCuentaDetalle } from './components/contabilidad/cuenta-list.js';
 import { clearAsientoForm, startAsientoEdit, collectAsientoPayload, showAsientoErrors, agregarLinea, quitarLinea, poblarPeriodosAsiento, poblarEntidadesAsiento } from './components/contabilidad/asiento-form.js';
-import { renderAsientoList } from './components/contabilidad/asiento-list.js';
-import { clearPagoForm, startPagoEdit, collectPagoPayload, showPagoErrors, poblarEntidadesPago, poblarDocumentosPago, poblarAsientosPago } from './components/contabilidad/pago-form.js';
+import { renderAsientoList, renderAsientoDetalle } from './components/contabilidad/asiento-list.js';
+import { clearPagoForm, startPagoEdit, collectPagoPayload, showPagoErrors, poblarEntidadesPago, poblarAsientosPago } from './components/contabilidad/pago-form.js';
 import { renderPagoList, renderPagoDetalle } from './components/contabilidad/pago-list.js';
 import { clearPeriodoForm, startPeriodoEdit, collectPeriodoPayload, showPeriodoErrors } from './components/contabilidad/periodo-form.js';
 import { renderPeriodoList } from './components/contabilidad/periodo-list.js';
 import { renderReporte } from './components/contabilidad/reportes.js';
-import { renderAcceso, obtenerCredenciales, mostrarErroresAcceso, limpiarFormularioAcceso } from './components/acceso.js';
-import { renderizarMenu, navegar } from './components/menu.js';
+import { renderAcceso, renderizarUsuariosPrueba, obtenerCredenciales, mostrarErroresAcceso, limpiarFormularioAcceso } from './components/acceso.js';
+import { renderizarMenu, renderizarIconosMenu, moduloVisible, navegar } from './components/menu.js';
 import { renderizarPanelInicio } from './components/panel-por-rol.js';
 import { renderizarResumenPagos } from './components/contabilidad/pago-resumen.js';
 import * as Sesion from './contabilidad/sesion.js';
 import * as Permisos from './contabilidad/permisos.js';
 import * as ResumenPagos from './contabilidad/resumen-pagos.js';
+import * as FiltrosMovimientos from './contabilidad/filtros-movimientos.js';
+import * as Auditoria from './contabilidad/auditoria.js';
+import { ordenarRegistros } from './contabilidad/interfaz-config.js';
 
 function qs(id){ return document.getElementById(id); }
 
@@ -73,6 +77,10 @@ let wired = false;
 let contabilidadInicializada = false;
 let modoAcceso = false;
 let filtroEstadoPago = 'todos';
+let focoResumenPendiente = null;
+let filtrosAuditoria = { tipoMovimiento: '', accion: '', usuario: '' };
+let ordenTablas = {};
+let pantallaActual = 'dashboard';
 
 function confirmar(mensaje){
   try{
@@ -80,6 +88,13 @@ function confirmar(mensaje){
   }catch(error){
     return true;
   }
+}
+
+function anunciarConfirmacion(mensaje){
+  const elemento = qs('mensaje-confirmacion');
+  if(!elemento) return;
+  elemento.textContent = mensaje || '';
+  elemento.hidden = !mensaje;
 }
 
 function asegurarContabilidad(){
@@ -100,7 +115,20 @@ function puede(accion){
 function puedeSeccion(seccion, accion){
   if(!modoAcceso) return true;
   const permiso = Permisos.obtenerPermiso(seccion, sesionActual());
-  return Boolean(permiso && permiso.acciones.includes(accion));
+  if(!permiso) return false;
+  const acciones = Array.isArray(permiso.acciones) ? permiso.acciones : [];
+  if(acciones.includes(accion)) return true;
+  const equivalencias = {
+    crear: 'puedeCrear',
+    editar: 'puedeEditar',
+    eliminar: 'puedeAnular',
+    anular: 'puedeAnular',
+    marcarPagado: 'puedeEditar',
+    aprobar: 'puedeEditar',
+    exportar: 'puedeExportar',
+    cerrar: 'puedeCerrar'
+  };
+  return Boolean(permiso[equivalencias[accion]]);
 }
 
 function verificarPermiso(seccion, accion){
@@ -109,12 +137,38 @@ function verificarPermiso(seccion, accion){
   return false;
 }
 
+function puedeConsultarAuditoriaMovimiento(){
+  if(!modoAcceso) return true;
+  const sesion = sesionActual();
+  return Permisos.puedeVerAuditoria(sesion) || Auditoria.puedeConsultarAuditoria(sesion);
+}
+
+function exigirAuditoriaMovimiento(){
+  if(puedeConsultarAuditoriaMovimiento()) return true;
+  mostrarBloqueo('Acceso no disponible para el registro de auditoría.');
+  return false;
+}
+
 function ocultarVistas(){
   Object.values(VIEWS).forEach(id => { const vista = qs(id); if(vista) vista.hidden = true; });
 }
 
+function establecerVisibilidadMenu(visible){
+  const workspace = document.querySelector('.workspace');
+  if(workspace) workspace.classList.toggle('sin-sidebar', !visible);
+  const sidebar = qs('sidebar-nav');
+  if(sidebar) sidebar.hidden = !visible;
+  const toggle = qs('menu-toggle');
+  if(toggle) toggle.hidden = !visible;
+  if(!visible){
+    sidebar?.classList.remove('sidebar-abierta');
+    toggle?.setAttribute('aria-expanded', 'false');
+  }
+}
+
 function mostrarAcceso(mensaje = ''){
   ocultarVistas();
+  establecerVisibilidadMenu(false);
   document.querySelectorAll('.nav-module').forEach(boton => { boton.hidden = true; });
   const vista = qs(VIEWS.acceso);
   if(vista) vista.hidden = false;
@@ -152,6 +206,8 @@ function aplicarSesion(){
   }
   const dato = datosPanel();
   renderizarPanelInicio(sesion, dato);
+  actualizarAlertasPanel();
+  establecerVisibilidadMenu(true);
   renderizarMenu(sesion.permisos, { ...sesion, pantallaActiva: 'panel' });
   return showModule('panel');
 }
@@ -163,6 +219,151 @@ function datosContabilidad(){
     periodos: Periodos.listarPeriodos(),
     asientos: Asientos.listarAsientos()
   };
+}
+
+function refrescarDashboard(){
+  const visible = Boolean(modoAcceso && Permisos.puedeVerAlertas(sesionActual()));
+  renderDashboard({ mostrarAlertasTesorero: visible });
+}
+
+function actualizarAlertasPanel(){
+  const raiz = qs('panel-alertas');
+  if(!raiz) return;
+  renderAlertasTesorero(raiz, {
+    pagos: Pagos.listarPagos(),
+    entidades: loadEntities(),
+    visible: Boolean(modoAcceso && Permisos.puedeVerAlertas(sesionActual()))
+  });
+}
+
+function poblarSelectCuentas(select){
+  if(!select) return;
+  const previo = select.value;
+  select.innerHTML = '';
+  const todas = document.createElement('option');
+  todas.value = '';
+  todas.textContent = 'Todas';
+  select.appendChild(todas);
+  for(const cuenta of Cuentas.listarCuentas()){
+    const opcion = document.createElement('option');
+    opcion.value = cuenta.id;
+    opcion.textContent = `${cuenta.code} · ${cuenta.name}`;
+    select.appendChild(opcion);
+  }
+  if(previo && [...select.options].some(opcion => opcion.value === previo)) select.value = previo;
+}
+
+function limpiarControles(ids, valor = ''){
+  for(const id of ids){
+    const elemento = qs(id);
+    if(elemento) elemento.value = valor;
+  }
+}
+
+function asientosParaFiltro(){
+  const lineas = Almacen.loadLineas();
+  return Asientos.listarAsientos().map(asiento => ({
+    ...asiento,
+    fecha: asiento.date,
+    estado: asiento.status,
+    concepto: asiento.concept,
+    montoCentavos: Number(asiento.totalDebit) || 0,
+    cuentaIds: lineas.filter(linea => linea.asiento_id === asiento.id).map(linea => linea.cuenta_id)
+  }));
+}
+
+function pagosParaFiltro(){
+  const lineas = Almacen.loadLineas();
+  const asientos = Asientos.listarAsientos();
+  return Pagos.listarPagos().map(pago => {
+    const asiento = asientos.find(item => item.id === pago.asiento_id);
+    const cuentaIds = asiento
+      ? lineas.filter(linea => linea.asiento_id === asiento.id).map(linea => linea.cuenta_id)
+      : [];
+    return {
+      ...pago,
+      fecha: pago.date,
+      estado: ResumenPagos.calcularEstadoPago(pago),
+      concepto: pago.numero,
+      montoCentavos: Number(pago.amount) || 0,
+      cuentaIds
+    };
+  });
+}
+
+function leerFiltroAsientos(){
+  return {
+    fechaDesde: qs('filtro-asiento-fecha-desde')?.value || '',
+    fechaHasta: qs('filtro-asiento-fecha-hasta')?.value || '',
+    cuentaId: qs('filtro-asiento-cuenta')?.value || '',
+    montoMin: qs('filtro-asiento-monto-min')?.value || '',
+    montoMax: qs('filtro-asiento-monto-max')?.value || '',
+    estado: qs('filtro-asiento-estado')?.value || 'todos',
+    texto: qs('asientos-filtro')?.value || '',
+    unidad: 'mxn'
+  };
+}
+
+function leerFiltroPagos(){
+  return {
+    fechaDesde: qs('filtro-pago-fecha-desde')?.value || '',
+    fechaHasta: qs('filtro-pago-fecha-hasta')?.value || '',
+    cuentaId: qs('filtro-pago-cuenta')?.value || '',
+    montoMin: qs('filtro-pago-monto-min')?.value || '',
+    montoMax: qs('filtro-pago-monto-max')?.value || '',
+    estado: filtroEstadoPago,
+    texto: qs('pagos-filtro-texto')?.value || '',
+    unidad: 'mxn'
+  };
+}
+
+function mostrarErrorFiltro(id, revision){
+  const elemento = qs(id);
+  if(!elemento) return;
+  elemento.textContent = revision.valido ? '' : (Object.values(revision.errores)[0] || 'Los filtros no son válidos.');
+}
+
+function mostrarTotalResultados(id, cantidad, totalCentavos){
+  const elemento = qs(id);
+  if(!elemento) return;
+  elemento.textContent = `${cantidad} registro(s) · ${formatearMXN(totalCentavos || 0)}`;
+}
+
+function ordenarParaVista(tabla, registros){
+  const orden = ordenTablas[tabla];
+  if(!orden) return registros;
+  return ordenarRegistros(registros, orden.columna, orden.direccion, orden.tipo);
+}
+
+function refrescarVistaOrdenada(tabla){
+  if(tabla === 'asientos') return refrescarAsientos();
+  if(tabla === 'pagos') return refrescarPagos();
+  if(tabla === 'periodos') return refrescarPeriodos();
+  if(tabla === 'cuentas') return refrescarCuentas();
+  if(tabla === 'registro-actividad') return refrescarReportes();
+  if(String(tabla).startsWith('reporte-')) return refrescarReportes();
+}
+
+function alternarOrden(tabla, columna, tipo){
+  const actual = ordenTablas[tabla];
+  const direccion = actual?.columna === columna && actual.direccion === 'asc' ? 'desc' : 'asc';
+  const tipos = { amount: 'numero', date: 'fecha', status: 'estado', texto: 'texto' };
+  ordenTablas = { ...ordenTablas, [tabla]: { tabla, columna, direccion, tipo: tipos[tipo] || 'texto' } };
+  refrescarVistaOrdenada(tabla);
+}
+
+function eventosParaAuditoria(){
+  let eventos = Auditoria.listarEventos();
+  if(filtrosAuditoria.tipoMovimiento){
+    eventos = eventos.filter(evento => (evento.tipoMovimiento || evento.entidad) === filtrosAuditoria.tipoMovimiento);
+  }
+  if(filtrosAuditoria.accion){
+    eventos = eventos.filter(evento => evento.accion === filtrosAuditoria.accion);
+  }
+  if(filtrosAuditoria.usuario){
+    eventos = eventos.filter(evento => (evento.usuarioNombre || evento.usuario) === filtrosAuditoria.usuario);
+  }
+  return ordenarParaVista('registro-actividad', eventos);
 }
 
 function elegirPeriodo(periodos, preferido = ''){
@@ -181,8 +382,8 @@ function refrescarResumen(){
 }
 
 function refrescarCuentas(){
-  const cuentas = Cuentas.listarCuentas();
-  const hayCuentas = renderCuentaList(qs('cuentas-lista'), cuentas, { filtro: qs('cuentas-filtro').value });
+  const cuentas = ordenarParaVista('cuentas', Cuentas.listarCuentas());
+  const hayCuentas = renderCuentaList(qs('cuentas-lista'), cuentas, { filtro: qs('cuentas-filtro').value, orden: ordenTablas.cuentas });
   qs('cuentas-empty').hidden = hayCuentas;
   populateCuentaParentSelect(cuentas, { excludeId: qs('cuenta-id').value || null });
   const detalle = Cuentas.obtenerDetalleCuenta(qs('cuenta-detalle-id').value);
@@ -190,13 +391,41 @@ function refrescarCuentas(){
   qs('cuenta-detalle-empty').hidden = hayDetalle;
 }
 
+function periodoDeRegistro(registro){
+  const periodos = Periodos.listarPeriodos();
+  const porId = periodos.find(periodo => periodo.id === (registro.period_id || registro.periodoId));
+  if(porId) return porId;
+  return periodos.find(periodo => periodo.startDate <= registro.date && registro.date <= periodo.endDate) || null;
+}
+
+function registroEnPeriodoCerrado(registro){
+  return periodoDeRegistro(registro)?.status === 'cerrado';
+}
+
 function refrescarAsientos(){
-  const hayAsientos = renderAsientoList(qs('asientos-lista'), Asientos.listarAsientos(), { filtro: qs('asientos-filtro').value });
-  qs('asientos-empty').hidden = hayAsientos;
+  const todos = asientosParaFiltro();
+  const filtro = leerFiltroAsientos();
+  const revision = FiltrosMovimientos.validarFiltro(filtro);
+  mostrarErrorFiltro('error-filtro-asientos', revision);
+  const detallado = revision.valido ? FiltrosMovimientos.filtrarAsientosDetallado(todos, filtro) : { registros: [], totalCentavos: 0 };
+  const registros = ordenarParaVista('asientos', detallado.registros).map(asiento => ({
+    ...asiento,
+    soloLectura: registroEnPeriodoCerrado(asiento)
+  }));
+  const hayAsientos = renderAsientoList(qs('asientos-lista'), registros, {
+    filtro: filtro.texto,
+    orden: ordenTablas.asientos,
+    puedeVerHistorial: puedeConsultarAuditoriaMovimiento()
+  });
+  qs('asientos-empty').hidden = todos.length > 0;
+  const vacioFiltro = qs('asientos-filtro-empty');
+  if(vacioFiltro) vacioFiltro.hidden = todos.length === 0 || hayAsientos;
+  mostrarTotalResultados('asientos-total-resultados', detallado.registros.length, detallado.totalCentavos);
+  refrescarDetalleAsiento();
 }
 
 function refrescarPagos(){
-  const { entidades, documentos, asientos } = datosContabilidad();
+  const { entidades, asientos } = datosContabilidad();
   const filtroEntidad = qs('pagos-filtro-entidad');
   const entidadPrevia = filtroEntidad.value;
   filtroEntidad.innerHTML = '';
@@ -211,26 +440,46 @@ function refrescarPagos(){
     filtroEntidad.appendChild(opcion);
   });
   if(entidadPrevia && [...filtroEntidad.options].some(o => o.value === entidadPrevia)) filtroEntidad.value = entidadPrevia;
+  poblarSelectCuentas(qs('filtro-pago-cuenta'));
 
-  const todosLosPagos = Pagos.listarPagos();
+  const todosLosPagos = pagosParaFiltro();
   const resumen = ResumenPagos.resumirPagos(todosLosPagos);
-  renderizarResumenPagos(qs('pago-resumen-tarjetas'), resumen, filtroEstadoPago, todosLosPagos.length === 0);
+  const tarjetaEnFoco = renderizarResumenPagos(
+    qs('pago-resumen-tarjetas'),
+    resumen,
+    filtroEstadoPago,
+    todosLosPagos.length === 0,
+    focoResumenPendiente
+  );
+  focoResumenPendiente = null;
+  tarjetaEnFoco?.focus();
 
-  const hayPagos = renderPagoList(qs('pagos-lista'), todosLosPagos, {
+  const filtro = leerFiltroPagos();
+  const revision = FiltrosMovimientos.validarFiltro(filtro);
+  mostrarErrorFiltro('error-filtro-pagos', revision);
+  const detallado = revision.valido ? FiltrosMovimientos.filtrarPagosDetallado(todosLosPagos, filtro) : { registros: [], totalCentavos: 0 };
+  const tipo = qs('pagos-filtro-tipo').value;
+  const filtrados = ordenarParaVista('pagos', detallado.registros.filter(pago => (!tipo || pago.tipo === tipo) && (!filtroEntidad.value || pago.entity_id === filtroEntidad.value))).map(pago => ({
+    ...pago,
+    soloLectura: registroEnPeriodoCerrado(pago)
+  }));
+  const hayPagos = renderPagoList(qs('pagos-lista'), filtrados, {
     entidades,
-    tipo: qs('pagos-filtro-tipo').value,
-    entityId: filtroEntidad.value,
-    estado: filtroEstadoPago,
-    texto: qs('pagos-filtro-texto').value
+    permitirMarcar: puedeSeccion('pagos', 'marcarPagado'),
+    orden: ordenTablas.pagos,
+    puedeVerHistorial: puedeConsultarAuditoriaMovimiento()
   });
   qs('pagos-empty').hidden = todosLosPagos.length > 0;
   const vacioFiltro = qs('pagos-filtro-empty');
   if(vacioFiltro) vacioFiltro.hidden = todosLosPagos.length === 0 || hayPagos;
-  if(!hayPagos) renderPagoDetalle(qs('pago-detalle'), null, { entidades, documentos, asientos });
+  mostrarTotalResultados('pagos-total-resultados', filtrados.length, sumarCentavos(filtrados.map(pago => pago.amount)));
+  if(!hayPagos) renderPagoDetalle(qs('pago-detalle'), null, { entidades, asientos });
+  else refrescarDetallePago();
 }
 
 function refrescarPeriodos(){
-  const hayPeriodos = renderPeriodoList(qs('periodos-lista'), Periodos.listarPeriodos(), { filtro: qs('periodos-filtro').value });
+  const periodos = ordenarParaVista('periodos', Periodos.listarPeriodos());
+  const hayPeriodos = renderPeriodoList(qs('periodos-lista'), periodos, { filtro: qs('periodos-filtro').value, orden: ordenTablas.periodos });
   qs('periodos-empty').hidden = hayPeriodos;
 }
 
@@ -238,7 +487,107 @@ function refrescarReportes(){
   const periodos = Periodos.listarPeriodos();
   const periodoId = elegirPeriodo(periodos, qs('reportes-periodo').value);
   const resultado = periodoId ? Reportes.obtenerMovimientos(periodoId) : null;
-  renderReporte({ periodos, periodoId, resultado });
+  const sesion = sesionActual();
+  renderReporte({
+    periodos,
+    periodoId,
+    resultado,
+    puedeExportar: !modoAcceso || Permisos.puedeExportar(sesion, 'reportes'),
+    puedeVerAuditoria: Boolean(modoAcceso && Permisos.puedeVerAuditoria(sesion)),
+    eventosAuditoria: eventosParaAuditoria(),
+    orden: ordenTablas['registro-actividad'],
+    ordenes: Object.fromEntries(Object.entries(ordenTablas)
+      .filter(([tabla]) => tabla.startsWith('reporte-'))
+      .map(([tabla, valor]) => [tabla.slice('reporte-'.length), valor])),
+    filtrosAuditoria,
+    onFiltrosAuditoria: (filtros) => {
+      filtrosAuditoria = filtros;
+      refrescarReportes();
+    }
+  });
+}
+
+function mostrarDetalleAsiento(id, anunciar = true){
+  const registro = Asientos.asientoConLineas(id);
+  if(!registro) return;
+  const eventos = Auditoria.historialPorMovimiento('asiento', id).filter(Boolean);
+  renderAsientoDetalle(qs('asiento-detalle'), registro, { eventos, puedeVerHistorial: puedeConsultarAuditoriaMovimiento() });
+  if(anunciar) anunciarConfirmacion(`Historial de asiento ${id} actualizado.`);
+}
+
+function mostrarDetallePago(id, anunciar = true){
+  const pago = Pagos.obtenerPago(id);
+  if(!pago) return;
+  const { entidades, asientos } = datosContabilidad();
+  const eventos = Auditoria.historialPorMovimiento('pago', id).filter(Boolean);
+  renderPagoDetalle(qs('pago-detalle'), pago, {
+    entidades,
+    asientos,
+    eventos,
+    puedeVerHistorial: puedeConsultarAuditoriaMovimiento()
+  });
+  if(anunciar) anunciarConfirmacion(`Historial de pago ${id} actualizado.`);
+}
+
+function refrescarDetalleAsiento(){
+  const contenedor = qs('asiento-detalle');
+  if(!contenedor || contenedor.hidden) return;
+  if(contenedor.dataset.movimientoId) mostrarDetalleAsiento(contenedor.dataset.movimientoId, false);
+  else renderAsientoDetalle(contenedor, null);
+}
+
+function refrescarDetallePago(){
+  const contenedor = qs('pago-detalle');
+  if(!contenedor || contenedor.hidden) return;
+  if(contenedor.dataset.movimientoId) mostrarDetallePago(contenedor.dataset.movimientoId, false);
+  else{
+    const { entidades, asientos } = datosContabilidad();
+    renderPagoDetalle(contenedor, null, { entidades, asientos });
+  }
+}
+
+function activarFiltroEstadoPago(estado, { enfocar = false } = {}){
+  filtroEstadoPago = estado || 'todos';
+  const control = qs('filtro-estado-pago');
+  if(control) control.value = filtroEstadoPago;
+  focoResumenPendiente = enfocar ? filtroEstadoPago : null;
+  refrescarPagos();
+  const etiquetas = { todos: 'Todos', pendiente: 'Pendiente', pagado: 'Pagado', vencido: 'Vencido', anulado: 'Anulado' };
+  anunciarConfirmacion(`Filtro aplicado: ${etiquetas[filtroEstadoPago] || filtroEstadoPago}.`);
+}
+
+function handleAccionesGlobales(ev){
+  const botonOrden = ev.target.closest('.orden-tabla[data-orden-tabla]');
+  if(botonOrden){
+    alternarOrden(botonOrden.dataset.ordenTabla, botonOrden.dataset.ordenColumna, botonOrden.dataset.ordenTipo);
+    return;
+  }
+  const botonLimpiar = ev.target.closest('[data-limpiar-campo]');
+  if(botonLimpiar){
+    const control = qs(botonLimpiar.dataset.limpiarCampo);
+    if(control){
+      if(control.id === 'filtro-estado-pago') activarFiltroEstadoPago('todos');
+      else{
+        control.value = '';
+        control.dispatchEvent(new Event(control.tagName === 'SELECT' ? 'change' : 'input', { bubbles: true }));
+      }
+    }
+    anunciarConfirmacion('Filtro eliminado.');
+    return;
+  }
+  const tarjetaResumen = ev.target.closest('[data-resumen-pago-estado]');
+  if(tarjetaResumen){
+    activarFiltroEstadoPago(tarjetaResumen.dataset.resumenPagoEstado, { enfocar: true });
+    return;
+  }
+}
+
+function handleAccionesGlobalesTeclado(ev){
+  if(ev.key !== 'Enter' && ev.key !== ' ') return;
+  const tarjetaResumen = ev.target.closest?.('[data-resumen-pago-estado]');
+  if(!tarjetaResumen) return;
+  ev.preventDefault();
+  activarFiltroEstadoPago(tarjetaResumen.dataset.resumenPagoEstado, { enfocar: true });
 }
 
 function showModule(name, opts = {}){
@@ -256,19 +605,25 @@ function showModule(name, opts = {}){
         return false;
       }
     }
+    establecerVisibilidadMenu(true);
     renderizarMenu(sesion.permisos, { ...sesion, pantallaActiva: name });
   }
   ocultarVistas();
+  cerrarDrawerNavegacion();
+  pantallaActual = name;
   const vista = qs(VIEWS[name]);
   if(vista) vista.hidden = false;
   setActiveModule(name);
   if(modoAcceso) sesionActual().pantallaActiva = name;
   if(name === 'dashboard'){
-    renderDashboard();
+    refrescarDashboard();
   }
   if(name === 'panel'){
     const sesion = sesionActual();
-    if(sesion) renderizarPanelInicio(sesion, datosPanel());
+    if(sesion){
+      renderizarPanelInicio(sesion, datosPanel());
+      actualizarAlertasPanel();
+    }
   }
   if(name === 'entities'){
     populateDocumentEntitySelect();
@@ -305,16 +660,16 @@ function showModule(name, opts = {}){
       poblarPeriodosAsiento(periodos, qs('asiento-periodo').value);
       poblarEntidadesAsiento(entidades, qs('asiento-entity').value);
     }
+    poblarSelectCuentas(qs('filtro-asiento-cuenta'));
     refrescarAsientos();
     if(opts.focusForm) qs('asiento-date').focus();
   }
   if(name === 'pagos'){
-    const { entidades, documentos, asientos } = datosContabilidad();
+    const { entidades, asientos } = datosContabilidad();
     if(opts.newRecord){
-      clearPagoForm({ entidades, documentos, asientos });
+      clearPagoForm({ entidades, asientos });
     }else{
       poblarEntidadesPago(entidades, qs('pago-entity').value);
-      poblarDocumentosPago(documentos, qs('pago-document').value);
       poblarAsientosPago(asientos, qs('pago-asiento').value);
     }
     refrescarPagos();
@@ -403,6 +758,7 @@ function handleDeleteSelectedEntity(){
   populateDocumentEntitySelect();
   populateEditEntitySelect();
   populateEditDocumentSelect();
+  anunciarConfirmacion('Entidad eliminada correctamente.');
 }
 
 function onEditDocumentChange(){
@@ -420,6 +776,7 @@ function handleDeleteSelectedDocument(){
   qs('error-edit-document').textContent = '';
   clearDocumentForm();
   populateEditDocumentSelect();
+  anunciarConfirmacion('Documento eliminado correctamente.');
 }
 
 function afterSaveRefresh(){
@@ -445,6 +802,7 @@ function handleEntitySubmit(ev){
     clearEntityForm();
   }
   afterSaveRefresh();
+  anunciarConfirmacion(id ? 'Entidad actualizada correctamente.' : 'Entidad creada correctamente.');
 }
 
 function handleDocumentSubmit(ev){
@@ -467,6 +825,7 @@ function handleDocumentSubmit(ev){
     showDocumentErrors({ status: e.message });
   }
   afterSaveRefresh();
+  anunciarConfirmacion(id ? 'Documento actualizado correctamente.' : 'Documento creado correctamente.');
 }
 
 function handleCuentaSubmit(ev){
@@ -482,6 +841,7 @@ function handleCuentaSubmit(ev){
     else Cuentas.crearCuenta(payload);
     clearCuentaForm();
     refrescarCuentas();
+    anunciarConfirmacion(id ? 'Cuenta contable actualizada correctamente.' : 'Cuenta contable creada correctamente.');
   }catch(e){
     showCuentaErrors({ code: e.message });
   }
@@ -517,6 +877,7 @@ function handleCuentaListClick(ev){
       }
       clearCuentaForm();
       refrescarCuentas();
+      anunciarConfirmacion(resultado.inactivada ? 'Cuenta contable inactivada por tener movimientos.' : 'Cuenta contable eliminada correctamente.');
     }catch(e){
       showCuentaErrors({ code: e.message });
     }
@@ -547,6 +908,7 @@ function handleAsientoSubmit(ev){
     const { periodos, entidades } = datosContabilidad();
     clearAsientoForm({ periodos, entidades });
     refrescarAsientos();
+    anunciarConfirmacion(id ? 'Asiento contable actualizado correctamente.' : 'Asiento contable creado correctamente.');
   }catch(e){
     showAsientoErrors({ balance: e.message });
   }
@@ -565,6 +927,11 @@ function handleAsientoListClick(ev){
     'eliminar-asiento': 'eliminar'
   };
   if(permisosAccion[accion] && !verificarPermiso('asientos', permisosAccion[accion])) return;
+  if(accion === 'ver-detalle-asiento' || accion === 'ver-historial-asiento'){
+    if(accion === 'ver-historial-asiento' && !exigirAuditoriaMovimiento()) return;
+    mostrarDetalleAsiento(id, accion === 'ver-historial-asiento');
+    return;
+  }
   if(accion === 'editar-asiento'){
     const registro = Asientos.asientoConLineas(id);
     if(!registro) return;
@@ -585,9 +952,22 @@ function handleAsientoListClick(ev){
     qs('error-asiento-lineas').textContent = '';
     if(qs('asiento-id').value === id) clearAsientoForm({ periodos, entidades });
     refrescarAsientos();
+    const verbos = { 'aprobar-asiento': 'aprobado', 'cancelar-asiento': 'cancelado', 'eliminar-asiento': 'eliminado' };
+    anunciarConfirmacion(`Asiento contable ${verbos[accion] || 'actualizado'} correctamente.`);
   }catch(e){
     showAsientoErrors({ balance: e.message });
   }
+}
+
+function mostrarErrorPago(error){
+  const mensaje = error?.message || 'No se pudo completar la operación.';
+  if(mensaje === Pagos.MENSAJE_PERIODO_CERRADO || /periodo.*cerrado/i.test(mensaje)){
+    showPagoErrors({ date: mensaje });
+    anunciarConfirmacion(mensaje);
+    qs('pago-date')?.focus();
+    return;
+  }
+  showPagoErrors({ amount: mensaje });
 }
 
 function handlePagoSubmit(ev){
@@ -601,14 +981,13 @@ function handlePagoSubmit(ev){
     || (existente ? existente.series : (tipo === 'cobro' ? 'COB' : 'PAG'));
   const folio = payload.folio !== ''
     ? Number(payload.folio)
-    : (existente ? existente.folio : Pagos.siguienteFolio(series));
+    : (existente ? existente.folio : Pagos.siguienteFolio(series, tipo));
   const numero = existente && existente.series === series && Number(existente.folio) === folio
     ? existente.numero
     : `${series}-${folio}`;
   const revision = validarPago({ ...payload, tipo, series, folio, numero }, {
     pagos: Almacen.loadPagos(),
     entidades: loadEntities(),
-    documentos: loadDocuments(),
     asientos: Almacen.loadAsientos(),
     id: id || null
   });
@@ -617,11 +996,13 @@ function handlePagoSubmit(ev){
   try{
     if(id) Pagos.actualizarPago(id, { ...payload, tipo, series, folio, numero, status: revision.status });
     else Pagos.crearPago({ ...payload, tipo, series, folio, numero, status: revision.status });
-    const { entidades, documentos, asientos } = datosContabilidad();
-    clearPagoForm({ entidades, documentos, asientos });
+    const { entidades, asientos } = datosContabilidad();
+    clearPagoForm({ entidades, asientos });
     refrescarPagos();
+    refrescarDashboard();
+    anunciarConfirmacion(id ? 'Pago o cobro actualizado correctamente.' : 'Pago o cobro creado correctamente.');
   }catch(e){
-    showPagoErrors({ amount: e.message });
+    mostrarErrorPago(e);
   }
 }
 
@@ -630,17 +1011,17 @@ function handlePagoListClick(ev){
   if(!boton) return;
   const id = boton.dataset.id;
   const accion = boton.dataset.action;
-  const { entidades, documentos, asientos } = datosContabilidad();
-  if(accion === 'ver-pago'){
-    const pago = Pagos.obtenerPago(id);
-    renderPagoDetalle(qs('pago-detalle'), pago, { entidades, documentos, asientos });
+  const { entidades, asientos } = datosContabilidad();
+  if(accion === 'ver-pago' || accion === 'ver-historial-pago'){
+    if(accion === 'ver-historial-pago' && !exigirAuditoriaMovimiento()) return;
+    mostrarDetallePago(id, accion === 'ver-historial-pago');
     return;
   }
   if(accion === 'editar-pago'){
     if(!verificarPermiso('pagos', 'editar')) return;
     const pago = Pagos.obtenerPago(id);
     if(!pago) return;
-    startPagoEdit(pago, { entidades, documentos, asientos });
+    startPagoEdit(pago, { entidades, asientos });
     qs('pago-date').focus();
     return;
   }
@@ -649,8 +1030,10 @@ function handlePagoListClick(ev){
     try{
       Pagos.marcarPagado(id);
       refrescarPagos();
+      refrescarDashboard();
+      anunciarConfirmacion('Pago marcado como pagado correctamente.');
     }catch(e){
-      showPagoErrors({ amount: e.message });
+      mostrarErrorPago(e);
     }
     return;
   }
@@ -665,11 +1048,14 @@ function handlePagoListClick(ev){
     if(accion === 'cancelar-pago') Pagos.cancelarPago(id);
     if(accion === 'eliminar-pago') Pagos.eliminarPago(id);
     if(qs('pago-id').value === id){
-      clearPagoForm({ entidades, documentos, asientos });
+      clearPagoForm({ entidades, asientos });
     }
     refrescarPagos();
+    refrescarDashboard();
+    const verbos = { 'cancelar-pago': 'cancelado', 'eliminar-pago': 'eliminado' };
+    anunciarConfirmacion(`Pago o cobro ${verbos[accion] || 'actualizado'} correctamente.`);
   }catch(e){
-    showPagoErrors({ amount: e.message });
+    mostrarErrorPago(e);
   }
 }
 
@@ -681,11 +1067,19 @@ function handlePeriodoSubmit(ev){
   const revision = validarPeriodo(payload, { periodos: Almacen.loadPeriodos(), id: id || null });
   showPeriodoErrors(revision.errores);
   if(!revision.valido) return;
+  const actual = id ? Almacen.loadPeriodos().find((periodo) => periodo.id === id) : null;
+  if(payload.status === 'cerrado' && actual?.status !== 'cerrado'){
+    if(!confirmar(`¿Cerrar el periodo "${payload.name}"? Esta acción es definitiva.`)){
+      qs('periodo-status').value = actual?.status || 'abierto';
+      return;
+    }
+  }
   try{
     if(id) Periodos.actualizarPeriodo(id, payload);
     else Periodos.crearPeriodo(payload);
     clearPeriodoForm();
     refrescarPeriodos();
+    anunciarConfirmacion(id ? 'Periodo contable actualizado correctamente.' : 'Periodo contable creado correctamente.');
   }catch(e){
     showPeriodoErrors({ name: e.message });
   }
@@ -696,21 +1090,21 @@ function handlePeriodoListClick(ev){
   if(!boton) return;
   const id = boton.dataset.id;
   const accion = boton.dataset.action;
-  const permisosAccion = { 'editar-periodo': 'editar', 'alternar-periodo': 'editar', 'eliminar-periodo': 'eliminar' };
+  const permisosAccion = { 'editar-periodo': 'editar', 'cerrar-periodo': 'cerrar', 'eliminar-periodo': 'eliminar' };
   if(permisosAccion[accion] && !verificarPermiso('periodos', permisosAccion[accion])) return;
   if(accion === 'editar-periodo'){
     const periodo = Periodos.obtenerPeriodo(id);
     if(periodo) startPeriodoEdit(periodo);
     return;
   }
-  if(accion === 'alternar-periodo'){
+  if(accion === 'cerrar-periodo'){
     const periodo = Periodos.obtenerPeriodo(id);
-    if(!periodo) return;
-    const siguiente = periodo.status === 'abierto' ? 'cerrado' : 'abierto';
-    if(!confirmar(`¿${siguiente === 'cerrado' ? 'Cerrar' : 'Abrir'} el periodo "${periodo.name}"?`)) return;
+    if(!periodo || periodo.status !== 'abierto') return;
+    if(!confirmar(`¿Cerrar el periodo "${periodo.name}"? Esta acción es definitiva.`)) return;
     try{
-      Periodos.cambiarEstadoPeriodo(id, siguiente);
+      Periodos.cambiarEstadoPeriodo(id, 'cerrado', { sesion: sesionActual() });
       refrescarPeriodos();
+      anunciarConfirmacion('Periodo cerrado correctamente.');
     }catch(e){
       showPeriodoErrors({ name: e.message });
     }
@@ -727,21 +1121,11 @@ function handlePeriodoListClick(ev){
       }
       if(qs('periodo-id').value === id) clearPeriodoForm();
       refrescarPeriodos();
+      anunciarConfirmacion(resultado.cerrado ? 'Periodo cerrado por tener movimientos asociados.' : 'Periodo eliminado correctamente.');
     }catch(e){
       showPeriodoErrors({ name: e.message });
     }
   }
-}
-
-function handleResetContabilidad(){
-  if(!puede('restablecerDatos')){
-    mostrarBloqueo('No tienes permiso para restablecer los datos de ejemplo.');
-    return;
-  }
-  if(!confirmar('¿Restaurar los datos de ejemplo de contabilidad? Se reemplazarán los datos contables actuales.')) return;
-  Almacen.reiniciarDatosEjemplo();
-  contabilidadInicializada = true;
-  refrescarResumen();
 }
 
 function handleAccesoSubmit(ev){
@@ -749,8 +1133,9 @@ function handleAccesoSubmit(ev){
   const { rut, contraseña } = obtenerCredenciales(qs(VIEWS.acceso));
   const revision = Sesion.iniciarSesion(rut, contraseña);
   if(!revision.ok){
-    mostrarErroresAcceso(revision.errores);
-    renderAcceso(qs(VIEWS.acceso), revision.errores);
+    const errores = revision.errores || { acceso: revision.mensaje || revision.error || 'RUT o contraseña incorrectos' };
+    mostrarErroresAcceso(errores);
+    renderAcceso(qs(VIEWS.acceso), errores);
     return;
   }
   limpiarFormularioAcceso();
@@ -763,9 +1148,11 @@ function handlePanelClick(ev){
   const accion = boton.dataset.accion;
   const mensaje = qs('mensaje-panel');
   const informar = (texto) => {
-    if(!mensaje) return;
-    mensaje.textContent = texto;
-    mensaje.hidden = !texto;
+    if(mensaje){
+      mensaje.textContent = texto;
+      mensaje.hidden = !texto;
+    }
+    anunciarConfirmacion(texto);
   };
   if(accion === 'cerrar-sesion'){
     Sesion.cerrarSesion();
@@ -777,6 +1164,7 @@ function handlePanelClick(ev){
       mostrarBloqueo('No tienes permiso para cargar datos de ejemplo.');
       return;
     }
+    if(!confirmar('¿Cargar los datos de ejemplo? Se reemplazarán los datos contables actuales.')) return;
     Almacen.cargarDatosEjemplo();
     contabilidadInicializada = true;
     aplicarSesion();
@@ -849,17 +1237,33 @@ function showConfigErrors(errors){
   }
 }
 
+function limpiarFiltrosAsientos(){
+  limpiarControles([
+    'filtro-asiento-fecha-desde', 'filtro-asiento-fecha-hasta', 'filtro-asiento-cuenta',
+    'filtro-asiento-monto-min', 'filtro-asiento-monto-max', 'asientos-filtro'
+  ]);
+  const estado = qs('filtro-asiento-estado');
+  if(estado) estado.value = 'todos';
+}
+
+function limpiarFiltrosPagos(){
+  limpiarControles([
+    'filtro-pago-fecha-desde', 'filtro-pago-fecha-hasta', 'filtro-pago-cuenta',
+    'filtro-pago-monto-min', 'filtro-pago-monto-max', 'pagos-filtro-texto',
+    'pagos-filtro-tipo', 'pagos-filtro-entidad'
+  ]);
+  filtroEstadoPago = 'todos';
+  const estado = qs('filtro-estado-pago');
+  if(estado) estado.value = 'todos';
+}
+
 function wireEvents(){
   if(wired) return;
   wired = true;
   document.querySelectorAll('.nav-module').forEach(btn => {
     btn.addEventListener('click', () => showModule(btn.dataset.module));
   });
-  on('action-nuevo-asiento', 'click', () => showModule('asientos', { newRecord: true, focusForm: true }));
-  on('action-cuentas', 'click', () => showModule('cuentas'));
-  on('action-registrar-pago', 'click', () => showModule('pagos', { newRecord: true, focusForm: true }));
-  on('action-ver-reportes', 'click', () => showModule('reportes'));
-  on('dashboard-periodo', 'change', renderDashboard);
+  on('dashboard-periodo', 'change', refrescarDashboard);
   qs('entity-form').addEventListener('submit', handleEntitySubmit);
   qs('cancel-edit').addEventListener('click', clearEntityForm);
   qs('document-form').addEventListener('submit', handleDocumentSubmit);
@@ -885,8 +1289,8 @@ function wireEvents(){
   on('asientos-lista', 'click', handleAsientoListClick);
   on('pago-form', 'submit', handlePagoSubmit);
   on('pago-cancel-edit', 'click', () => {
-    const { entidades, documentos, asientos } = datosContabilidad();
-    clearPagoForm({ entidades, documentos, asientos });
+    const { entidades, asientos } = datosContabilidad();
+    clearPagoForm({ entidades, asientos });
   });
   on('pagos-lista', 'click', handlePagoListClick);
   on('pagos-filtro-tipo', 'change', refrescarPagos);
@@ -903,19 +1307,44 @@ function wireEvents(){
     refrescarPagos();
   });
   on('resumen-periodo', 'change', refrescarResumen);
-  on('resumen-reset', 'click', handleResetContabilidad);
   on('reportes-periodo', 'change', refrescarReportes);
   on('acceso-formulario', 'submit', handleAccesoSubmit);
   on('view-panel-inicio', 'click', handlePanelClick);
+  document.addEventListener('click', handleAccionesGlobales);
+  document.addEventListener('keydown', handleAccionesGlobalesTeclado);
+
+  const conectarFiltro = (id, manejador) => {
+    on(id, 'change', manejador);
+    on(id, 'input', manejador);
+  };
+  [
+    'filtro-asiento-fecha-desde', 'filtro-asiento-fecha-hasta', 'filtro-asiento-cuenta',
+    'filtro-asiento-monto-min', 'filtro-asiento-monto-max', 'filtro-asiento-estado'
+  ].forEach(id => conectarFiltro(id, refrescarAsientos));
+  [
+    'filtro-pago-fecha-desde', 'filtro-pago-fecha-hasta', 'filtro-pago-cuenta',
+    'filtro-pago-monto-min', 'filtro-pago-monto-max'
+  ].forEach(id => conectarFiltro(id, refrescarPagos));
+  on('asientos-limpiar-filtros', 'click', () => {
+    limpiarFiltrosAsientos();
+    refrescarAsientos();
+  });
+  on('pagos-limpiar-filtros', 'click', () => {
+    limpiarFiltrosPagos();
+    refrescarPagos();
+  });
 }
 
 export function initApp(resolved, opciones = {}){
+  migrarAlmacenLegado();
   modoAcceso = Boolean(opciones.requireAccess);
   showConfigErrors(resolved.errors);
   setActiveConfig(resolved.config);
   applyTheme(resolved.config);
   renderLogo(qs('logo-mark'));
   applyLabels(resolved.config);
+  renderizarIconosMenu();
+  inicializarShellAccesible();
   wireEvents();
   clearEntityForm();
   clearDocumentForm();
@@ -923,13 +1352,17 @@ export function initApp(resolved, opciones = {}){
   clearPagoForm();
   clearPeriodoForm();
   Almacen.inicializarAcceso();
+  renderizarUsuariosPrueba(qs(VIEWS.acceso));
   if(modoAcceso) asegurarContabilidad();
   Pagos.normalizarEstadosHeredados();
   if(modoAcceso){
     if(sesionActual()) aplicarSesion();
     else mostrarAcceso();
   }else{
-    document.querySelectorAll('.nav-module').forEach(boton => { boton.hidden = false; });
+    establecerVisibilidadMenu(true);
+    document.querySelectorAll('.nav-module').forEach(boton => {
+      boton.hidden = !moduloVisible(boton.dataset.module || boton.dataset.destino);
+    });
     showModule('dashboard');
   }
 }

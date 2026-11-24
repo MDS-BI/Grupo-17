@@ -1,6 +1,6 @@
-// ============================================================================
-// Configuración del Módulo — edita `userConfig` abajo para adaptar este módulo
-// base a un módulo ERP específico (p. ej., Ventas). Ningún otro archivo necesita cambios.
+﻿// ============================================================================
+// ConfiguraciÃ³n del MÃ³dulo â€” edita `userConfig` abajo para adaptar este mÃ³dulo
+// base a un mÃ³dulo ERP especÃ­fico (p. ej., Ventas). NingÃºn otro archivo necesita cambios.
 // ============================================================================
 
 // Establece en null para ejecutar con los valores predeterminados integrados,
@@ -10,18 +10,18 @@
 //   labels: { entity: 'Cliente', entities: 'Clientes', document: 'Pedido de Venta', documents: 'Pedidos de Venta' },
 //   customFields: [
 //     { target: 'entity', key: 'zona', label: 'Zona', type: 'select', options: ['Norte', 'Sur'] },
-//     { target: 'document', key: 'metodoEnvio', label: 'Método de envío', type: 'select', options: ['estándar', 'exprés'] }
+//     { target: 'document', key: 'metodoEnvio', label: 'MÃ©todo de envÃ­o', type: 'select', options: ['estÃ¡ndar', 'exprÃ©s'] }
 //   ],
 //   statusLifecycle: {
-//     statuses: ['cotización', 'pedido', 'facturado'],
-//     transitions: { cotización: ['pedido'], pedido: ['facturado'], facturado: [] }
+//     statuses: ['cotizaciÃ³n', 'pedido', 'facturado'],
+//     transitions: { cotizaciÃ³n: ['pedido'], pedido: ['facturado'], facturado: [] }
 //   },
 //   theme: { accentColor: '#0f62fe' }
 // }
 export const userConfig = null;
 
 // ---------------------------------------------------------------------------
-// Cargador central — no deberías necesitar modificar nada debajo de esta línea.
+// Cargador central â€” no deberÃ­as necesitar modificar nada debajo de esta lÃ­nea.
 // ---------------------------------------------------------------------------
 
 export const DEFAULT_CONFIG = Object.freeze({
@@ -45,7 +45,7 @@ export const DEFAULT_CONFIG = Object.freeze({
   }),
   customFields: Object.freeze([]),
   statusLifecycle: null,
-  theme: Object.freeze({ accentColor: '#0f766e' })
+  theme: Object.freeze({ accentColor: '#0f766e', nombreEmpresa: 'Comercial Los Andes SpA', logoEmpresa: '' })
 });
 
 export const FIELD_TYPES = ['text', 'number', 'date', 'select'];
@@ -65,11 +65,11 @@ function validateCustomFields(raw, errors){
     const where = `customFields[${i}]`;
     if(!f || typeof f !== 'object'){ errors.push(`${where} debe ser un objeto`); return; }
     if(f.target !== 'entity' && f.target !== 'document'){ errors.push(`${where}.target debe ser "entity" o "document"`); return; }
-    if(!isNonEmptyString(f.key)){ errors.push(`${where}.key debe ser una cadena no vacía`); return; }
+    if(!isNonEmptyString(f.key)){ errors.push(`${where}.key debe ser una cadena no vacÃ­a`); return; }
     if(BASE_FIELDS[f.target].includes(f.key)){ errors.push(`${where}.key "${f.key}" choca con un campo base de ${f.target}`); return; }
     if(seen[f.target].has(f.key)){ errors.push(`${where}.key "${f.key}" está declarada más de una vez`); return; }
     if(!FIELD_TYPES.includes(f.type)){ errors.push(`${where}.type debe ser uno de: ${FIELD_TYPES.join(', ')}`); return; }
-    if(f.type === 'select' && !(Array.isArray(f.options) && f.options.length > 0)){ errors.push(`${where}.options debe ser un arreglo no vacío para campos de selección`); return; }
+    if(f.type === 'select' && !(Array.isArray(f.options) && f.options.length > 0)){ errors.push(`${where}.options debe ser un arreglo no vacÃ­o para campos de selecciÃ³n`); return; }
     seen[f.target].add(f.key);
     clean.push({ target: f.target, key: f.key, label: isNonEmptyString(f.label) ? f.label : f.key, type: f.type, required: Boolean(f.required), options: Array.isArray(f.options) ? [...f.options] : undefined });
   });
@@ -79,7 +79,7 @@ function validateCustomFields(raw, errors){
 function validateLifecycle(raw, errors){
   if(raw === null || raw === undefined) return null;
   if(typeof raw !== 'object' || !Array.isArray(raw.statuses) || raw.statuses.length === 0 || !raw.statuses.every(isNonEmptyString)){
-    errors.push('statusLifecycle.statuses debe ser un arreglo no vacío de nombres de estado');
+    errors.push('statusLifecycle.statuses debe ser un arreglo no vacÃ­o de nombres de estado');
     return null;
   }
   const statuses = new Set(raw.statuses);
@@ -120,12 +120,12 @@ export function normalizeConfig(raw){
     return { config: structuredClone(DEFAULT_CONFIG), errors: [] };
   }
   if(typeof raw !== 'object'){
-    return { config: structuredClone(DEFAULT_CONFIG), errors: ['La configuración del módulo debe ser un objeto'] };
+    return { config: structuredClone(DEFAULT_CONFIG), errors: ['La configuraciÃ³n del mÃ³dulo debe ser un objeto'] };
   }
   const errors = [];
   const cfg = structuredClone(DEFAULT_CONFIG);
   if(raw.moduleName !== undefined){
-    if(!isNonEmptyString(raw.moduleName)) errors.push('moduleName debe ser una cadena no vacía');
+    if(!isNonEmptyString(raw.moduleName)) errors.push('moduleName debe ser una cadena no vacÃ­a');
     else cfg.moduleName = raw.moduleName.trim();
   }
   if(raw.labels !== undefined){
@@ -133,7 +133,7 @@ export function normalizeConfig(raw){
     else {
       for(const key of ['entity', 'entities', 'document', 'documents', 'cuenta', 'cuentas', 'asiento', 'asientos', 'pago', 'pagos', 'periodo', 'periodos', 'reporte', 'reportes', 'resumen']){
         if(raw.labels[key] === undefined) continue;
-        if(!isNonEmptyString(raw.labels[key])){ errors.push(`labels.${key} debe ser una cadena no vacía`); continue; }
+        if(!isNonEmptyString(raw.labels[key])){ errors.push(`labels.${key} debe ser una cadena no vacÃ­a`); continue; }
         cfg.labels[key] = raw.labels[key].trim();
       }
     }
@@ -169,3 +169,4 @@ export async function loadModuleConfig(){
   const { config, errors } = normalizeConfig(userConfig);
   return { config, errors };
 }
+

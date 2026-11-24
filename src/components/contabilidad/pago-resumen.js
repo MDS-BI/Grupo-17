@@ -7,13 +7,13 @@ const ETIQUETAS = Object.freeze({
   vencido: 'Vencido'
 });
 
-export function renderizarResumenPagos(contenedor, resumen, filtro = 'todos', vacio = false) {
+export function renderizarResumenPagos(contenedor, resumen, filtro = 'todos', vacio = false, estadoEnFoco = null) {
   if (!contenedor) return;
   const formateado = formatearResumen(resumen);
   contenedor.innerHTML = ESTADOS_VISIBLES.map((estado) => {
     const grupo = formateado[estado];
-    const activo = filtro === estado ? ' activo' : '';
-    return `<article class="resumen-pago-card${activo}" data-estado="${estado}" data-total-centavos="${grupo.totalCentavos}">
+    const activo = filtro === estado;
+    return `<article class="resumen-pago-card${activo ? ' activo' : ''}" data-estado="${estado}" data-resumen-pago-estado="${estado}" data-total-centavos="${grupo.totalCentavos}" role="button" tabindex="0" aria-pressed="${activo ? 'true' : 'false'}">
       <h3>${ETIQUETAS[estado]}</h3>
       <strong>${escapeHtml(grupo.total)}</strong>
       <span>${grupo.cantidad} movimiento${grupo.cantidad === 1 ? '' : 's'}</span>
@@ -21,6 +21,7 @@ export function renderizarResumenPagos(contenedor, resumen, filtro = 'todos', va
   }).join('');
   const estadoVacio = document.getElementById('pago-resumen-empty');
   if (estadoVacio) estadoVacio.hidden = !vacio;
+  return estadoEnFoco ? contenedor.querySelector(`[data-estado="${estadoEnFoco}"]`) : null;
 }
 
 export function renderizarFiltroEstado(select, filtro = 'todos') {

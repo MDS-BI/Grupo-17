@@ -17,6 +17,7 @@ export function instalarAlmacen(){
     get length(){ return store.size; }
   };
   globalThis.localStorage = almacen;
+  globalThis.sessionStorage = almacen;
   return almacen;
 }
 

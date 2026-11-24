@@ -3,6 +3,13 @@ import { instalarAlmacen } from '../../setup/contabilidad.js';
 import { inicializarContabilidad, loadAsientos, saveAsientos, loadLineas, saveLineas } from '../../../src/contabilidad/almacenamiento.js';
 import { obtenerMovimientos, calcularSaldosCuentas, periodosDisponibles } from '../../../src/contabilidad/reportes.js';
 
+function vaciarMovimientos(periodoId) {
+  const asientos = loadAsientos().filter((asiento) => asiento.period_id !== periodoId);
+  const ids = new Set(asientos.map((asiento) => asiento.id));
+  saveAsientos(asientos);
+  saveLineas(loadLineas().filter((linea) => ids.has(linea.asiento_id)));
+}
+
 beforeEach(() => {
   const almacen = instalarAlmacen();
   almacen.clear();
@@ -25,6 +32,10 @@ describe('reportes financieros por periodo', () => {
     expect(septiembre.movimientos.every((m) => m.date.startsWith('2026-09'))).toBe(true);
     expect(septiembre.totalDebit).toBe(58000);
 
+    const noviembreInicial = obtenerMovimientos('per-2026-11');
+    expect(noviembreInicial.vacio).toBe(false);
+
+    vaciarMovimientos('per-2026-11');
     const noviembre = obtenerMovimientos('per-2026-11');
     expect(noviembre.vacio).toBe(true);
     expect(noviembre.movimientos).toHaveLength(0);
@@ -63,6 +74,6 @@ describe('reportes financieros por periodo', () => {
     expect(bancos.saldo).toBe(-250000);
 
     const periodos = periodosDisponibles();
-    expect(periodos.map((p) => p.name)).toEqual(['2026-08', '2026-09', '2026-10', '2026-11']);
+    expect(periodos.map((p) => p.name)).toEqual(['2026-07', '2026-08', '2026-09', '2026-10', '2026-11']);
   });
 });

@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { instalarAlmacen } from '../../setup/contabilidad.js';
 import { inicializarAcceso } from '../../../src/contabilidad/almacenamiento.js';
 import { iniciarSesion } from '../../../src/contabilidad/sesion.js';
-import { matrizPorRol, opcionesMenu, puedeAcceder, puedeEjecutar, normalizarSeccion } from '../../../src/contabilidad/permisos.js';
+import { matrizPorRol, opcionesMenu, puedeAcceder, puedeEjecutar, normalizarSeccion, puedeExportar, puedeVerAlertas } from '../../../src/contabilidad/permisos.js';
 
 describe('matriz de permisos', () => {
   beforeEach(() => {
@@ -30,5 +30,31 @@ describe('matriz de permisos', () => {
     expect(puedeAcceder('pagos', sesion)).toBe(false);
     expect(puedeEjecutar('crear', sesion)).toBe(true);
     expect(puedeEjecutar('restablecerDatos', sesion)).toBe(false);
+  });
+
+  it('permite exportar reportes solo con acceso de gestión o lectura', () => {
+    const sesiones = [
+      ['11.111.111-1', 'Admin2026!', true],
+      ['22.222.222-2', 'Contador2026!', true],
+      ['33.333.333-3', 'Tesorero2026!', false],
+      ['44.444.444-4', 'Auditor2026!', true]
+    ];
+    sesiones.forEach(([rut, contraseña, esperado]) => {
+      const sesion = iniciarSesion(rut, contraseña).sesion;
+      expect(puedeExportar(sesion, 'reportes')).toBe(esperado);
+    });
+  });
+
+  it('muestra alertas de vencimiento solo al tesorero', () => {
+    const roles = [
+      ['11.111.111-1', 'Admin2026!', false],
+      ['22.222.222-2', 'Contador2026!', false],
+      ['33.333.333-3', 'Tesorero2026!', true],
+      ['44.444.444-4', 'Auditor2026!', false]
+    ];
+    roles.forEach(([rut, contraseña, esperado]) => {
+      const sesion = iniciarSesion(rut, contraseña).sesion;
+      expect(puedeVerAlertas(sesion)).toBe(esperado);
+    });
   });
 });

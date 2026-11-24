@@ -18,7 +18,6 @@ function folioPositivo(valor) {
 export function validarPago(payload = {}, {
   pagos = [],
   entidades = [],
-  documentos = [],
   asientos = [],
   id = null
 } = {}) {
@@ -26,7 +25,6 @@ export function validarPago(payload = {}, {
   const date = texto(payload.date);
   const tipo = texto(payload.tipo);
   const entityId = texto(payload.entity_id);
-  const documentId = texto(payload.document_id);
   const asientoId = texto(payload.asiento_id);
   const method = texto(payload.method);
   const estadoEntrada = texto(payload.status) || 'pendiente';
@@ -56,13 +54,9 @@ export function validarPago(payload = {}, {
     errores.amount = 'El monto debe ser mayor que cero';
   }
 
-  if (!entityId) errores.entity_id = 'La entidad es obligatoria';
+  if (!entityId) errores.entity_id = 'El cliente o proveedor es obligatorio';
   else if (!entidades.some((e) => e.entity_id === entityId)) {
-    errores.entity_id = 'La entidad seleccionada no existe';
-  }
-
-  if (documentId && !documentos.some((d) => d.id === documentId)) {
-    errores.document_id = 'El documento seleccionado no existe';
+    errores.entity_id = 'El cliente o proveedor seleccionado no existe';
   }
 
   if (asientoId) {

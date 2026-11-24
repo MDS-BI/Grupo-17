@@ -32,6 +32,14 @@ describe('resumen de pagos por estado', () => {
     expect(calcularEstadoPago(pago('c', { fechaVencimiento: '2026-12-01' }), HOY)).toBe('pendiente');
   });
 
+  it('excluye los pagos anulados del resumen visible', () => {
+    const anulado = pago('anulado', { anulado: true, amount: 45000 });
+    expect(calcularEstadoPago(anulado, HOY)).toBe('anulado');
+    const resumen = resumirPagos([pago('vigente'), anulado], HOY);
+    expect(resumen.pendiente).toEqual({ cantidad: 1, totalCentavos: 10000 });
+    expect(filtrarPagos([pago('vigente'), anulado], 'anulado', HOY).map((item) => item.id)).toEqual(['anulado']);
+  });
+
   it('resume cantidades y totales en centavos', () => {
     const resumen = resumirPagos([
       pago('a', { status: 'pagado', amount: 10000 }),

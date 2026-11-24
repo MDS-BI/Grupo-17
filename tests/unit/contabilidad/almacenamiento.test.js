@@ -10,7 +10,8 @@ import {
   loadPeriodos,
   loadAsientos,
   loadLineas,
-  loadPagos
+  loadPagos,
+  loadRegistrosActividad
 } from '../../../src/contabilidad/almacenamiento.js';
 import { loadEntities, loadDocuments } from '../../../src/storage.js';
 
@@ -33,10 +34,11 @@ describe('almacenamiento contable', () => {
     const pagos = loadPagos();
 
     expect(cuentas).toHaveLength(17);
-    expect(periodos).toHaveLength(4);
-    expect(asientos).toHaveLength(6);
-    expect(lineas).toHaveLength(14);
-    expect(pagos).toHaveLength(3);
+    expect(periodos).toHaveLength(5);
+    expect(asientos).toHaveLength(10);
+    expect(lineas).toHaveLength(22);
+    expect(pagos).toHaveLength(5);
+    expect(loadRegistrosActividad().length).toBeGreaterThanOrEqual(8);
     expect(asientos[0].id).toBe('asi-0001');
     expect(asientos[0].totalDebit).toBe(116000);
     expect(asientos[0].totalCredit).toBe(116000);
@@ -47,7 +49,7 @@ describe('almacenamiento contable', () => {
     expect(entidades.map((e) => e.entity_id)).toEqual(['ent-cliente-demo', 'ent-proveedor-demo']);
     expect(documentos.map((d) => d.id)).toEqual(['doc-venta-demo', 'doc-compra-demo']);
     expect(asientos[0].sourceDocumentId).toBe('doc-venta-demo');
-    expect(pagos[0].document_id).toBe('doc-venta-demo');
+    expect(pagos[0]).not.toHaveProperty('document_id');
   });
 
   it('no vuelve a sembrar cuando ya existen datos contables', () => {
@@ -65,13 +67,14 @@ describe('almacenamiento contable', () => {
 
     expect(reiniciarDatosEjemplo()).toBe(true);
     expect(loadCuentas()[0].name).toBe('Activo');
-    expect(loadAsientos()).toHaveLength(6);
+    expect(loadAsientos()).toHaveLength(10);
   });
 
   it('limpia todas las claves contables sin tocar entidades ni documentos base', () => {
     inicializarContabilidad();
     limpiarContabilidad();
     expect(hayDatosContables()).toBe(false);
+    expect(loadRegistrosActividad()).toHaveLength(0);
     expect(loadEntities()).toHaveLength(2);
     expect(loadDocuments()).toHaveLength(2);
   });

@@ -14,8 +14,8 @@ describe('series del panel financiero', () => {
   it('expone ingresos, gastos y resultado por periodo', () => {
     const periodos = periodosDisponibles();
     const series = obtenerSeriesDashboard(periodos);
-    expect(series.ingresosGastos).toHaveLength(4);
-    expect(series.resultado).toHaveLength(4);
+    expect(series.ingresosGastos).toHaveLength(5);
+    expect(series.resultado).toHaveLength(5);
     expect(series.vacio).toBe(false);
   });
 

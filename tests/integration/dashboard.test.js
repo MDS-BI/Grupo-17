@@ -17,6 +17,7 @@ beforeEach(async () => {
   globalThis.window = w;
   globalThis.document = w.document;
   globalThis.localStorage = w.localStorage;
+  globalThis.sessionStorage = w.sessionStorage;
   globalThis.alert = vi.fn();
   globalThis.confirm = vi.fn(() => true);
   w.scrollTo = vi.fn();
@@ -53,11 +54,29 @@ describe('User Story 3 - panel de inicio de Contabilidad y Finanzas', () => {
     expect(qs('stat-asientos').textContent).toBe('0');
   });
 
-  it('shows the accounting quick actions on the dashboard', async () => {
+  it('shows financial analysis content and sidebar navigation controls', async () => {
     await bootWith(undefined);
 
-    const actions = [...document.querySelectorAll('#view-dashboard .action-card strong')].map((el) => el.textContent);
-    expect(actions).toEqual(['Nuevo asiento contable', 'Cuentas contables', 'Registrar pago', 'Ver reportes']);
+    expect(qs('dashboard-heading').textContent).toContain('Contabilidad y Finanzas');
+    expect(document.querySelector('label[for="dashboard-periodo"]').textContent).toBe('Periodo contable');
+    expect(qs('dashboard-charts-heading').textContent).toBe('Análisis financiero');
+    expect([...document.querySelectorAll('#view-dashboard .chart-card h3')].map((el) => el.textContent.trim())).toEqual([
+      'Ingresos vs gastos por periodo',
+      'Gastos por cuenta',
+      'Resultado financiero por periodo'
+    ]);
+    expect([...document.querySelectorAll('.nav-module')].filter((boton) => !boton.hidden).map((boton) => boton.dataset.module)).toEqual([
+      'dashboard',
+      'resumen',
+      'cuentas',
+      'asientos',
+      'pagos',
+      'periodos',
+      'reportes'
+    ]);
+
+    qs('nav-cuentas').click();
+    expect(qs('view-cuentas').hidden).toBe(false);
   });
 
   it('keeps entity and document management reachable from the sidebar', async () => {

@@ -1,7 +1,14 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { instalarAlmacen } from '../../setup/contabilidad.js';
-import { inicializarContabilidad } from '../../../src/contabilidad/almacenamiento.js';
+import { inicializarContabilidad, loadAsientos, saveAsientos, loadLineas, saveLineas } from '../../../src/contabilidad/almacenamiento.js';
 import { calcularResumen } from '../../../src/contabilidad/reportes.js';
+
+function vaciarMovimientos(periodoId) {
+  const asientos = loadAsientos().filter((asiento) => asiento.period_id !== periodoId);
+  const ids = new Set(asientos.map((asiento) => asiento.id));
+  saveAsientos(asientos);
+  saveLineas(loadLineas().filter((linea) => ids.has(linea.asiento_id)));
+}
 
 beforeEach(() => {
   const almacen = instalarAlmacen();
@@ -30,6 +37,10 @@ describe('resumen financiero', () => {
   });
 
   it('reporta un periodo sin movimientos como vacío', () => {
+    const noviembreInicial = calcularResumen('per-2026-11');
+    expect(noviembreInicial.hayMovimientos).toBe(true);
+
+    vaciarMovimientos('per-2026-11');
     const noviembre = calcularResumen('per-2026-11');
     expect(noviembre.ingresos).toBe(0);
     expect(noviembre.gastos).toBe(0);

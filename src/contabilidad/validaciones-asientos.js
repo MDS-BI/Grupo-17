@@ -1,4 +1,4 @@
-import { normalizarImporte, formatearMXN } from './dinero.js';
+import { normalizarImporte, formatearMXN, sumarCentavos } from './dinero.js';
 import { esFechaValida, periodoContieneFecha } from './fechas.js';
 
 export const ESTADOS_ASIENTO = Object.freeze(['borrador', 'aprobado', 'cancelado']);
@@ -114,15 +114,17 @@ export function validarAsiento(payload = {}, {
     errores.lineas = 'El asiento debe tener al menos dos líneas contables';
   }
 
-  let totalDebit = 0;
-  let totalCredit = 0;
+  const debitos = [];
+  const creditos = [];
   const lineaErrores = [];
   lineas.forEach((linea, indice) => {
     const resultado = validarLinea(linea, { cuentas, indice });
     if (!resultado.valido) lineaErrores.push(resultado.errores);
-    totalDebit += resultado.debit;
-    totalCredit += resultado.credit;
+    debitos.push(resultado.debit);
+    creditos.push(resultado.credit);
   });
+  const totalDebit = sumarCentavos(debitos);
+  const totalCredit = sumarCentavos(creditos);
   if (lineaErrores.length > 0) {
     errores.lineasDetalle = lineaErrores;
     if (!errores.lineas) errores.lineas = Object.values(lineaErrores[0])[0];

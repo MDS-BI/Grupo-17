@@ -1,8 +1,9 @@
-import { formatearMXN } from './dinero.js';
+import { formatearMXN, sumarCentavos } from './dinero.js';
 import { fechaHoyISO } from './fechas.js';
 
 export const ESTADOS_VISIBLES = Object.freeze(['pendiente', 'pagado', 'vencido']);
-export const FILTROS_ESTADO = Object.freeze(['todos', ...ESTADOS_VISIBLES]);
+export const ESTADOS_OCULTOS = Object.freeze(['anulado']);
+export const FILTROS_ESTADO = Object.freeze(['todos', ...ESTADOS_VISIBLES, ...ESTADOS_OCULTOS]);
 
 function texto(valor) {
   return String(valor ?? '').trim();
@@ -18,13 +19,15 @@ function fechaISO(fechaActual) {
 
 export function normalizarEstadoPago(pago) {
   const estado = texto(pago && pago.status);
+  if (pago && pago.anulado) return 'anulado';
+  if (estado === 'cancelado' || estado === 'anulado') return 'anulado';
   if (estado === 'pagado' || estado === 'aplicado') return 'pagado';
   return 'pendiente';
 }
 
 export function calcularEstadoPago(pago, fechaActual = new Date()) {
   const base = normalizarEstadoPago(pago);
-  if (base === 'pagado') return 'pagado';
+  if (base !== 'pendiente') return base;
   const vencimiento = texto(pago && pago.fechaVencimiento) || texto(pago && pago.date);
   const hoy = fechaISO(fechaActual);
   return vencimiento && vencimiento < hoy ? 'vencido' : 'pendiente';
@@ -36,13 +39,19 @@ export function resumirPagos(pagos = [], fechaActual = new Date()) {
   const clave = `${fechaISO(fechaActual)}:${JSON.stringify(pagos)}`;
   if (cacheResumenPagos.has(clave)) return cacheResumenPagos.get(clave);
   const resumen = {};
+  const importes = {};
   for (const estado of ESTADOS_VISIBLES) {
     resumen[estado] = { cantidad: 0, totalCentavos: 0 };
+    importes[estado] = [];
   }
   for (const pago of pagos) {
     const estado = calcularEstadoPago(pago, fechaActual);
+    if (!ESTADOS_VISIBLES.includes(estado)) continue;
     resumen[estado].cantidad += 1;
-    resumen[estado].totalCentavos += Number(pago.amount) || 0;
+    importes[estado].push(pago.amount);
+  }
+  for (const estado of ESTADOS_VISIBLES) {
+    resumen[estado].totalCentavos = sumarCentavos(importes[estado]);
   }
   cacheResumenPagos.set(clave, resumen);
   if (cacheResumenPagos.size > 50) cacheResumenPagos.delete(cacheResumenPagos.keys().next().value);

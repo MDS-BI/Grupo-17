@@ -1,6 +1,14 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { crearDom, bootContabilidad, qs } from '../../setup/contabilidad.js';
-import { loadPeriodos, loadRoles, loadUsuarios } from '../../../src/contabilidad/almacenamiento.js';
+import {
+  cargarDatosEjemplo,
+  loadAsientos,
+  loadPagos,
+  loadPeriodos,
+  loadRoles,
+  loadUsuarios,
+  restablecerEstadoInicial
+} from '../../../src/contabilidad/almacenamiento.js';
 
 let dom;
 
@@ -16,9 +24,25 @@ describe('cargar y restablecer datos de ejemplo', () => {
   it('permite al administrador recargar la semilla sin duplicados', async () => {
     await bootContabilidad(undefined, { requireAccess: true, sesion: 'administrador' });
     const antes = loadPeriodos().length;
+    const asientosCerrados = loadAsientos().filter((asiento) => asiento.period_id === 'per-2026-09').map((asiento) => asiento.id);
     qs('view-panel-inicio').querySelector('[data-accion="cargar-datos"]').click();
     expect(loadPeriodos()).toHaveLength(antes);
+    expect(loadPeriodos().find((periodo) => periodo.id === 'per-2026-09').status).toBe('cerrado');
+    expect(loadPeriodos().find((periodo) => periodo.id === 'per-2026-07').status).toBe('cerrado');
+    expect(loadAsientos().filter((asiento) => asiento.period_id === 'per-2026-09').map((asiento) => asiento.id)).toEqual(asientosCerrados);
     expect(qs('mensaje-panel').textContent).toContain('Datos de ejemplo cargados');
+  });
+
+  it('conserva periodos y registros cerrados al restablecer y cargar de nuevo', async () => {
+    await bootContabilidad(undefined, { requireAccess: true, sesion: 'administrador' });
+    const asientosCerrados = loadAsientos().filter((asiento) => asiento.period_id === 'per-2026-09').map((asiento) => asiento.id);
+    const pagosCerrados = loadPagos().filter((pago) => pago.date.startsWith('2026-09')).map((pago) => pago.id);
+    restablecerEstadoInicial();
+    expect(loadPeriodos()).toHaveLength(0);
+    cargarDatosEjemplo();
+    expect(loadPeriodos().filter((periodo) => periodo.status === 'cerrado').map((periodo) => periodo.id)).toEqual(['per-2026-07', 'per-2026-09']);
+    expect(loadAsientos().filter((asiento) => asiento.period_id === 'per-2026-09').map((asiento) => asiento.id)).toEqual(asientosCerrados);
+    expect(loadPagos().filter((pago) => pago.date.startsWith('2026-09')).map((pago) => pago.id)).toEqual(pagosCerrados);
   });
 
   it('restablece el estado inicial conservando usuarios y roles', async () => {

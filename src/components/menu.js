@@ -1,4 +1,5 @@
-import { SECCIONES_EXCLUIDAS, normalizarSeccion } from '../contabilidad/permisos.js';
+﻿import { SECCIONES_EXCLUIDAS, normalizarSeccion, permisosEfectivos } from '../contabilidad/permisos.js';
+import { iconoSeccion } from '../contabilidad/interfaz-config.js';
 
 export const MAPA_NAVEGACION = Object.freeze([
   Object.freeze({ pantalla: 'dashboard', control: 'Panel', seccion: 'panel', roles: ['administrador', 'contador', 'tesorero', 'auditor'] }),
@@ -10,10 +11,16 @@ export const MAPA_NAVEGACION = Object.freeze([
   Object.freeze({ pantalla: 'reportes', control: 'Reportes financieros', seccion: 'reportes', roles: ['administrador', 'contador', 'auditor'] })
 ]);
 
-const ACCIONES = Object.freeze(['cargarDatos', 'restablecerDatos', 'cerrarSesion']);
+const ACCIONES = Object.freeze(['cargarDatos', 'restablecerDatos', 'cerrarSesion', 'configurarInterfaz']);
+const MODULOS_ELIMINADOS = Object.freeze(['entities', 'documents', 'search']);
 
 export function obtenerMapaNavegacion() {
   return MAPA_NAVEGACION.map((entrada) => ({ ...entrada, roles: [...entrada.roles] }));
+}
+
+export function moduloVisible(pantalla) {
+  const destino = MAPA_NAVEGACION.find((item) => item.pantalla === pantalla);
+  return Boolean(destino && !MODULOS_ELIMINADOS.includes(pantalla));
 }
 
 export function esAccion(control) {
@@ -38,17 +45,44 @@ export function navegar(pantalla, permisos = []) {
   return { permitido: true, mensaje: '' };
 }
 
-export function renderizarMenu(permisos = [], sesion = null, botones = []) {
+export function renderizarIconosMenu(botones = []) {
   const elementos = botones.length > 0
     ? botones
     : (typeof document !== 'undefined' ? [...document.querySelectorAll('.nav-module')] : []);
   for (const boton of elementos) {
     const destino = boton.dataset.module || boton.dataset.destino;
-    const permitido = navegar(destino, permisos).permitido;
+    const icono = boton.querySelector('.nav-icono');
+    if (icono) icono.textContent = iconoSeccion(destino === 'dashboard' ? 'dashboard' : destino);
+  }
+  return elementos;
+}
+
+export function renderizarMenu(permisos = [], sesion = null, botones = []) {
+  // compat: renderizarMenu(permisos, { ...sesion, pantallaActiva })
+  if (sesion && !Array.isArray(botones) && typeof botones === 'object' && botones !== null && botones.contenedor) {
+    botones = [];
+  }
+  const elementos = Array.isArray(botones) && botones.length > 0
+    ? botones
+    : (typeof document !== 'undefined' ? [...document.querySelectorAll('.nav-module')] : []);
+  renderizarIconosMenu(elementos);
+  let permisosLista = Array.isArray(permisos) ? permisos : [];
+  if ((!permisosLista.length || !permisosLista[0]?.seccion) && sesion) permisosLista = permisosEfectivos(sesion);
+  if (permisosLista.length && typeof permisosLista[0] === 'string') permisosLista = permisosEfectivos(sesion);
+  for (const boton of elementos) {
+    const destino = boton.dataset.module || boton.dataset.destino;
+    const resultado = navegar(destino, permisosLista);
+    const permitido = resultado.permitido && moduloVisible(destino);
     boton.hidden = !permitido;
     boton.dataset.destino = destino;
     boton.dataset.menu = 'opcion';
+    boton.disabled = false;
+    boton.classList.remove('nav-disabled');
+    boton.removeAttribute('aria-disabled');
+    boton.removeAttribute('title');
     if (sesion) boton.dataset.rol = sesion.rolId || '';
+    const etiqueta = boton.querySelector('.nav-label');
+    if (etiqueta && !etiqueta.dataset.base) etiqueta.dataset.base = etiqueta.textContent;
     if (permitido && sesion && sesion.pantallaActiva === destino) {
       boton.setAttribute('aria-current', 'page');
       boton.classList.add('active');

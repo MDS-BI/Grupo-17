@@ -5,9 +5,9 @@
 
 ## Resumen
 
-Este módulo añade contabilidad por partida doble sobre el módulo base. Reutiliza `Entity` (terceros: clientes, proveedores, bancos), `Document` (documentos de origen, p. ej., facturas) y `ModuleConfig` (etiquetas y ciclo de vida), y agrega siete entidades persistentes: `CuentaContable`, `AsientoContable`, `LineaAsiento`, `Pago`, `PeriodoContable`, `Usuario` y `Rol`, además de una `Sesion` activa como máximo.
+Este módulo añade contabilidad por partida doble sobre el módulo base. Reutiliza `Entity` (terceros: clientes, proveedores, bancos), `Document` (documentos de origen, p. ej., facturas) y `ModuleConfig` (etiquetas y ciclo de vida), y agrega ocho entidades persistentes: `CuentaContable`, `AsientoContable`, `LineaAsiento`, `Pago`, `PeriodoContable`, `Usuario`, `Rol` y `RegistroActividad`, además de una `Sesion` activa como máximo.
 
-`Usuario` identifica a los cuatro usuarios de prueba mediante RUT, contraseña y rol. `Rol` define el panel de inicio, la matriz de `permisos` y las acciones globales disponibles. Las Historias de Usuario 8 a 12 también introducen conceptos derivados que no se persisten como colecciones independientes: `PermisoRol`, `OpcionMenu`, `PanelInicio`, `DatosEjemplo`, `EstadoInicial`, `DestinoNavegacion`, `ControlAccion`, `EstadoPago` y `ResumenPagos`.
+`Usuario` identifica a los cuatro usuarios de prueba mediante RUT, contraseña y rol. `Rol` define el panel de inicio, la matriz de `permisos` y las acciones globales disponibles. `RegistroActividad` conserva la trazabilidad inmutable de creación, edición y anulación de asientos y pagos, con usuario, rol, fecha, hora y campos modificados. Las Historias de Usuario 7 a 21 también introducen conceptos derivados que no se persisten como colecciones independientes: `PermisoRol`, `OpcionMenu`, `PanelInicio`, `DatosEjemplo`, `EstadoInicial`, `DestinoNavegacion`, `ControlAccion`, `EstadoPago`, `ResumenPagos`, `ReporteFinanciero`, `SaldoContable`, `CierrePeriodo`, `AlertaPago`, `ResumenAlerta`, `ArchivoReporte`, `ListadoFiltrado`, `TablaOrdenable` e `IdentidadCorporativa`.
 
 Cada movimiento económico se registra como un asiento con dos o más líneas cuyos débitos y créditos deben sumar igual (partida doble). Un `Document` puede originar un asiento; un `Pago` puede generar y referenciar su asiento en el libro mayor. Todo importe se almacena como entero en centavos y se formatea en MXN solo en la capa de presentación.
 
@@ -16,7 +16,7 @@ Cada movimiento económico se registra como un asiento con dos o más líneas cu
 | Entidad base | Papel en este módulo |
 |---|---|
 | Entity | Tercero o auxiliar: cliente, proveedor, banco, acreedor. `entity_id` se usa como FK auxiliar en cuentas, líneas y pagos; se selecciona de forma contextual dentro de los formularios permitidos, sin sección navegable propia |
-| Document | Documento origen que genera asientos y pagos (p. ej., factura de venta o compra). Se referencia mediante `sourceDocumentId` o `document_id`; se selecciona de forma contextual, sin sección navegable propia |
+| Document | Documento origen que genera asientos (p. ej., factura de venta o compra). Se referencia mediante `sourceDocumentId`; no se asocia a pagos o cobros en el MVP y no tiene sección navegable propia |
 | ModuleConfig | Adaptación del módulo: `labels` (p. ej., `document: "Factura"`), `customFields` y `statusLifecycle` de asientos y pagos |
 
 ## Entidad: Usuario (acceso de demostración) — MVP
@@ -80,6 +80,41 @@ Categoría de acceso que determina el panel inicial, las opciones visibles del m
 | Búsqueda | No disponible | No disponible | No disponible | No disponible |
 | Acciones de datos de ejemplo | Cargar y restablecer | No disponible | No disponible | No disponible |
 | Cerrar sesión | Disponible | Disponible | Disponible | Disponible |
+
+## Entidad: RegistroActividad (trazabilidad de movimientos) — MVP
+
+Colección append-only que documenta quién creó, editó o anuló un asiento o pago. Cada evento se escribe solo después de una operación exitosa y con cambios reales; no se actualiza ni se elimina desde la interfaz. La semilla genera eventos deterministas y el restablecimiento devuelve la colección a ese estado inicial sin huérfanos.
+
+| Campo | Tipo | Clave | Descripción | Restricciones |
+|---|---|---|---|---|
+| id | string | PK | Identificador único del evento | Obligatorio, generado de forma determinista en la semilla |
+| fechaHora | string | — | Marca ISO de cuando ocurrió la acción | Obligatoria; en la semilla deriva de la marca fija `MARCA` |
+| accion | string | — | Tipo de acción registrada | Obligatoria: `crear`, `editar`, `anular` |
+| tipoMovimiento | string | — | Dominio del movimiento afectado | Obligatorio: `asiento`, `pago` |
+| movimientoId | string | — | Identificador del asiento o pago | Obligatorio; se resuelve junto con `tipoMovimiento` |
+| numero | string | — | Número visible del movimiento al ocurrir el evento | Obligatorio para presentación; copia del folio/número vigente |
+| usuarioRut | string | FK → Usuario (`rut`) | Usuario responsable | Obligatorio; `RESTRICT` |
+| usuarioNombre | string | — | Nombre copiado del usuario en el momento del evento | Obligatorio; conserva la identidad histórica |
+| rolId | string | FK → Rol (`id`) | Rol vigente al ejecutar la acción | Obligatorio; `RESTRICT` |
+| rolNombre | string | — | Nombre del rol copiado en el evento | Obligatorio; conserva el contexto histórico |
+| camposModificados | CampoModificado[] | — | Descripción de los cambios reales | Obligatorio; debe contener al menos un elemento cuando `accion = editar`; vacío para `crear` y `anular` |
+
+### Objeto de Valor: CampoModificado
+
+| Campo | Tipo | Descripción | Restricciones |
+|---|---|---|---|
+| campo | string | Nombre del campo modificado | Obligatorio, visible en español en la interfaz |
+| valorAnterior | any | Valor antes del cambio | Obligatorio para `editar`; se normaliza para presentación |
+| valorNuevo | any | Valor después del cambio | Obligatorio para `editar`; distinto de `valorAnterior` |
+
+**Reglas de auditoría**:
+
+- Los eventos se ordenan por `fechaHora` descendente y se filtran por `tipoMovimiento`, `accion` y `usuarioRut`.
+- La consulta consolidada y el historial por movimiento son de solo lectura y solo para el Auditor, dentro de "Reportes financieros".
+- No se genera evento en operaciones rechazadas, no-op, segunda anulación ni exportaciones.
+- Un movimiento anulado conserva sus eventos; no se sobrescribe el historial al editarlo nuevamente.
+- La eliminación física de un borrador con eventos asociados se bloquea; se ofrece anulación lógica para conservar la trazabilidad.
+- El restablecimiento limpia y vuelve a sembrar `RegistroActividad` de forma atómica con el resto del módulo.
 
 ## Entidad: Sesion (estado de autenticación) — MVP
 
@@ -167,17 +202,19 @@ Movimiento financiero de dinero contra un tercero: cobro a un cliente o pago a u
 | date | string | — | Fecha del pago en formato YYYY-MM-DD | Obligatorio, fecha de calendario válida |
 | fechaVencimiento | string | — | Fecha límite para considerar el movimiento como pagado | Obligatoria, fecha válida YYYY-MM-DD. Puede ser anterior, igual o posterior a `date`; es la base para derivar `vencido` |
 | entity_id | string | FK → Entity (`entity_id`) | Tercero pagado o que realiza el cobro | Obligatorio, debe referenciar una entidad existente; `RESTRICT` al eliminar la entidad |
-| document_id | string | FK → Document (`id`) | Documento que se liquida con el pago | Opcional; debe referenciar un documento existente; SET NULL al eliminar el documento |
+| ~~document_id~~ | — | — | No disponible en el MVP; los pagos no conservan documento asociado | Excluido por FR-015; no debe generarse ni validarse |
 | asiento_id | string | FK, UK → AsientoContable (`id`) | Asiento generado por el pago (1:1 opcional) | Opcional, único; debe referenciar un asiento existente; SET NULL al eliminar el asiento |
 | amount | integer | — | Importe pagado en la moneda configurada, en centavos | Obligatorio, entero mayor que cero |
 | currency | string | — | Código de moneda; en el MVP siempre `MXN` | Obligatorio en el MVP; valor fijo `MXN` |
 | method | string | — | Medio de pago: `efectivo`, `transferencia`, `cheque`, `tarjeta` | Opcional, valor del conjunto cerrado |
 | status | string | — | Estado operativo: `pendiente`, `pagado` | Obligatorio en el MVP. `vencido` no se captura: se deriva en `EstadoPago` cuando un pendiente supera `fechaVencimiento` |
+| anulado | boolean | — | Indica anulación lógica conservando el registro | Obligatorio por defecto `false`. Un pago anulado se excluye de totales vigentes, resumen, alertas y reportes |
+| anuladoEn | string | — | Marca ISO de la anulación | Obligatoria cuando `anulado = true`; en caso contrario ausente |
 | notes | string | — | Notas u observaciones libres | Opcional |
 | createdAt | string | — | Marca de tiempo de creación | Obligatorio |
 | updatedAt | string | — | Marca de última modificación | Obligatorio |
 
-> Migración de estados: los valores heredados `aplicado` se normalizan a `pagado`. No se conserva `cancelado` en el MVP porque FR-092 exige clasificar cada pago/cobro como `pendiente`, `pagado` o `vencido`; un movimiento que ya no deba ejecutarse se mantiene como `pendiente` y se muestra como `vencido` cuando corresponda, o se elimina solo antes de la confirmación.
+> Migración de estados: los valores heredados `aplicado` se normalizan a `pagado` y los heredados `cancelado` se normalizan a `anulado: true` con `status` conservado. `vencido` nunca se persiste; se deriva para pagos pendientes no anulados. Un pago anulado permanece consultable pero se excluye de totales vigentes, resumen, alertas y filtros de estado operativo.
 
 ## Entidad: PeriodoContable (periodo fiscal) — MVP
 
@@ -251,7 +288,7 @@ Ventana de tiempo (mes, trimestre o año) en la que se registran asientos. Los a
 - `numero`, `date`, `fechaVencimiento`, `entity_id`, `amount` y `status` son obligatorios; `amount` debe ser un entero mayor que cero en centavos.
 - `tipo` distingue cobros de pagos y debe pertenecer al conjunto `cobro`, `pago`; si no se envía, se asume `pago`.
 - Si no se envían `series` y `folio`, se generan automáticamente con la serie `COB` o `PAG` según `tipo` y el siguiente folio disponible.
-- `entity_id`, `document_id` y `asiento_id`, cuando existen, deben referenciar registros existentes.
+- `entity_id` y `asiento_id`, cuando existen, deben referenciar registros existentes; `document_id` no forma parte del pago en el MVP.
 - `numero` es único; `folio` es un entero positivo único en combinación `(series, folio)`, con `series` vacía normalizada a cadena vacía.
 - `asiento_id` es único: un pago genera o referencia como mucho un asiento y un asiento corresponde como mucho a un pago (1:1 opcional).
 - `status` solo admite `pendiente` o `pagado`. El estado visible `vencido` se calcula; nunca se almacena como valor independiente para evitar desincronización con la fecha actual.
@@ -263,6 +300,44 @@ Ventana de tiempo (mes, trimestre o año) en la que se registran asientos. Los a
 - `startDate` y `endDate` deben ser fechas válidas con `endDate >= startDate`.
 - No se permite que dos periodos se solapen, independientemente de su estado (abierto o cerrado).
 - Un periodo con asientos no se elimina: se cierra (`status = cerrado`). El borrado está restringido por `AsientoContable.period_id`.
+- Solo el Administrador financiero puede ejecutar `cerrarPeriodo(id)`, previa confirmación; un periodo ya cerrado no puede cerrarse dos veces y la cancelación no modifica el registro.
+- El cierre solo cambia `status` y `updatedAt`; no altera asientos, pagos, saldos ni reportes históricos.
+- Toda escritura de asiento o pago valida que la fecha original y la nueva fecha pertenezcan a un periodo abierto, incluidos cambios de estado, anulación y borrado permitido.
+- Un periodo cerrado puede consultarse en listados y reportes, pero no ofrece acciones de creación, edición, eliminación ni cambio de estado.
+
+### Registro de actividad
+
+- `fechaHora`, `accion`, `tipoMovimiento`, `movimientoId`, `numero`, `usuarioRut`, `usuarioNombre`, `rolId`, `rolNombre` y `camposModificados` son obligatorios.
+- `accion` solo admite `crear`, `editar` o `anular`; `tipoMovimiento` solo admite `asiento` o `pago`.
+- Un evento `editar` debe identificar al menos un campo modificado con valores anterior y nuevo distintos.
+- No se genera evento cuando la operación falla, no produce cambios o intenta anular dos veces el mismo movimiento.
+- Los eventos son inmutables: no existe operación de alta manual, edición ni eliminación desde la interfaz.
+- La consulta consolidada y el historial por movimiento solo están disponibles para el Auditor.
+- La semilla y el restablecimiento producen el mismo conjunto de eventos, sin referencias a movimientos inexistentes.
+
+### Reportes financieros por periodo
+
+- Los reportes se calculan solo desde asientos con `status = aprobado`; se excluyen borradores y cancelados.
+- El saldo inicial de cada cuenta se deriva de movimientos aprobados anteriores al rango del periodo; si no existen, es cero.
+- El Balance de Comprobación excluye cuentas con saldo cero al cierre y advierte si los totales deudores y acreedores no coinciden.
+- El Estado de Resultados calcula `resultado = ingresos - gastos` y el Balance General incluye el resultado acumulado dentro del patrimonio.
+- Una cuenta sin `type` válido impide completar el Estado de Resultados o el Balance General y genera una advertencia identificando la cuenta.
+- Un periodo sin movimientos ni saldos muestra estado vacío en los cuatro reportes; un periodo cerrado se consulta sin modificar su estado.
+
+### Alertas de vencimientos
+
+- Solo se consideran pagos con `status = pendiente` y `anulado = false`.
+- `vencido`: `fechaVencimiento < fechaReferencia`. `venceEstaSemana`: `fechaReferencia <= fechaVencimiento <= domingo` de la semana `lunes a domingo`.
+- Las categorías son mutuamente excluyentes: un pago vencido dentro de la semana actual solo cuenta en `vencidos`.
+- Cada alerta expone cantidad, total en centavos y hasta tres detalles con entidad, monto y fecha de vencimiento; si hay más, se indica el número adicional.
+- Las alertas solo se muestran en el panel del Tesorero, se recalculan al actualizar el panel y no crean navegación adicional.
+
+### Filtros y ordenación
+
+- Los filtros de asientos aplican a `date`, líneas (`cuenta_id`), totales y `status`; los de pagos aplican a `date`, asiento relacionado, `amount` y estado visible.
+- Los rangos de fecha y monto son inclusivos; una entrada inválida muestra mensaje claro y no altera el listado.
+- Los filtros se combinan con AND, se pueden limpiar y no persisten entre sesiones ni modifican registros.
+- Ordenar tablas no muta entidades: se comparan fechas ISO como cronología, importes como enteros y estados según su orden definido.
 
 ## Precisión Monetaria y Validación de Totales
 
@@ -291,14 +366,17 @@ Ventana de tiempo (mes, trimestre o año) en la que se registran asientos. Los a
 | `pagos` | 4 | Al menos uno por periodo y al menos uno en cada estado visible `pendiente`, `pagado`, `vencido` |
 | `entidades` y `documentos` | Los necesarios | Solo como apoyo contextual de asientos y pagos; IDs derivados de índices fijos |
 | `usuarios` y `roles` | 4 / 4 | Se conservan de la semilla base de acceso; la carga no los duplica |
+| `auditoria` | Los necesarios | Eventos deterministas de creación, edición y anulación sobre los movimientos sembrados; sin huérfanos ni marcas aleatorias |
 
 - La semilla usa identificadores derivados de índices fijos y fechas literales; no incluye marcas de tiempo aleatorias.
-- Cargar la semilla dos veces reemplaza periodos, cuentas, asientos y pagos por copias idénticas.
+- Cargar la semilla dos veces reemplaza periodos, cuentas, asientos, pagos y auditoría por copias idénticas.
+- Los periodos cerrados de la semilla solo conservan movimientos históricos; la semilla no crea movimientos nuevos dentro de ellos.
 - Después de cargar, paneles, listados, reportes y gráficas leen el mismo estado sin recálculos divergentes.
 
 ### EstadoInicial (restablecimiento)
 
 - Colecciones financieras vacías: `cuentas`, `asientos`, `lineas`, `pagos`, `periodos`, `entidades` y `documentos` creados por el usuario.
+- `auditoria` vuelve a su estado inicial determinista: sin eventos huérfanos y con eventos de ejemplo cuando la semilla los defina.
 - Se conservan `usuarios` y `roles` exactamente como en la semilla de acceso.
 - La sesión autenticada del Administrador financiero permanece válida; el restablecimiento no cierra sesión.
 - No quedan referencias rotas ni totales incoherentes; los paneles muestran estados vacíos en español.
@@ -312,13 +390,17 @@ La cardinalidad se lee como **A ↔ B**: cuántos A puede tener cada B y cuánto
 | Rol ← Usuario | 1 a 1..* | `Usuario.rol_id` | FK obligatoria; `RESTRICT` al eliminar el rol |
 | Usuario ← Sesion | 1 a 0..1 | `Sesion.usuarioRut` | Como máximo una sesión activa por usuario en la demo; `RESTRICT` |
 | Rol ← Sesion | 1 a 0..1 | `Sesion.rolId` | Copia del rol vigente; `RESTRICT` |
+| Usuario ← RegistroActividad | 1 a 0..* | `RegistroActividad.usuarioRut` | FK obligatoria; `RESTRICT`; conserva nombre e identidad histórica |
+| Rol ← RegistroActividad | 1 a 0..* | `RegistroActividad.rolId` | FK obligatoria; `RESTRICT`; conserva rol histórico |
+| AsientoContable ↔ RegistroActividad | 0..1 a 0..* | `tipoMovimiento='asiento'` + `movimientoId` | Referencia lógica polimórfica; integridad resuelta en la capa central |
+| Pago ↔ RegistroActividad | 0..1 a 0..* | `tipoMovimiento='pago'` + `movimientoId` | Referencia lógica polimórfica; integridad resuelta en la capa central |
 | Entity ← Document | 1 a 0..* | `Document.entity_id` | Relación base; FK obligatoria. Al eliminar Entity, CASCADE sobre Document por regla del módulo 001 |
 | Entity ← CuentaContable | 0..1 a 0..* | `CuentaContable.entity_id` | FK opcional; SET NULL al eliminar la entidad |
 | Entity ← AsientoContable | 0..1 a 0..* | `AsientoContable.entity_id` | FK opcional; SET NULL al eliminar la entidad |
 | Entity ← LineaAsiento | 0..1 a 0..* | `LineaAsiento.entity_id` | FK opcional; SET NULL al eliminar la entidad |
 | Entity ← Pago | 1 a 0..* | `Pago.entity_id` | FK obligatoria; `RESTRICT` al eliminar la entidad |
 | Document ← AsientoContable | 0..1 a 0..* | `AsientoContable.sourceDocumentId` | FK opcional; `RESTRICT` al eliminar el documento |
-| Document ← Pago | 0..1 a 0..* | `Pago.document_id` | FK opcional; SET NULL al eliminar el documento |
+| Document ← Pago | — | — | Relación excluida del MVP por FR-015 |
 | PeriodoContable ← AsientoContable | 1 a 0..* | `AsientoContable.period_id` | FK obligatoria; `RESTRICT` al eliminar el periodo |
 | CuentaContable ← CuentaContable | 0..1 a 0..* | `CuentaContable.parent_id` | Autorreferencia padre/hijo; `RESTRICT` |
 | CuentaContable ← LineaAsiento | 1 a 0..* | `LineaAsiento.cuenta_id` | FK obligatoria; `RESTRICT` |
@@ -334,6 +416,9 @@ Se mantiene la **anulación lógica** (`status = cancelado`) para asientos hist�
 | `Usuario.rol_id → Rol.id` | `RESTRICT` | No se elimina un rol con usuarios asignados; los roles de la semilla son fijos |
 | `Sesion.usuarioRut → Usuario.rut` | `RESTRICT` | Los usuarios de prueba se conservan; cerrar sesión elimina la sesión, no al usuario |
 | `Sesion.rolId → Rol.id` | `RESTRICT` | La sesión necesita su copia de permisos; el rol no se elimina durante la demo |
+| `RegistroActividad.usuarioRut → Usuario.rut` | `RESTRICT` | La auditoría debe conservar al responsable; los usuarios de prueba no se eliminan |
+| `RegistroActividad.rolId → Rol.id` | `RESTRICT` | La auditoría debe conservar el rol vigente; los roles de la semilla no se eliminan |
+| `RegistroActividad` ↔ asiento/pago | `RESTRICT` lógico | No se elimina físicamente un movimiento con eventos; se aplica anulación lógica para conservar la trazabilidad |
 | `Document.entity_id → Entity.entity_id` | `CASCADE` (regla base) | Se conserva la regla del módulo 001; no se modifica. Los asientos y pagos se desvinculan con `SET NULL`/`RESTRICT` y no se borran por esta cascada |
 | `CuentaContable.parent_id → CuentaContable.id` | `RESTRICT` | Evita cuentas hijas huérfanas y mantiene la jerarquía del plan |
 | `CuentaContable.entity_id → Entity.entity_id` | `SET NULL` | La cuenta y su saldo histórico sobreviven; solo se pierde el auxiliar del tercero |
@@ -344,13 +429,14 @@ Se mantiene la **anulación lógica** (`status = cancelado`) para asientos hist�
 | `LineaAsiento.cuenta_id → CuentaContable.id` | `RESTRICT` | No se borra una cuenta con movimientos; se marca `inactiva` |
 | `LineaAsiento.entity_id → Entity.entity_id` | `SET NULL` | La línea histórica sobrevive; el tercero es un auxiliar opcional |
 | `Pago.entity_id → Entity.entity_id` | `RESTRICT` | Un pago siempre requiere un tercero; no se borra una entidad con pagos |
-| `Pago.document_id → Document.id` | `SET NULL` | El pago sobrevive al borrar el documento liquidado |
+| ~~`Pago.document_id → Document.id`~~ | — | No aplica en el MVP; FR-015 excluye la asociación documento-pago |
 | `Pago.asiento_id → AsientoContable.id` | `SET NULL` | El pago sobrevive si se borra físicamente un asiento en borrador; los asientos aprobados/cancelados no se borran |
 
 - **Cascadas**: la única cascada contable nueva es `LineaAsiento.asiento_id`; `Document.entity_id` es una cascada heredada del módulo base. `Entity` y `Document` no borran asientos, líneas, cuentas ni pagos.
 - **Conservación del historial**: las referencias opcionales usan `SET NULL`; las obligatorias usan `RESTRICT`. Así se evita perder registros contables al eliminar una `Entity` o un `Document`.
-- **Ciclos de vida**: cuentas con movimientos o hijas se inactivan; periodos con asientos se cierran; asientos cancelados se conservan. Los pagos pasan de `pendiente` a `pagado` y pueden derivarse como `vencido` sin borrarse.
-- **Restablecimiento**: es la única operación que vacía colecciones financieras completas; lo ejecuta solo el Administrador financiero y conserva `Usuario` y `Rol`.
+- **Ciclos de vida**: cuentas con movimientos o hijas se inactivan; periodos con asientos se cierran; asientos cancelados y pagos anulados se conservan. Los pagos pasan de `pendiente` a `pagado` y pueden derivarse como `vencido` sin borrarse.
+- **Trazabilidad**: `RegistroActividad` es append-only; cualquier movimiento con eventos se anula lógicamente en lugar de borrarse físicamente.
+- **Restablecimiento**: es la única operación que vacía colecciones financieras completas y reinicia la auditoría; lo ejecuta solo el Administrador financiero y conserva `Usuario` y `Rol`.
 
 ## Reglas de Balance (Partida Doble)
 
@@ -362,13 +448,14 @@ Se mantiene la **anulación lógica** (`status = cancelado`) para asientos hist�
 
 ## Alcance MVP
 
-No se elimina ninguna de las cinco entidades contables originales; se añaden `Usuario`, `Rol` y `Sesion` para el acceso simulado.
+No se elimina ninguna de las cinco entidades contables originales; se añaden `Usuario`, `Rol`, `Sesion` para el acceso simulado y `RegistroActividad` para la trazabilidad exigida por la HU16.
 
 | Entidad | Alcance | Motivo |
 |---|---|---|
 | Usuario | MVP | HU8: credenciales ficticias y panel por rol |
 | Rol | MVP | HU8 y HU9: permisos y panel de inicio |
 | Sesion | MVP | HU8: autenticación local y cierre de sesión |
+| RegistroActividad | MVP | HU16: trazabilidad inmutable de creación, edición y anulación |
 | CuentaContable | MVP | Plan de cuentas necesario para clasificar los movimientos |
 | AsientoContable | MVP | Cabecera del registro contable |
 | LineaAsiento | MVP | Implementa la partida doble |
@@ -388,17 +475,26 @@ No se elimina ninguna de las cinco entidades contables originales; se añaden `U
 - Los permisos se ocultan en el menú en lugar de deshabilitarse; las secciones excluidas no tienen control de navegación (HU9 y HU11).
 - La carga de semilla reemplaza el conjunto previo y el restablecimiento conserva usuarios y roles (HU10).
 - `fechaVencimiento` es obligatoria y `vencido` es un estado derivado en lectura; no se almacena como valor independiente (HU12).
+- Los cuatro estados financieros se calculan solo desde asientos aprobados; los saldos iniciales se derivan de periodos anteriores y no se persisten como snapshots (HU13).
+- El cierre de periodos usa confirmación, permiso de Administrador financiero y bloqueo en la capa de escritura para todos los roles, sin reapertura en este alcance (HU14 y HU15).
+- `RegistroActividad` es la entidad persistente de auditoría; no se persisten eventos en asientos/pagos ni se crea una sección nueva de menú (HU16).
+- La anulación de pagos se modela con `anulado = true` y conserva el registro; no se usa `status = cancelado` (HU16).
+- Las alertas de vencimientos son vistas derivadas del panel del Tesorero, con semanas de lunes a domingo y categorías mutuamente excluyentes (HU17).
+- La identidad corporativa usa la constante `Comercial Los Andes SpA` y un logotipo ficticio en línea, sin configuración editable (HU18).
+- La exportación comparte el modelo generado para la pantalla, es de solo lectura y no produce eventos de auditoría (HU19).
+- Los filtros son estado local de cada listado, no una entidad ni una búsqueda global; el estado de pagos sustituye al control previo para evitar duplicidad (HU20).
+- Paleta, íconos, ordenación, confirmaciones y menú móvil se derivan de configuración compartida y no alteran reglas financieras (HU21).
 
 ## Notas de Extensibilidad
 
 - Los campos base de `Entity` y `Document` conservan sus nombres y semántica; este módulo solo añade registros propios y referencias por `entity_id` e `id` de documento.
 - `ModuleConfig` puede renombrar términos (`labels`: asiento, cuenta, pago), añadir campos personalizados (`customFields` con `target: "document"` o `"entity"`) y definir el ciclo de vida de `status` para asientos y pagos (`statusLifecycle`).
 - La numeración por serie y folio sigue la convención del módulo base; la numeración automática queda como punto de extensión de implementación.
-- El cierre de ejercicio, los comprobantes de reportes (balance general, estado de resultados) y el ajuste por tipo de cambio son puntos de extensión posteriores.
+- El cierre de ejercicio con reapertura, los comprobantes descargables en formatos adicionales y el ajuste por tipo de cambio son puntos de extensión posteriores; el cierre simple y los cuatro reportes financieros ya están en el MVP.
 - `Rol.permisos` puede incorporar nuevas secciones sin cambiar la forma de `Usuario` ni de `Sesion`.
 - Si el alcance deja de ser una demostración, `Usuario`/`Sesion` deben sustituirse por un proveedor de identidad real; el resto del modelo contable no depende de ese cambio.
 
-## Vistas Derivadas (Historias de Usuario 7 a 12)
+## Vistas Derivadas (Historias de Usuario 7 a 21)
 
 Estas vistas no introducen colecciones persistentes nuevas. Se calculan en memoria desde entidades persistidas o desde la configuración de la sesión.
 
@@ -454,8 +550,86 @@ Estas vistas no introducen colecciones persistentes nuevas. Se calculan en memor
 - Las cantidades y totales del resumen deben coincidir exactamente con el listado filtrado.
 - Los importes se suman en centavos y se formatean en MXN con la utilidad compartida.
 
+### Estados Financieros (HU13)
+
+| Vista derivada | Origen | Campos calculados | Regla de presentación |
+|---|---|---|---|
+| `SaldoContable` | `LineaAsiento` de asientos aprobados hasta una fecha límite | `cuentaId`, `debitCentavos`, `creditCentavos`, `saldoCentavos` | Saldo inicial usa movimientos anteriores al periodo; saldo final incluye el periodo |
+| `LibroMayor` | `SaldoContable` y movimientos del periodo | `codigo`, `nombre`, `saldoInicial`, `debitos`, `creditos`, `saldoFinal` | Solo cuentas con movimientos o saldo;MXN y orden por código |
+| `BalanceComprobacion` | `SaldoContable` al cierre | `cuenta`, `saldoDeudor`, `saldoAcreedor`, `totalDeudor`, `totalAcreedor` | Excluye saldo cero; advierte si los totales no coinciden |
+| `EstadoResultados` | `SaldoContable` de cuentas `ingreso` y `gasto` | `ingresos`, `gastos`, `resultado` | `resultado = ingresos - gastos`; advierte si una cuenta no tiene tipo válido |
+| `BalanceGeneral` | `SaldoContable` de `activo`, `pasivo` y `patrimonio` | `activos`, `pasivos`, `patrimonio`, `resultadoAcumulado` | Incluye el resultado acumulado en patrimonio; advierte si no cuadra |
+
+- Los reportes son de solo lectura y no permiten capturar cifras manualmente ni modificar movimientos.
+- Los periodos cerrados se consultan sin cambiar su estado; la selección de otro periodo recalcula las cinco vistas.
+- Las advertencias son mensajes en español y bloquean la exportación cuando una igualdad contable no se cumple.
+
+### Cierre de Periodo (HU14 y HU15)
+
+| Vista derivada | Origen | Regla de presentación |
+|---|---|---|
+| `CierrePeriodo` | Acción confirmada sobre `PeriodoContable` | Solo Administrador financiero; cambia `status` a `cerrado` y `updatedAt` |
+| `MensajePeriodoCerrado` | Intento de escribir en un periodo cerrado | Mensaje claro en español; bloquea guardado original y destino |
+| `ListadoPeriodoCerrado` | `PeriodoContable.status = cerrado` | Muestra el estado y oculta acciones de modificación para todos los roles |
+
+- El bloqueo se aplica a crear, editar, eliminar, anular y cambiar fecha de asientos y pagos, incluido el Administrador financiero.
+- La validación se ejecuta contra el estado vigente al guardar, por lo que un formulario abierto antes del cierre no puede escribir después.
+- Los reportes y listados de periodos cerrados siguen disponibles para los roles autorizados.
+
+### Trazabilidad (HU16)
+
+| Vista derivada | Origen | Regla de presentación |
+|---|---|---|
+| `HistorialAuditoria` | `RegistroActividad` filtrado por `tipoMovimiento` y `movimientoId` | Eventos en orden cronológico descendente |
+| `RegistroConsolidado` | `RegistroActividad` de asientos y pagos | Consulta de solo lectura dentro de "Reportes financieros", solo para Auditor |
+| `FiltroAuditoria` | Selección del Auditor | Filtra por tipo de movimiento, acción y usuario; sin búsqueda global |
+| `EstadoVacioAuditoria` | Ausencia de eventos o sin coincidencias | Mensaje en español; nunca inventa eventos |
+
+- El detalle de cada movimiento ofrece su historial sin duplicar la consulta consolidada como opción de menú.
+- Los roles distintos del Auditor reciben "Acceso no disponible" y no ven eventos.
+
+### Alertas de Vencimientos (HU17)
+
+| Vista derivada | Origen | Campos calculados | Regla de presentación |
+|---|---|---|---|
+| `SemanaReferencia` | Fecha de referencia del panel | `inicioLunes`, `finDomingo` | Define el rango de la alerta semanal |
+| `AlertaPago` | `Pago` pendiente no anulado y `fechaVencimiento` | `categoria`, `cantidad`, `totalCentavos`, `detalles[]` | `vencido` o `venceEstaSemana`, sin duplicar pagos |
+| `ResumenAlerta` | `AlertaPago` | `cantidad`, `totalMXN`, `adicionales` | Hasta tres detalles y contador de pagos restantes |
+| `PanelTesorero` | `Sesion.rolId = tesorero` y alertas | Bloques informativos | Sin `data-action`, sin enlaces y sin nueva opción de menú |
+
+- Las alertas se recalculan al iniciar sesión, al volver al panel y al actualizar pagos.
+- Los importes y fechas usan los formateadores compartidos y coinciden con "Pagos y cobros".
+
+### Identidad Corporativa y Exportación (HU18 y HU19)
+
+| Vista derivada | Origen | Regla de presentación |
+|---|---|---|
+| `IdentidadCorporativa` | Constante `NOMBRE_EMPRESA = "Comercial Los Andes SpA"` y logotipo ficticio en línea | Presente en el encabezado de todas las pantallas posteriores al acceso |
+| `ModeloExportacion` | Reporte activo, periodo y utilidades compartidas | Único origen para pantalla, PDF y Excel: empresa, periodo, fecha de generación, filas, totales y estado vacío |
+| `ArchivoReporte` | `ModeloExportacion` y generador vanilla | Descarga con `Blob`/`URL.createObjectURL`; nombre `Comercial-Los-Andes-SpA_<reporte>_<periodo>.{pdf,xls}` |
+| `TotalesReporte` | Cálculo del reporte | Deben coincidir exactamente entre pantalla y archivo; exportación bloqueada si el reporte no cuadra |
+
+- La identidad corporativa no sustituye el título de la pantalla ni aparece como opción de menú.
+- Si falta el logotipo, se conserva el nombre y una referencia visual clara.
+- Exportar no muta filtros, periodos, datos ni auditoría.
+
+### Filtros, Interfaz y Accesibilidad (HU20 y HU21)
+
+| Vista derivada | Origen | Regla de presentación |
+|---|---|---|
+| `FiltroMovimientos` | Entrada local del usuario | `fechaDesde`, `fechaHasta`, `cuentaId`, `montoDesde`, `montoHasta`, `estado`; combinación AND y límites inclusivos |
+| `ListadoFiltrado` | Entidades del listado y `FiltroMovimientos` | Solo registros visibles para el rol; mensaje específico cuando no hay resultados |
+| `OrdenTabla` | Columna seleccionada y sentido | Comparadores por fecha ISO, centavos y estado; no muta entidades |
+| `PaletaColores` e `IconoSeccion` | `src/contabilidad/interfaz-config.js` | Mismos tokens e íconos en menú, encabezados, mensajes y tablas |
+| `MensajeConfirmacion` | Guardado o eliminación permitida | Confirmación antes de borrar, mensaje de éxito después de guardar/borrar y ningún mensaje de éxito en fallos |
+| `MenuAdaptable` | `OpcionMenu` y CSS responsive | Mismas secciones por rol en escritorio y celular; se cierra al navegar |
+
+- Los filtros y la ordenación son estado de vista; no se persisten y no sustituyen los permisos.
+- La interfaz no crea nuevas opciones de menú, no modifica reglas financieras y mantiene el texto visible junto al ícono.
+
 ## Decisiones de Persistencia Actualizadas
 
-- El mecanismo por defecto es `sessionStorage` para todas las colecciones del módulo, incluidas `Usuario`, `Rol`, `Sesion` y las estructuras base `Entity`/`Document` que utilice el módulo.
-- No se persisten agregaciones, gráficas, permisos derivados ni estados de pago calculados; se recomputan desde el estado de la sesión.
-- La migración desde `localStorage` y las garantías de integridad referencial quedan trazadas en `tasks.md` como T063 y T064.
+- El mecanismo por defecto es `sessionStorage` para todas las colecciones del módulo, incluidas `Usuario`, `Rol`, `Sesion`, `RegistroActividad` y las estructuras base `Entity`/`Document` que utilice el módulo.
+- No se persisten agregaciones, gráficas, alertas, filtros, ordenación de tablas, modelos de exportación, permisos derivados ni estados de pago calculados; se recomputan desde el estado de la sesión.
+- `RegistroActividad` se persiste como colección append-only con `CLAVES.auditoria` y se reinicia de forma determinista con la semilla.
+- La migración desde `localStorage` y las garantías de integridad referencial quedan trazadas en `tasks.md` como T117.

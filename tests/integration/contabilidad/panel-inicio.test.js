@@ -14,17 +14,92 @@ afterEach(() => {
 });
 
 describe('panel de inicio de Contabilidad y Finanzas', () => {
+  it('muestra el panel del administrador con secciones accesibles y controles de ejemplo', async () => {
+    await bootContabilidad(undefined, { requireAccess: true, sesion: 'administrador' });
+    const vista = qs('view-panel-inicio');
+
+    expect(vista.hidden).toBe(false);
+    expect(vista.querySelector('section[aria-label="Panel de inicio por rol"]')).not.toBeNull();
+    expect(vista.dataset.panelRol).toBe('administrador');
+    expect([...vista.querySelectorAll('[data-panel-seccion]')].map((seccion) => seccion.dataset.panelSeccion)).toEqual([
+      'resumen-integral',
+      'estado-periodos',
+      'asuntos-prioritarios'
+    ]);
+    expect([...vista.querySelectorAll('[data-panel-seccion] > h3')].map((titulo) => titulo.textContent)).toEqual([
+      'Resumen integral',
+      'Estado de periodos',
+      'Asuntos prioritarios'
+    ]);
+    expect(vista.textContent).toContain('Ingresos del periodo');
+    expect(vista.textContent).toContain('Abiertos: 3 · Cerrados: 2');
+    expect(vista.textContent).toContain('2026-11 · abierto');
+    expect(vista.querySelector('[data-accion="cargar-datos"]').textContent.trim()).toBe('Cargar datos de ejemplo');
+    expect(vista.querySelector('[data-accion="cargar-datos"]').classList.contains('boton-destacado')).toBe(true);
+    expect(vista.querySelector('[data-accion="restablecer-datos"]').textContent.trim()).toBe('Restablecer datos');
+    expect(vista.querySelector('[data-accion="cerrar-sesion"]').textContent.trim()).toBe('Cerrar sesión');
+
+    const tarjetas = [...vista.querySelectorAll('[data-panel-seccion="resumen-integral"] .stat-card')];
+    expect(tarjetas).toHaveLength(4);
+    expect(tarjetas.map((tarjeta) => tarjeta.querySelector('.stat-value') !== null)).toEqual([true, true, true, true]);
+    expect(tarjetas[0].classList.contains('stat-card-ingresos')).toBe(true);
+    expect(tarjetas[1].classList.contains('stat-card-gastos')).toBe(true);
+    expect(tarjetas[2].classList.contains('stat-card-negativo')).toBe(true);
+    expect(vista.querySelector('[data-panel-seccion="estado-periodos"]').classList.contains('panel-seccion-periodos')).toBe(true);
+    expect(vista.querySelector('[data-panel-seccion="asuntos-prioritarios"]').classList.contains('panel-seccion-prioritarios')).toBe(true);
+  });
+
+  it('muestra el panel del contador sin controles de ejemplo', async () => {
+    await bootContabilidad(undefined, { requireAccess: true, sesion: 'contador' });
+    const vista = qs('view-panel-inicio');
+
+    expect(vista.dataset.panelRol).toBe('contador');
+    expect([...vista.querySelectorAll('[data-panel-seccion]')].map((seccion) => seccion.dataset.panelSeccion)).toEqual([
+      'plan-cuentas',
+      'control-asientos',
+      'reportes-disponibles'
+    ]);
+    expect(vista.textContent).toContain('Plan de cuentas');
+    expect(vista.textContent).toContain('Cuentas registradas: 17');
+    expect(vista.querySelector('[data-accion="cargar-datos"]')).toBeNull();
+    expect(vista.querySelector('[data-accion="restablecer-datos"]')).toBeNull();
+    expect(vista.querySelector('[data-accion="cerrar-sesion"]')).not.toBeNull();
+  });
+
+  it('navega a las secciones contables desde el menú lateral', async () => {
+    await bootContabilidad(undefined, { requireAccess: true, sesion: 'administrador' });
+    const destinos = [
+      ['nav-asientos', 'view-asientos'],
+      ['nav-cuentas', 'view-cuentas'],
+      ['nav-pagos', 'view-pagos'],
+      ['nav-reportes', 'view-reportes']
+    ];
+
+    for (const [botonId, vistaId] of destinos) {
+      qs(botonId).click();
+      expect(qs(vistaId).hidden).toBe(false);
+      expect(qs('view-panel-inicio').hidden).toBe(true);
+    }
+  });
+
   it('muestra los indicadores financieros del periodo con movimientos', async () => {
     await bootContabilidad();
     qs('nav-cuentas').click();
     qs('nav-dashboard').click();
 
-    expect(qs('dashboard-periodo').value).toBe('per-2026-10');
-    expect(qs('stat-ingresos').textContent).toBe(formatearMXN(100000));
-    expect(qs('stat-gastos').textContent).toBe(formatearMXN(250000));
-    expect(qs('stat-resultado').textContent).toBe(formatearMXN(-150000));
+    expect([...qs('dashboard-periodo').options].map((opcion) => opcion.textContent)).toEqual([
+      '2026-07 (cerrado)',
+      '2026-08 (abierto)',
+      '2026-09 (cerrado)',
+      '2026-10 (abierto)',
+      '2026-11 (abierto)'
+    ]);
+    expect(qs('dashboard-periodo').value).toBe('per-2026-11');
+    expect(qs('stat-ingresos').textContent).toBe(formatearMXN(0));
+    expect(qs('stat-gastos').textContent).toBe(formatearMXN(60000));
+    expect(qs('stat-resultado').textContent).toBe(formatearMXN(-60000));
     expect(qs('stat-resultado').classList.contains('negative')).toBe(true);
-    expect(qs('stat-asientos').textContent).toBe('2');
+    expect(qs('stat-asientos').textContent).toBe('1');
     expect(qs('dashboard-empty').hidden).toBe(true);
   });
 
@@ -33,42 +108,22 @@ describe('panel de inicio de Contabilidad y Finanzas', () => {
     qs('nav-cuentas').click();
     qs('nav-dashboard').click();
 
-    elegir(qs('dashboard-periodo'), 'per-2026-11');
+    elegir(qs('dashboard-periodo'), 'per-2026-10');
 
-    expect(qs('stat-ingresos').textContent).toBe(formatearMXN(0));
-    expect(qs('stat-gastos').textContent).toBe(formatearMXN(0));
-    expect(qs('stat-resultado').textContent).toBe(formatearMXN(0));
-    expect(qs('stat-asientos').textContent).toBe('0');
-    expect(qs('dashboard-empty').hidden).toBe(false);
-  });
-
-  it('navega a las secciones contables desde las acciones rápidas', async () => {
-    await bootContabilidad();
-
-    qs('action-nuevo-asiento').click();
-    expect(qs('view-asientos').hidden).toBe(false);
-    expect(qs('view-dashboard').hidden).toBe(true);
-
-    qs('nav-dashboard').click();
-    qs('action-cuentas').click();
-    expect(qs('view-cuentas').hidden).toBe(false);
-
-    qs('nav-dashboard').click();
-    qs('action-registrar-pago').click();
-    expect(qs('view-pagos').hidden).toBe(false);
-
-    qs('nav-dashboard').click();
-    qs('action-ver-reportes').click();
-    expect(qs('view-reportes').hidden).toBe(false);
+    expect(qs('stat-ingresos').textContent).toBe(formatearMXN(100000));
+    expect(qs('stat-gastos').textContent).toBe(formatearMXN(250000));
+    expect(qs('stat-resultado').textContent).toBe(formatearMXN(-150000));
+    expect(qs('stat-asientos').textContent).toBe('2');
+    expect(qs('dashboard-empty').hidden).toBe(true);
   });
 
   it('actualiza los indicadores al aprobar un nuevo asiento', async () => {
     await bootContabilidad();
     qs('nav-asientos').click();
 
-    qs('asiento-date').value = '2026-10-20';
+    qs('asiento-date').value = '2026-11-20';
     qs('asiento-concept').value = 'Ingreso adicional';
-    qs('asiento-periodo').value = 'per-2026-10';
+    qs('asiento-periodo').value = 'per-2026-11';
     qs('linea-cuenta-0').value = 'cta-1010';
     qs('linea-debit-0').value = '100';
     qs('linea-cuenta-1').value = 'cta-4010';
@@ -80,9 +135,10 @@ describe('panel de inicio de Contabilidad y Finanzas', () => {
 
     qs('nav-dashboard').click();
 
-    expect(qs('stat-ingresos').textContent).toBe(formatearMXN(110000));
-    expect(qs('stat-gastos').textContent).toBe(formatearMXN(250000));
-    expect(qs('stat-resultado').textContent).toBe(formatearMXN(-140000));
-    expect(qs('stat-asientos').textContent).toBe('3');
+    expect(qs('dashboard-periodo').value).toBe('per-2026-11');
+    expect(qs('stat-ingresos').textContent).toBe(formatearMXN(10000));
+    expect(qs('stat-gastos').textContent).toBe(formatearMXN(60000));
+    expect(qs('stat-resultado').textContent).toBe(formatearMXN(-50000));
+    expect(qs('stat-asientos').textContent).toBe('2');
   });
 });

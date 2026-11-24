@@ -4,7 +4,7 @@ Acompaña a [data-model.md](data-model.md). Las entidades base (`Entity`, `Docum
 
 > Se conserva la representación de `Entity` (`entity_id` como PK) y de `ModuleConfig` (`moduleName` como PK), sin modificar sus claves. Las FK hacia `Entity` apuntan a `entity_id`; las FK hacia `Document` apuntan a `Document.id`.
 
-> `Usuario`, `Rol` y `Sesion` incorporan el acceso simulado de las Historias de Usuario 8 y 9. `PermisoRol` se embebe en `Rol.permisos` y se copia a `Sesion.permisos`.
+> `Usuario`, `Rol` y `Sesion` incorporan el acceso simulado de las Historias de Usuario 8 y 9. `RegistroActividad` añade trazabilidad inmutable de asientos y pagos (HU16). `PermisoRol` se embebe en `Rol.permisos` y se copia a `Sesion.permisos`.
 
 ## Diagrama
 
@@ -12,18 +12,24 @@ Acompaña a [data-model.md](data-model.md). Las entidades base (`Entity`, `Docum
 
 [Ver diagrama en formato Mermaid (.mmd)](diagrama.mmd)
 
+> El bloque Mermaid de este documento y `diagrama.mmd` son la fuente actual del modelo; `diagrama.png` debe regenerarse para reflejar `RegistroActividad` y `Pago.anulado`.
+
 ```mermaid
 erDiagram
     Rol ||--|{ Usuario : "rol asignado"
     Usuario ||--o| Sesion : "autentica"
     Rol ||--o| Sesion : "permisos vigentes"
+    Usuario ||--o{ RegistroActividad : "responsable"
+    Rol ||--o{ RegistroActividad : "rol vigente"
+    AsientoContable |o--o{ RegistroActividad : "eventos de asiento"
+    Pago |o--o{ RegistroActividad : "eventos de pago"
     Entity ||--o{ Document : "documentos (base)"
     Entity |o--o{ CuentaContable : "cuenta auxiliar (opcional)"
     Entity |o--o{ AsientoContable : "tercero relacionado (opcional)"
     Entity |o--o{ LineaAsiento : "auxiliar por línea (opcional)"
     Entity ||--o{ Pago : "tercero (obligatorio)"
     Document |o--o{ AsientoContable : "origina (sourceDocumentId)"
-    Document |o--o{ Pago : "se liquida (document_id)"
+    %% Document ← Pago: relación excluida del MVP por FR-015
     PeriodoContable ||--o{ AsientoContable : "pertenece"
     CuentaContable |o--o{ CuentaContable : "jerarquía padre/hijo"
     CuentaContable ||--o{ LineaAsiento : "afecta (cuenta hoja y activa)"
@@ -52,6 +58,19 @@ erDiagram
         string panelInicio
         string estado "autenticada o cerrada"
         string iniciadaEn
+    }
+    RegistroActividad {
+        string id PK
+        string fechaHora
+        string accion "crear, editar o anular"
+        string tipoMovimiento "asiento o pago"
+        string movimientoId "referencia lógica"
+        string numero
+        string usuarioRut FK
+        string usuarioNombre
+        string rolId FK
+        string rolNombre
+        object camposModificados "CampoModificado[]"
     }
     Entity {
         string entity_id PK
@@ -126,12 +145,13 @@ erDiagram
         string date
         string fechaVencimiento "vencido es derivado"
         string entity_id FK
-        string document_id FK
         string asiento_id FK "UK: 1:1 opcional"
         integer amount "centavos"
         string currency
         string method
         string status "pendiente o pagado"
+        boolean anulado "anulación lógica"
+        string anuladoEn
     }
 ```
 
@@ -141,7 +161,7 @@ erDiagram
 
 > La unicidad compuesta `(series, folio)` se documenta en los atributos porque Mermaid no expresa claves únicas compuestas de forma nativa. `Pago.asiento_id` es FK y UK (1:1 opcional).
 
-> `vencido` no aparece como valor persistido de `Pago.status`: se deriva al comparar `fechaVencimiento` con la fecha actual para un pago pendiente.
+> `vencido` no aparece como valor persistido de `Pago.status`: se deriva al comparar `fechaVencimiento` con la fecha actual para un pago pendiente y no anulado. La anulación se conserva con `Pago.anulado = true` y excluye el movimiento de totales vigentes y alertas.
 
 ## Leyenda de Cardinalidades
 
@@ -162,13 +182,17 @@ La cardinalidad se lee como **A ↔ B**: cuántos A puede tener cada B y cuánto
 | Rol ← Usuario | 1 a 1..* | `Usuario.rol_id` | `RESTRICT` | Todo usuario tiene un rol; cada rol tiene al menos un usuario de prueba |
 | Usuario ← Sesion | 1 a 0..1 | `Sesion.usuarioRut` | `RESTRICT` | Una sesión autenticada como máximo por usuario |
 | Rol ← Sesion | 1 a 0..1 | `Sesion.rolId` | `RESTRICT` | La sesión conserva una copia del rol vigente |
+| Usuario ← RegistroActividad | 1 a 0..* | `RegistroActividad.usuarioRut` | `RESTRICT` | Un evento conserva al usuario responsable; un usuario puede tener muchos eventos |
+| Rol ← RegistroActividad | 1 a 0..* | `RegistroActividad.rolId` | `RESTRICT` | Un evento conserva el rol vigente; un rol puede tener muchos eventos |
+| AsientoContable ↔ RegistroActividad | 0..1 a 0..* | `tipoMovimiento='asiento'` + `movimientoId` | `RESTRICT` lógico | Un asiento puede tener eventos; cada evento apunta a un asiento |
+| Pago ↔ RegistroActividad | 0..1 a 0..* | `tipoMovimiento='pago'` + `movimientoId` | `RESTRICT` lógico | Un pago puede tener eventos; cada evento apunta a un pago |
 | Entity ← Document | 1 a 0..* | `Document.entity_id` | `CASCADE` (base) | Un documento pertenece a una entidad; una entidad tiene cero o más documentos |
 | Entity ← CuentaContable | 0..1 a 0..* | `CuentaContable.entity_id` | `SET NULL` | Una cuenta puede tener un tercero auxiliar; un tercero puede tener cero o más cuentas |
 | Entity ← AsientoContable | 0..1 a 0..* | `AsientoContable.entity_id` | `SET NULL` | Un asiento puede referenciar un tercero; un tercero puede tener cero o más asientos |
 | Entity ← LineaAsiento | 0..1 a 0..* | `LineaAsiento.entity_id` | `SET NULL` | Una línea puede tener un tercero auxiliar; un tercero puede tener cero o más líneas |
 | Entity ← Pago | 1 a 0..* | `Pago.entity_id` | `RESTRICT` | Todo pago involucra exactamente un tercero; un tercero puede tener cero o más pagos |
 | Document ← AsientoContable | 0..1 a 0..* | `AsientoContable.sourceDocumentId` | `RESTRICT` | Un asiento proviene como mucho de un documento; un documento puede originar cero o más asientos |
-| Document ← Pago | 0..1 a 0..* | `Pago.document_id` | `SET NULL` | Un pago liquida como mucho un documento; un documento puede liquidarse en cero o más pagos |
+| Document ← Pago | — | — | — | Relación excluida del MVP por FR-015 |
 | PeriodoContable ← AsientoContable | 1 a 0..* | `AsientoContable.period_id` | `RESTRICT` | Todo asiento pertenece a exactamente un periodo; un periodo puede tener cero o más asientos |
 | CuentaContable ← CuentaContable | 0..1 a 0..* | `CuentaContable.parent_id` | `RESTRICT` | Una cuenta tiene como mucho una cuenta padre; una cuenta padre puede tener cero o más hijas |
 | CuentaContable ← LineaAsiento | 1 a 0..* | `LineaAsiento.cuenta_id` | `RESTRICT` | Toda línea afecta exactamente una cuenta; una cuenta puede tener cero o más líneas |
@@ -183,7 +207,8 @@ La cardinalidad se lee como **A ↔ B**: cuántos A puede tener cada B y cuánto
 - **Acceso simulado**: `Sesion` copia `Rol.permisos` y `Rol.panelInicio` al autenticarse. Un cambio de rol requiere cerrar sesión; al cerrarla se elimina `Sesion`.
 - **Cascadas**: la única cascada contable nueva es `AsientoContable → LineaAsiento` y solo aplica al borrado físico de asientos en `borrador`. `Document.entity_id → Entity.entity_id` es una cascada heredada del módulo base y no se modifica.
 - **Historial contable**: `Entity` y `Document` no borran asientos, líneas, cuentas ni pagos. Las referencias opcionales usan `SET NULL`, salvo `AsientoContable.sourceDocumentId` que usa `RESTRICT`, y las obligatorias usan `RESTRICT` para no perder registros históricos.
-- **Anulación lógica**: asientos cancelados y pagos pagados/vencidos conservan su registro. Los pagos no almacenan `vencido`: se deriva de `fechaVencimiento`.
+- **Anulación lógica**: asientos cancelados y pagos anulados conservan su registro. Los pagos no almacenan `vencido`: se deriva de `fechaVencimiento` para pendientes no anulados.
+- **Trazabilidad inmutable**: `RegistroActividad` es append-only; un movimiento con eventos no se elimina físicamente, sino que se anula lógicamente para conservar la auditoría.
 - **Unicidad**: `code` en `CuentaContable`, `name` en `PeriodoContable`, `numero` en `Pago`, `rut`/`rutNormalizado` en `Usuario` e `id` en `Rol` son únicos. En `AsientoContable` y `Pago` la unicidad de `folio` es compuesta: `UNIQUE(series, folio)`, normalizando `series` vacía a cadena vacía. `Pago.asiento_id` es único.
 - **Periodos**: un `AsientoContable` solo puede existir en un `PeriodoContable` con `status = abierto`; un periodo con asientos se cierra, no se elimina. Los periodos no pueden solaparse, sin importar su estado.
 - **Semilla y restablecimiento**: cargar datos reemplaza colecciones financieras sin duplicar identificadores; restablecer las vacía conservando `Usuario` y `Rol`.
@@ -195,18 +220,25 @@ La cardinalidad se lee como **A ↔ B**: cuántos A puede tener cada B y cuánto
 | `PermisoRol`, `OpcionMenu`, `PanelInicio` | `Rol` y `Sesion` | Menú filtrado y panel por rol (HU8, HU9) |
 | `DatosEjemplo`, `EstadoInicial` | Fábricas puras de semilla | Botones del panel del Administrador (HU10) |
 | `DestinoNavegacion`, `ControlAccion` | Mapa estático de navegación | Un único control por pantalla (HU11) |
-| `EstadoPago`, `ResumenPagos` | `Pago.status` y `fechaVencimiento` | Resumen y filtro dentro de Pagos y cobros (HU12) |
+| `EstadoPago`, `ResumenPagos` | `Pago.status`, `fechaVencimiento` y `anulado` | Resumen y filtro dentro de Pagos y cobros (HU12) |
 | `SerieIngresosGastos`, `SerieResultado`, `DistribucionGastos` | Reportes y saldos | Gráficas del panel (HU7) |
+| `SaldoContable`, `LibroMayor`, `BalanceComprobacion`, `EstadoResultados`, `BalanceGeneral` | Asientos aprobados y cuentas | Estados financieros por periodo (HU13) |
+| `CierrePeriodo`, `MensajePeriodoCerrado` | `PeriodoContable.status` | Cierre y bloqueo de movimientos (HU14, HU15) |
+| `HistorialAuditoria`, `RegistroConsolidado` | `RegistroActividad` | Trazabilidad solo para Auditor (HU16) |
+| `AlertaPago`, `ResumenAlerta`, `SemanaReferencia` | Pagos pendientes, entidades y fecha de referencia | Alertas del panel del Tesorero (HU17) |
+| `IdentidadCorporativa`, `ModeloExportacion`, `ArchivoReporte` | Configuración visual y reporte activo | Encabezado y exportación PDF/Excel (HU18, HU19) |
+| `FiltroMovimientos`, `ListadoFiltrado`, `OrdenTabla`, `MenuAdaptable` | Estado local y configuración de interfaz | Filtros e interfaz profesional (HU20, HU21) |
 
 ## Alcance MVP
 
-No se elimina ninguna de las cinco entidades contables originales; se añaden `Usuario`, `Rol` y `Sesion` para el acceso simulado.
+No se elimina ninguna de las cinco entidades contables originales; se añaden `Usuario`, `Rol` y `Sesion` para el acceso simulado y `RegistroActividad` para la trazabilidad.
 
 | Entidad | Alcance | Motivo |
 |---|---|---|
 | Usuario | MVP | HU8: credenciales ficticias y panel por rol |
 | Rol | MVP | HU8 y HU9: permisos y panel de inicio |
 | Sesion | MVP | HU8: autenticación local y cierre de sesión |
+| RegistroActividad | MVP | HU16: trazabilidad inmutable de creación, edición y anulación |
 | CuentaContable | MVP | Plan de cuentas necesario para clasificar los movimientos |
 | AsientoContable | MVP | Cabecera del registro contable |
 | LineaAsiento | MVP | Implementa la partida doble |
@@ -226,3 +258,9 @@ No se elimina ninguna de las cinco entidades contables originales; se añaden `U
 7. **Semilla determinista reemplazable y restablecimiento que conserva usuarios** (HU10).
 8. **Navegación única sin Entidades, Documentos ni Búsqueda** (HU11).
 9. **`vencido` derivado de `fechaVencimiento`, no persistido** (HU12).
+10. **Estados financieros calculados desde asientos aprobados sin snapshots** (HU13).
+11. **Cierre con confirmación y bloqueo en la capa de escritura para todos los roles** (HU14, HU15).
+12. **`RegistroActividad` como entidad append-only y anulación lógica de pagos con `anulado`** (HU16).
+13. **Alertas mutuamente excluyentes de lunes a domingo, solo en el panel del Tesorero** (HU17).
+14. **Identidad corporativa fija y exportación vanilla sin dependencias** (HU18, HU19).
+15. **Filtros locales, tablas ordenables y menú adaptable sin cambiar reglas financieras** (HU20, HU21).

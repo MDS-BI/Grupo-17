@@ -11,7 +11,8 @@ export const CLAVES = Object.freeze({
   periodos: `${PREFIJO}periodos`,
   usuarios: `${PREFIJO}usuarios`,
   roles: `${PREFIJO}roles`,
-  sesion: `${PREFIJO}sesion`
+  sesion: `${PREFIJO}sesion`,
+  auditoria: `${PREFIJO}auditoria`
 });
 
 function leerLista(clave) {
@@ -44,6 +45,10 @@ export function loadUsuarios() { return leerLista(CLAVES.usuarios); }
 export function saveUsuarios(lista) { escribirLista(CLAVES.usuarios, lista); }
 export function loadRoles() { return leerLista(CLAVES.roles); }
 export function saveRoles(lista) { escribirLista(CLAVES.roles, lista); }
+export function loadRegistrosActividad() { return leerLista(CLAVES.auditoria); }
+export function saveRegistrosActividad(lista) { escribirLista(CLAVES.auditoria, lista); }
+export const loadAuditoria = loadRegistrosActividad;
+export const saveAuditoria = saveRegistrosActividad;
 
 export function loadSesion() {
   try {
@@ -106,6 +111,7 @@ function persistirSemilla(datos) {
   saveAsientos(datos.asientos);
   saveLineas(datos.lineas);
   savePagos(datos.pagos);
+  saveRegistrosActividad(datos.auditoria || []);
 }
 
 export function inicializarContabilidad({ forzar = false } = {}) {

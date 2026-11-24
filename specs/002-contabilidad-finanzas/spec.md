@@ -9,6 +9,16 @@
 **Entrada adicional**: Descripción del usuario: "En la especificación 002-contabilidad-finanzas, agregar historia de usuario 10: botón visible en el panel para cargar datos de ejemplo de al menos 4 periodos (cuentas, asientos y pagos) y botón para restablecer datos."
 **Entrada adicional**: Descripción del usuario: "En la especificación 002-contabilidad-finanzas, agregar historia de usuario 11: quitar del menú Entidades, Documentos y Búsqueda. Que no haya dos botones que lleven a la misma pantalla."
 **Entrada adicional**: Descripción del usuario: "En la especificación 002-contabilidad-finanzas, agregar historia de usuario 12: resumen de pagos por estado (pendiente, pagado, vencido) con filtro por estado."
+**Entrada adicional**: Descripción del usuario: "En la especificación 002-contabilidad-finanzas: eliminar del menú lateral Entidades, Documentos y Búsqueda porque no pertenecen al módulo. El menú lateral solo se muestra después de iniciar sesión y solo con las secciones que el rol puede usar."
+**Entrada adicional**: Descripción del usuario: "En la especificación 002-contabilidad-finanzas, agregar una nueva historia de usuario: como Contador, quiero generar Libro Mayor, Balance de Comprobación, Estado de Resultados y Balance General por periodo, para conocer la situación financiera de la empresa."
+**Entrada adicional**: Descripción del usuario: "En la especificación 002-contabilidad-finanzas, agregar una nueva historia de usuario: como Administrador financiero, quiero cerrar un periodo contable para que nadie pueda registrar ni modificar asientos o pagos en ese periodo."
+**Entrada adicional**: Descripción del usuario: "En la especificación 002-contabilidad-finanzas, agregar una nueva historia de usuario: como Administrador financiero, quiero cerrar un periodo contable para que nadie pueda registrar ni modificar asientos o pagos en ese periodo."
+**Entrada adicional**: Descripción del usuario: "En la especificación 002-contabilidad-finanzas, agregar una nueva historia de usuario: como Auditor, quiero ver un registro de quién creó, editó o anuló cada asiento y pago, con fecha y hora, para controlar riesgos."
+**Entrada adicional**: Descripción del usuario: "En la especificación 002-contabilidad-finanzas, agregar una nueva historia de usuario: como Tesorero, quiero ver en el panel alertas de pagos vencidos y de pagos que vencen esta semana."
+**Entrada adicional**: Descripción del usuario: "En la especificación 002-contabilidad-finanzas, agregar una nueva historia de usuario: mostrar en el encabezado el nombre de la empresa ficticia \"Comercial Los Andes SpA\" con su logo."
+**Entrada adicional**: Descripción del usuario: "En la especificación 002-contabilidad-finanzas, agregar una nueva historia de usuario: como Contador, quiero que cada reporte financiero tenga dos botones, \"Exportar PDF\" y \"Exportar Excel\", que descarguen el reporte del periodo seleccionado con el nombre de la empresa, la fecha y los totales."
+**Entrada adicional**: Descripción del usuario: "En la especificación 002-contabilidad-finanzas, agregar una nueva historia de usuario: como usuario, quiero filtrar asientos y pagos por fecha, cuenta, monto y estado."
+**Entrada adicional**: Descripción del usuario: "En la especificación 002-contabilidad-finanzas, agregar una nueva historia de usuario: como usuario, quiero una interfaz profesional: mismos colores en todo el módulo, íconos en cada sección, tablas ordenables, mensaje de confirmación al guardar o eliminar, y menú adaptable en celular."
 
 ## Propósito
 
@@ -201,7 +211,7 @@ Como usuario autenticado del módulo, quiero que el menú muestre únicamente la
 4. **Dado** que inicia sesión el Auditor, **cuando** se carga el menú, **entonces** ve únicamente Reportes en modo de consulta y no ve opciones para crear, editar, eliminar ni cambiar estados.
 5. **Dado** que un usuario intenta abrir una sección que su rol no puede usar, **cuando** realiza la acción, **entonces** el sistema muestra un mensaje de acceso no disponible y no presenta la información de esa sección.
 6. **Dado** que el Contador registra un asiento, **cuando** necesita seleccionar el periodo, **entonces** puede elegir un periodo abierto sin que se muestre la opción de cambiar su estado.
-7. **Dado** que el Tesorero consulta un pago, **cuando** revisa sus relaciones, **entonces** puede ver la entidad o el documento asociado sin acceder a la gestión de esas estructuras.
+7. **Dado** que el Tesorero consulta un pago, **cuando** revisa sus relaciones, **entonces** puede ver la entidad asociada sin acceder a la gestión de esa estructura; la consulta de documentos asociados a pagos queda fuera del MVP.
 8. **Dado** que el Auditor consulta un reporte, **cuando** revisa la información, **entonces** puede filtrar por periodo pero no encuentra acciones de modificación sobre movimientos ni periodos.
 
 **Matriz de acceso por rol**:
@@ -260,6 +270,9 @@ Como usuario del módulo, quiero que el menú no muestre Entidades, Documentos n
 6. **Dado** que dos controles con etiquetas distintas apuntan a la misma pantalla, **cuando** se aplica esta historia, **entonces** se conserva una sola opción coherente con la matriz de permisos y se elimina la otra.
 7. **Dado** que un usuario intenta abrir una pantalla eliminada del menú, **cuando** realiza la acción, **entonces** el sistema muestra un mensaje de sección no disponible y no presenta su contenido.
 8. **Dado** que un usuario abre el panel del Administrador financiero, **cuando** identifica los botones "Cargar datos de ejemplo", "Restablecer datos" y "Cerrar sesión", **entonces** los reconoce como acciones y no como accesos duplicados a pantallas del menú.
+9. **Dado** que una persona abre el módulo sin iniciar sesión, **cuando** se muestra la pantalla de acceso, **entonces** no se muestra el menú lateral con secciones del módulo.
+10. **Dado** que un usuario autenticado selecciona "Cerrar sesión", **cuando** finaliza el cierre, **entonces** el menú lateral desaparece y no reaparece al volver a una pantalla anterior sin autenticarse de nuevo.
+11. **Dado** que un usuario inicia sesión con un rol válido, **cuando** se carga el menú lateral, **entonces** el menú contiene únicamente las secciones que ese rol puede usar según la matriz de acceso.
 
 **Mapa de navegación única**:
 
@@ -297,6 +310,245 @@ Como Tesorero o Administrador financiero, quiero ver un resumen de pagos y cobro
 8. **Dado** que un usuario sin acceso a pagos abre su panel, **cuando** revisa la información disponible, **entonces** no ve el resumen ni el filtro por estado.
 9. **Dado** que no existen pagos registrados, **cuando** se consulta el resumen, **entonces** se muestran ceros en cada estado y un mensaje de estado vacío.
 10. **Dado** que se aplica un filtro sin resultados, **cuando** se revisa el listado, **entonces** se muestra un mensaje indicando que no hay pagos con ese estado.
+
+---
+
+### Historia de Usuario 13 - Generar estados financieros por periodo (Prioridad: P1)
+
+Como Contador, quiero generar Libro Mayor, Balance de Comprobación, Estado de Resultados y Balance General por periodo, para conocer la situación financiera de la empresa.
+
+**Por qué esta prioridad**: Estos reportes transforman los asientos contables aprobados en información organizada para analizar la posición y el desempeño financiero. El Libro Mayor aporta trazabilidad, el Balance de Comprobación valida la igualdad contable, el Estado de Resultados resume ingresos y gastos, y el Balance General muestra activos, pasivos y patrimonio al cierre del periodo.
+
+**Prueba Independiente**: El Contador selecciona un periodo con asientos aprobados, genera los cuatro reportes desde la sección "Reportes financieros" y verifica que los saldos y totales sean coherentes entre sí y con los movimientos de origen.
+
+**Escenarios de Aceptación**:
+
+1. **Dado** que existen asientos contables aprobados en un periodo, **cuando** el Contador selecciona ese periodo y genera el Libro Mayor, **entonces** el reporte muestra para cada cuenta con movimientos su código, nombre, saldo inicial, total de débitos, total de créditos y saldo final.
+2. **Dado** que existen movimientos aprobados en periodos anteriores, **cuando** se genera el Libro Mayor de un periodo posterior, **entonces** el saldo inicial de cada cuenta se deriva de los movimientos aprobados anteriores a ese periodo.
+3. **Dado** que existen asientos en borrador o cancelado dentro del periodo, **cuando** se generan los reportes, **entonces** esos movimientos se excluyen de los importes mostrados.
+4. **Dado** que el Contador genera el Balance de Comprobación de un periodo con saldos, **cuando** revisa los totales, **entonces** la suma de saldos deudores es igual a la suma de saldos acreedores.
+5. **Dado** que una cuenta tiene saldo cero al cierre del periodo, **cuando** se genera el Balance de Comprobación, **entonces** esa cuenta no se incluye en el listado de saldos.
+6. **Dado** que los totales del Balance de Comprobación no cumplen la igualdad contable, **cuando** se genera el reporte, **entonces** se muestra una advertencia clara y el reporte no se presenta como válido.
+7. **Dado** que existen asientos aprobados con cuentas de ingreso y gasto en un periodo, **cuando** se genera el Estado de Resultados, **entonces** el reporte muestra los ingresos, los gastos y el resultado financiero del periodo.
+8. **Dado** que el Estado de Resultados está visible, **cuando** se revisa el resultado, **entonces** este es igual a la suma de ingresos menos la suma de gastos del periodo seleccionado.
+9. **Dado** que existen saldos aprobados de cuentas de activo, pasivo y patrimonio al cierre de un periodo, **cuando** se genera el Balance General, **entonces** el reporte muestra activos, pasivos y patrimonio con sus totales correspondientes.
+10. **Dado** que el Balance General está visible, **cuando** se revisan los totales, **entonces** el total de activos es igual a la suma del total de pasivos y el total de patrimonio, incluyendo el resultado acumulado en el patrimonio.
+11. **Dado** que una cuenta no tiene un tipo que permita clasificarla como activo, pasivo, patrimonio, ingreso o gasto, **cuando** se genera el Estado de Resultados o el Balance General, **entonces** se muestra una advertencia que identifica la cuenta que impide completar el reporte.
+12. **Dado** que un periodo no tiene movimientos aprobados ni saldos, **cuando** se generan los cuatro reportes, **entonces** cada uno muestra un mensaje de estado vacío en español.
+13. **Dado** que el Contador cambia el periodo seleccionado, **cuando** genera nuevamente cualquier reporte, **entonces** la información se actualiza por completo para el nuevo periodo.
+14. **Dado** que un periodo está cerrado, **cuando** se generan los reportes de ese periodo, **entonces** se muestran los saldos históricos sin modificar el estado del periodo ni los movimientos.
+15. **Dado** que se revisa el menú lateral, **cuando** se comparan sus entradas con la configuración vigente, **entonces** no se crea ninguna opción nueva para estos reportes.
+16. **Dado** que un rol sin acceso a "Reportes financieros" intenta abrir estos reportes directamente, **cuando** realiza la acción, **entonces** se muestra un mensaje de acceso no disponible y no se revela información financiera.
+17. **Dado** que un reporte está visible, **cuando** se revisan sus importes y acciones, **entonces** los importes se muestran en MXN con el mismo formato del módulo y no existen opciones para capturar cifras manualmente ni modificar movimientos.
+
+---
+
+### Historia de Usuario 14 - Cerrar un periodo contable (Prioridad: P1)
+
+Como Administrador financiero, quiero cerrar un periodo contable para que nadie pueda registrar ni modificar asientos o pagos en ese periodo.
+
+**Por qué esta prioridad**: El cierre protege la integridad de la información financiera al impedir cambios posteriores en los movimientos de un periodo ya finalizado y evita que los reportes consultados dejen de ser confiables.
+
+**Prueba Independiente**: El Administrador financiero cierra un periodo abierto, confirma la acción y verifica que no sea posible registrar, editar, eliminar ni cambiar el estado de asientos o pagos de ese periodo, mientras los reportes sigan disponibles para consulta.
+
+**Escenarios de Aceptación**:
+
+1. **Dado** que existe un periodo contable abierto, **cuando** el Administrador financiero selecciona cerrarlo y confirma la acción, **entonces** el periodo queda marcado como cerrado en el listado.
+2. **Dado** que un periodo tiene asientos y pagos registrados, **cuando** el Administrador financiero lo cierra, **entonces** los registros existentes se conservan sin cambios y solo su estado pasa a cerrado.
+3. **Dado** que un periodo está abierto, **cuando** el Administrador financiero inicia el cierre y cancela la confirmación, **entonces** el periodo permanece abierto y no se aplica ningún bloqueo.
+4. **Dado** que un periodo ya está cerrado, **cuando** el Administrador financiero intenta cerrarlo de nuevo, **entonces** no se permite la acción y se muestra un mensaje claro.
+5. **Dado** que un periodo está cerrado, **cuando** cualquier usuario intenta registrar un asiento con fecha correspondiente a ese periodo, **entonces** el sistema impide el registro y muestra un mensaje indicando que el periodo está cerrado.
+6. **Dado** que existe un asiento en un periodo cerrado, **cuando** cualquier usuario intenta editarlo, eliminarlo o cambiar su estado, **entonces** el sistema bloquea la acción y no guarda cambios.
+7. **Dado** que existe un asiento en un periodo abierto, **cuando** un usuario intenta cambiar su fecha a un periodo cerrado, **entonces** el sistema bloquea el cambio y mantiene el asiento en su periodo original.
+8. **Dado** que un periodo está cerrado, **cuando** cualquier usuario intenta registrar un pago o cobro con fecha correspondiente a ese periodo, **entonces** el sistema impide el registro y muestra el mensaje de periodo cerrado.
+9. **Dado** que existe un pago o cobro en un periodo cerrado, **cuando** cualquier usuario intenta modificarlo, marcarlo como pagado o eliminarlo, **entonces** el sistema bloquea la acción y conserva el registro.
+10. **Dado** que existe un pago o cobro en un periodo abierto, **cuando** un usuario intenta cambiar su fecha a un periodo cerrado, **entonces** el sistema bloquea el cambio y mantiene el registro en su periodo original.
+11. **Dado** que un asiento o pago estaba abierto para edición antes de cerrar el periodo, **cuando** el usuario intenta guardar después del cierre, **entonces** el sistema rechaza el guardado y muestra el mensaje de periodo cerrado.
+12. **Dado** que el propio Administrador financiero intenta modificar un asiento o pago del periodo cerrado, **cuando** confirma la acción, **entonces** el sistema también lo bloquea porque el cierre aplica a todos los roles.
+13. **Dado** que un periodo cerrado tiene asientos y pagos registrados, **cuando** un usuario autorizado consulta listados o reportes de ese periodo, **entonces** puede ver la información sin encontrar acciones de creación, edición, eliminación ni cambio de estado.
+14. **Dado** que inicia sesión el Contador, el Tesorero o el Auditor, **cuando** abre la gestión de periodos, **entonces** no ve la acción para cerrar periodos.
+15. **Dado** que un rol distinto del Administrador financiero intenta cerrar un periodo directamente, **cuando** realiza la acción, **entonces** el sistema bloquea la operación y muestra un mensaje de acceso no disponible.
+16. **Dado** que se cierra un periodo, **cuando** se revisan otros periodos, **entonces** sus estados y operaciones permanecen sin cambios.
+17. **Dado** que no existe un periodo seleccionado para cerrar, **cuando** se intenta aplicar el cierre, **entonces** el sistema no realiza cambios y muestra un mensaje claro.
+
+---
+
+### Historia de Usuario 15 - Cerrar un periodo contable para bloquear movimientos (Prioridad: P1)
+
+Como Administrador financiero, quiero cerrar un periodo contable para que nadie pueda registrar ni modificar asientos o pagos en ese periodo.
+
+**Por qué esta prioridad**: Refuerza la integridad financiera al congelar un intervalo ya finalizado y evitar que cambios posteriores alteren saldos, resúmenes y reportes previamente consultados.
+
+**Prueba Independiente**: El Administrador financiero cierra un periodo abierto y se comprueba que los asientos y pagos de ese periodo no puedan crearse, editarse, eliminarse ni cambiar de estado, mientras la consulta y los reportes permanezcan disponibles.
+
+**Escenarios de Aceptación**:
+
+1. **Dado** que existe un periodo abierto, **cuando** el Administrador financiero confirma su cierre, **entonces** el periodo queda marcado como cerrado y se muestra claramente en el listado.
+2. **Dado** que el cierre se cancela, **cuando** se cierra la confirmación, **entonces** el periodo permanece abierto y sin cambios.
+3. **Dado** que un periodo ya está cerrado, **cuando** se intenta cerrarlo nuevamente, **entonces** el sistema rechaza la acción y muestra un mensaje claro.
+4. **Dado** que un periodo está cerrado, **cuando** cualquier rol intenta registrar un asiento con fecha de ese periodo, **entonces** el sistema bloquea el registro y muestra el mensaje de periodo cerrado.
+5. **Dado** que existe un asiento en un periodo cerrado, **cuando** cualquier rol intenta editarlo, eliminarlo o cambiar su estado, **entonces** el sistema bloquea la acción y conserva el registro original.
+6. **Dado** que un periodo está cerrado, **cuando** cualquier rol intenta registrar un pago o cobro con fecha de ese periodo, **entonces** el sistema bloquea el registro y muestra el mensaje de periodo cerrado.
+7. **Dado** que existe un pago o cobro en un periodo cerrado, **cuando** cualquier rol intenta editarlo, marcarlo como pagado o eliminarlo, **entonces** el sistema bloquea la acción y conserva el registro original.
+8. **Dado** que un asiento o pago está en un periodo abierto, **cuando** se intenta cambiar su fecha a un periodo cerrado, **entonces** el sistema bloquea el cambio.
+9. **Dado** que un asiento o pago estaba abierto para edición antes del cierre, **cuando** se intenta guardar después del cierre, **entonces** el sistema rechaza el guardado y muestra el mensaje de periodo cerrado.
+10. **Dado** que un periodo cerrado tiene movimientos, **cuando** un usuario autorizado consulta listados o reportes, **entonces** puede ver la información sin encontrar acciones de modificación.
+11. **Dado** que inicia sesión un rol distinto del Administrador financiero, **cuando** revisa la gestión de periodos, **entonces** no ve la acción de cierre y su acceso directo es bloqueado.
+
+---
+
+### Historia de Usuario 16 - Registrar trazabilidad de creación, edición y anulación (Prioridad: P1)
+
+Como Auditor, quiero ver un registro de quién creó, editó o anuló cada asiento y pago, con fecha y hora, para controlar riesgos.
+
+**Por qué esta prioridad**: La trazabilidad de las operaciones permite identificar responsables de cambios, detectar actividades inusuales y apoyar la revisión de riesgos financieros con evidencia confiable.
+
+**Prueba Independiente**: El Auditor crea una consulta de auditoría dentro de "Reportes financieros", revisa eventos de asientos y pagos con usuario, rol, fecha y hora, y comprueba que no puedan modificarse.
+
+**Escenarios de Aceptación**:
+
+1. **Dado** que un usuario crea un asiento o pago, **cuando** finaliza la acción, **entonces** se genera automáticamente un evento de auditoría con usuario, rol, fecha y hora.
+2. **Dado** que un asiento o pago es editado, **cuando** se guarda el cambio, **entonces** se genera un evento de edición que describe los campos modificados.
+3. **Dado** que un asiento o pago es anulado, **cuando** se aplica la anulación, **entonces** se genera un evento de anulación y el registro se conserva para consulta.
+4. **Dado** que un movimiento tiene varios eventos, **cuando** el Auditor abre su historial, **entonces** ve los eventos en orden cronológico con el más reciente primero.
+5. **Dado** que el Auditor abre "Reportes financieros", **cuando** selecciona la consulta de auditoría, **entonces** ve una lista consolidada de eventos de asientos y pagos.
+6. **Dado** que la lista consolidada está visible, **cuando** el Auditor filtra por tipo de movimiento, acción o usuario, **entonces** la lista muestra únicamente los eventos coincidentes.
+7. **Dado** que un evento de auditoría está visible, **cuando** cualquier usuario intenta editarlo o eliminarlo, **entonces** el sistema bloquea la acción.
+8. **Dado** que una operación es rechazada, **cuando** no se produce ningún cambio real, **entonces** no se genera un evento de auditoría.
+9. **Dado** que un movimiento ya está anulado, **cuando** se intenta anularlo de nuevo, **entonces** no se genera un segundo evento de anulación.
+10. **Dado** que los datos de ejemplo son cargados dos veces, **cuando** se comparan los historiales, **entonces** usuarios, acciones, fechas y horas son idénticos.
+11. **Dado** que el Administrador restablece datos, **cuando** el Auditor consulta el registro, **entonces** el historial vuelve a su estado inicial determinista sin eventos huérfanos.
+12. **Dado** que se revisa el menú lateral, **cuando** se compara con la configuración vigente, **entonces** no se crea una nueva opción para la consulta de auditoría.
+13. **Dado** que un rol distinto del Auditor intenta abrir el registro de auditoría directamente, **cuando** realiza la acción, **entonces** se muestra un mensaje de acceso no disponible y no se revelan eventos.
+14. **Dado** que no existen eventos para un movimiento o para los filtros aplicados, **cuando** se consulta el registro, **entonces** se muestra un mensaje de estado vacío en español.
+
+---
+
+### Historia de Usuario 17 - Alertas de vencimientos de pagos en el panel (Prioridad: P1)
+
+Como Tesorero, quiero ver en el panel alertas de pagos vencidos y de pagos que vencen esta semana, para priorizar la cobranza y anticiparme a los compromisos financieros próximos.
+
+**Por qué esta prioridad**: Los vencimientos afectan directamente la tesorería; mostrarlos al iniciar sesión permite actuar sin buscar en otros listados.
+
+**Prueba Independiente**: El Tesorero inicia sesión con datos de ejemplo que contienen pagos vencidos y pagos con vencimiento en la semana actual, y verifica que el panel muestre ambas alertas con cantidades y totales coherentes.
+
+**Escenarios de Aceptación**:
+
+1. **Dado** que existen pagos pendientes vencidos, **cuando** inicia sesión el Tesorero, **entonces** su panel muestra una alerta de pagos vencidos con cantidad y total en MXN.
+2. **Dado** que existen pagos pendientes que vencen entre la fecha de referencia y el domingo de la semana actual, **cuando** inicia sesión el Tesorero, **entonces** su panel muestra una alerta de pagos que vencen esta semana con cantidad y total en MXN.
+3. **Dado** que una alerta está visible, **cuando** el Tesorero revisa su detalle, **entonces** puede identificar la entidad, el monto y la fecha de vencimiento de cada pago incluido.
+4. **Dado** que hay más pagos de los que caben en el detalle, **cuando** se revisa la alerta, **entonces** se indica cuántos pagos adicionales existen.
+5. **Dado** que un pago vence el domingo de la semana actual, **cuando** se consulta el panel, **entonces** se incluye en la alerta semanal.
+6. **Dado** que un pago vence el lunes de la semana siguiente, **cuando** se consulta el panel, **entonces** no se incluye en la alerta semanal.
+7. **Dado** que un pago está pagado o anulado, **cuando** se consultan las alertas, **entonces** se excluye de ambas alertas.
+8. **Dado** que un pago vencido tiene fecha dentro de la semana actual, **cuando** se consultan las alertas, **entonces** se muestra solo en la alerta de vencidos.
+9. **Dado** que se registra, edita, paga o anula un pago, **cuando** se actualiza el panel, **entonces** las alertas reflejan el nuevo estado del movimiento.
+10. **Dado** que no existen pagos que cumplan una condición, **cuando** se consulta el panel, **entonces** se muestra un estado sin alertas o la alerta se oculta sin cifras engañosas.
+11. **Dado** que se revisa el menú lateral, **cuando** se comparan sus opciones con el panel, **entonces** las alertas no crean una nueva opción ni un acceso duplicado a "Pagos y cobros".
+12. **Dado** que inicia sesión un rol distinto del Tesorero, **cuando** revisa su panel, **entonces** no ve las alertas de vencimientos de pagos.
+13. **Dado** que se cargan datos de ejemplo dos veces con la misma fecha de referencia, **cuando** se comparan las alertas, **entonces** cantidades, totales y montos son idénticos.
+14. **Dado** que se restablecen datos, **cuando** el Tesorero consulta su panel, **entonces** las alertas vuelven a su estado inicial coherente con la semilla.
+
+---
+
+### Historia de Usuario 18 - Identidad corporativa en el encabezado (Prioridad: P2)
+
+Como usuario del módulo, quiero ver en el encabezado el nombre de la empresa ficticia "Comercial Los Andes SpA" con su logo, para reconocer de inmediato la empresa a la que pertenece la información financiera mostrada.
+
+**Por qué esta prioridad**: La identidad corporativa hace evidente que los datos son ficticios y pertenecen a una sola empresa, mejorando la claridad de la demostración.
+
+**Prueba Independiente**: El usuario inicia sesión con cualquier rol y verifica que el encabezado muestra el texto exacto "Comercial Los Andes SpA" junto a un logotipo ficticio reconocible.
+
+**Escenarios de Aceptación**:
+
+1. **Dado** que existe una sesión válida, **cuando** se abre cualquier pantalla del módulo, **entonces** el encabezado muestra el nombre exacto "Comercial Los Andes SpA".
+2. **Dado** que el encabezado está visible, **cuando** se revisa su contenido, **entonces** el logotipo aparece junto al nombre de la empresa.
+3. **Dado** que se comparan las pantallas disponibles, **cuando** se navega entre secciones, **entonces** el nombre y el logotipo permanecen visibles.
+4. **Dado** que inician sesión distintos roles, **cuando** revisan sus paneles, **entonces** todos ven la misma identidad corporativa.
+5. **Dado** que el encabezado está visible, **cuando** se revisa el menú lateral, **entonces** la identidad corporativa no aparece como una opción adicional.
+6. **Dado** que una pantalla tiene su propio título, **cuando** se revisa el encabezado, **entonces** el nombre de la empresa no sustituye ni duplica ese título.
+7. **Dado** que el logotipo no está disponible, **cuando** se visualiza el encabezado, **entonces** el nombre de la empresa permanece visible y el espacio del logotipo conserva una referencia visual clara.
+8. **Dado** que se cargan o restablecen datos, **cuando** se consulta el encabezado, **entonces** la identidad corporativa permanece igual.
+
+---
+
+### Historia de Usuario 19 - Exportar reportes financieros a PDF y Excel (Prioridad: P1)
+
+Como Contador, quiero que cada reporte financiero tenga los botones "Exportar PDF" y "Exportar Excel", para descargar el reporte del periodo seleccionado con el nombre de la empresa, la fecha y los totales.
+
+**Por qué esta prioridad**: La exportación permite compartir y archivar los reportes financieros con información trazable y coherente con lo revisado en el módulo.
+
+**Prueba Independiente**: El Contador abre cada reporte financiero para un periodo válido, usa ambos botones y verifica que los archivos descargados contengan el nombre de la empresa, la fecha y los totales del periodo.
+
+**Escenarios de Aceptación**:
+
+1. **Dado** que un reporte financiero está visible para un periodo seleccionado, **cuando** se revisan sus acciones, **entonces** aparecen los botones "Exportar PDF" y "Exportar Excel".
+2. **Dado** que se selecciona "Exportar PDF", **cuando** finaliza la acción, **entonces** se obtiene un archivo descargable en formato PDF con el contenido del reporte.
+3. **Dado** que se selecciona "Exportar Excel", **cuando** finaliza la acción, **entonces** se obtiene un archivo descargable en formato Excel con el contenido del reporte.
+4. **Dado** que un archivo exportado está disponible, **cuando** se revisa su encabezado, **entonces** aparece el nombre exacto "Comercial Los Andes SpA".
+5. **Dado** que un archivo exportado está disponible, **cuando** se revisa la fecha, **entonces** aparece el periodo seleccionado y la fecha de generación.
+6. **Dado** que un archivo exportado está disponible, **cuando** se revisan los totales, **entonces** aparecen los totales aplicables al tipo de reporte.
+7. **Dado** que se comparan el reporte en pantalla y el archivo exportado, **cuando** se revisan las cifras, **entonces** coinciden para el mismo periodo.
+8. **Dado** que se cambia el periodo seleccionado, **cuando** se exporta el reporte, **entonces** el archivo corresponde al nuevo periodo.
+9. **Dado** que un reporte válido no tiene movimientos, **cuando** se exporta, **entonces** el archivo incluye totales en cero y una indicación de ausencia de movimientos.
+10. **Dado** que existen datos inconsistentes que impiden validar el reporte, **cuando** se intenta exportar, **entonces** la exportación se bloquea y se muestra la advertencia correspondiente.
+11. **Dado** que se exporta un reporte, **cuando** se revisa el módulo, **entonces** no se modifican cuentas, asientos, pagos, periodos ni filtros.
+12. **Dado** que se revisa el menú lateral, **cuando** se compara con las acciones del reporte, **entonces** la exportación no crea una opción de menú adicional.
+
+---
+
+### Historia de Usuario 20 - Filtros de asientos y pagos (Prioridad: P1)
+
+Como usuario, quiero filtrar asientos y pagos por fecha, cuenta, monto y estado, para encontrar rápidamente los movimientos que necesito revisar.
+
+**Por qué esta prioridad**: Los filtros reducen el tiempo de localización de movimientos y disminuyen errores al revisar listados extensos.
+
+**Prueba Independiente**: El usuario aplica filtros individuales y combinados en los listados de asientos y pagos, verifica los resultados y comprueba que pueda limpiarlos sin modificar registros.
+
+**Escenarios de Aceptación**:
+
+1. **Dado** que el listado de asientos está visible, **cuando** se aplica un rango de fechas, **entonces** se muestran solo los asientos cuya fecha contable esté dentro del rango, incluyendo ambos límites.
+2. **Dado** que el listado de asientos está visible, **cuando** se selecciona una cuenta contable, **entonces** se muestran solo los asientos que tienen al menos una línea con esa cuenta.
+3. **Dado** que el listado de asientos está visible, **cuando** se define un rango de montos, **entonces** se muestran solo los asientos cuyo monto total esté dentro del rango, incluyendo ambos límites.
+4. **Dado** que el listado de asientos está visible, **cuando** se selecciona un estado, **entonces** se muestran solo los asientos con ese estado.
+5. **Dado** que el listado de pagos y cobros está visible, **cuando** se aplica un rango de fechas, **entonces** se muestran solo los pagos cuya fecha del movimiento esté dentro del rango, incluyendo ambos límites.
+6. **Dado** que el listado de pagos y cobros está visible, **cuando** se selecciona una cuenta contable, **entonces** se muestran solo los pagos relacionados con un asiento que utilice esa cuenta.
+7. **Dado** que el listado de pagos y cobros está visible, **cuando** se define un rango de montos, **entonces** se muestran solo los pagos cuyo monto esté dentro del rango, incluyendo ambos límites.
+8. **Dado** que el listado de pagos y cobros está visible, **cuando** se selecciona un estado, **entonces** se muestran solo los pagos con ese estado.
+9. **Dado** que se aplican varios filtros a la vez, **cuando** se revisa el listado, **entonces** se muestran solo los registros que cumplen todos los criterios simultáneamente.
+10. **Dado** que no existen resultados, **cuando** se aplican los filtros, **entonces** se muestra un mensaje de estado vacío en español.
+11. **Dado** que se han aplicado filtros, **cuando** se selecciona limpiar filtros, **entonces** el listado vuelve a mostrar todos los registros disponibles para el rol.
+12. **Dado** que un rango de fechas o montos es inválido, **cuando** se intenta filtrar, **entonces** se muestra un mensaje específico y no se aplica ese filtro.
+13. **Dado** que un rol no tiene acceso a un listado, **cuando** revisa el módulo, **entonces** no ve los filtros de ese listado.
+14. **Dado** que se revisa el menú lateral, **cuando** se comparan los filtros, **entonces** no se crea una nueva opción de menú ni una pantalla de búsqueda global.
+
+---
+
+### Historia de Usuario 21 - Interfaz profesional del módulo (Prioridad: P1)
+
+Como usuario, quiero una interfaz profesional con colores coherentes, íconos por sección, tablas ordenables, mensajes de confirmación y menú adaptable en celular, para trabajar con claridad y confianza en distintos dispositivos.
+
+**Por qué esta prioridad**: La consistencia visual y la retroalimentación clara reducen errores y mejoran la usabilidad de una herramienta financiera.
+
+**Prueba Independiente**: El usuario recorre el módulo en pantalla amplia y celular, verifica colores e íconos, ordena tablas y confirma guardados y eliminaciones.
+
+**Escenarios de Aceptación**:
+
+1. **Dado** que se recorren todas las secciones del módulo, **cuando** se comparan sus colores, **entonces** encabezados, botones y mensajes usan la misma paleta.
+2. **Dado** que un estado es de éxito, error o advertencia, **cuando** se muestra su mensaje, **entonces** usa el mismo color en todas las pantallas.
+3. **Dado** que el menú lateral está visible, **cuando** se revisa cada opción, **entonces** cada sección muestra un ícono junto a su texto.
+4. **Dado** que se abre una sección, **cuando** se revisa su encabezado, **entonces** aparece el ícono correspondiente a esa sección.
+5. **Dado** que una tabla tiene encabezados de columna, **cuando** se selecciona un encabezado, **entonces** los registros se ordenan por esa columna.
+6. **Dado** que una tabla está ordenada, **cuando** se selecciona el mismo encabezado nuevamente, **entonces** el orden cambia entre ascendente y descendente.
+7. **Dado** que una tabla contiene fechas o importes, **cuando** se ordena por esas columnas, **entonces** el orden respeta el valor cronológico o numérico.
+8. **Dado** que se guarda un registro válido, **cuando** finaliza la acción, **entonces** se muestra un mensaje de confirmación de guardado exitoso.
+9. **Dado** que se intenta eliminar un registro permitido, **cuando** se inicia la acción, **entonces** se muestra un mensaje de confirmación antes de eliminar.
+10. **Dado** que el usuario cancela la confirmación de eliminación, **cuando** se cierra el mensaje, **entonces** el registro permanece sin cambios.
+11. **Dado** que el usuario confirma la eliminación permitida, **cuando** finaliza la acción, **entonces** se elimina el registro y se muestra un mensaje de confirmación.
+12. **Dado** que el módulo se visualiza en una pantalla de celular, **cuando** se abre el menú, **entonces** las secciones permitidas están disponibles para el rol autenticado.
+13. **Dado** que se selecciona una sección desde el menú en celular, **cuando** se navega, **entonces** el menú deja de ocupar la pantalla.
+14. **Dado** que se comparan menú amplio y menú de celular, **cuando** se revisan sus opciones, **entonces** ambos muestran las mismas secciones permitidas para el rol.
+15. **Dado** que se aplican mejoras de interfaz, **cuando** se revisan reglas de negocio, permisos y datos, **entonces** permanecen sin cambios.
 
 ---
 
@@ -348,6 +600,82 @@ Como Tesorero o Administrador financiero, quiero ver un resumen de pagos y cobro
 - ¿Qué ocurre cuando un pago no tiene fecha de vencimiento registrada?
 - ¿Qué ocurre cuando se filtra por un estado sin pagos asociados?
 - ¿Qué ocurre cuando el total de un estado no coincide con la suma del listado filtrado?
+- ¿Qué ocurre cuando el periodo seleccionado no tiene asientos aprobados?
+- ¿Qué ocurre cuando el periodo seleccionado está cerrado?
+- ¿Qué ocurre cuando existen asientos en borrador o cancelado dentro del periodo?
+- ¿Qué ocurre cuando se cambia de periodo mientras un reporte financiero está abierto?
+- ¿Qué ocurre cuando una cuenta no tiene un tipo que permita clasificarla como activo, pasivo, patrimonio, ingreso o gasto?
+- ¿Qué ocurre cuando los totales de un reporte financiero no cumplen la igualdad contable esperada?
+- ¿Qué ocurre cuando una cuenta tiene saldo inicial pero no movimientos en el periodo?
+- ¿Qué ocurre cuando se generan los cuatro reportes financieros para periodos distintos durante la misma consulta?
+- ¿Qué ocurre cuando un usuario sin acceso a Reportes financieros intenta abrir un reporte directamente?
+- ¿Qué ocurre cuando se cancela la confirmación de cierre de un periodo?
+- ¿Qué ocurre cuando se intenta cerrar un periodo que ya está cerrado?
+- ¿Qué ocurre cuando no existe el periodo seleccionado para cerrar?
+- ¿Qué ocurre cuando un asiento o pago estaba abierto para edición antes de cerrar el periodo?
+- ¿Qué ocurre cuando se intenta cambiar la fecha de un asiento o pago desde un periodo abierto hacia uno cerrado?
+- ¿Qué ocurre cuando se intenta cambiar la fecha de un asiento o pago desde un periodo cerrado hacia uno abierto?
+- ¿Qué ocurre cuando un pago vencido de un periodo cerrado se intenta marcar como pagado?
+- ¿Qué ocurre cuando se cargan datos de ejemplo mientras existen periodos cerrados?
+- ¿Qué ocurre cuando se restablecen datos después de cerrar periodos?
+- ¿Qué ocurre cuando un usuario sin permiso intenta cerrar un periodo directamente?
+- ¿Qué ocurre cuando un periodo cerrado se consulta desde un reporte financiero?
+- ¿Qué ocurre cuando se cierra un periodo que no tiene movimientos registrados?
+- ¿Qué ocurre cuando un movimiento fue creado antes de que existiera el registro de auditoría?
+- ¿Qué ocurre cuando el usuario responsable ya no aparece en la lista de usuarios de prueba?
+- ¿Qué ocurre cuando dos eventos ocurren con la misma fecha y hora?
+- ¿Qué ocurre cuando se intenta anular un movimiento ya anulado?
+- ¿Qué ocurre cuando una edición no cambia ningún valor?
+- ¿Qué ocurre cuando se restablecen datos con filtros de auditoría aplicados?
+- ¿Qué ocurre cuando un usuario sin rol de Auditor intenta abrir el registro de auditoría directamente?
+- ¿Qué ocurre cuando no existen eventos de auditoría?
+- ¿Qué ocurre cuando no existen pagos pendientes?
+- ¿Qué ocurre cuando todos los pagos están pagados o anulados?
+- ¿Qué ocurre cuando un pago vence exactamente en la fecha de referencia?
+- ¿Qué ocurre cuando un pago vence el domingo de la semana actual?
+- ¿Qué ocurre cuando un pago vence el lunes de la semana siguiente?
+- ¿Qué ocurre cuando un pago vencido también tiene fecha dentro de la semana actual?
+- ¿Qué ocurre cuando se cambia la fecha de vencimiento de un pago ya vencido a la semana siguiente?
+- ¿Qué ocurre cuando un pago se anula después de aparecer en una alerta?
+- ¿Qué ocurre cuando se restablecen datos mientras el panel del Tesorero está abierto?
+- ¿Qué ocurre cuando hay más pagos de alerta de los que se muestran en el detalle?
+- ¿Qué ocurre cuando un rol distinto del Tesorero intenta acceder a las alertas directamente?
+- ¿Qué ocurre cuando el logotipo no está disponible?
+- ¿Qué ocurre cuando el nombre de la empresa se muestra en una pantalla estrecha?
+- ¿Qué ocurre cuando se cargan o restablecen datos mientras el encabezado está visible?
+- ¿Qué ocurre cuando el título de la pantalla coincide parcialmente con el nombre de la empresa?
+- ¿Qué ocurre cuando se cierra sesión?
+- ¿Qué ocurre cuando el texto del nombre no cabe en una sola línea?
+- ¿Qué ocurre cuando la descripción accesible del logotipo no está definida?
+- ¿Qué ocurre cuando el reporte no tiene movimientos?
+- ¿Qué ocurre cuando los datos son inconsistentes y el reporte no puede validarse?
+- ¿Qué ocurre cuando se cambia el periodo después de abrir el reporte?
+- ¿Qué ocurre cuando se exporta el mismo reporte dos veces seguidas?
+- ¿Qué ocurre cuando se exportan PDF y Excel del mismo periodo?
+- ¿Qué ocurre cuando un rol sin acceso a reportes intenta usar los botones directamente?
+- ¿Qué ocurre cuando el archivo no puede descargarse?
+- ¿Qué ocurre cuando se cargan o restablecen datos antes de exportar?
+- ¿Qué ocurre cuando no existen registros en el listado?
+- ¿Qué ocurre cuando no hay resultados para la combinación de filtros?
+- ¿Qué ocurre cuando la fecha inicial es posterior a la fecha final?
+- ¿Qué ocurre cuando el monto mínimo es mayor que el monto máximo?
+- ¿Qué ocurre cuando se ingresa un monto negativo o no numérico?
+- ¿Qué ocurre cuando se selecciona una cuenta sin movimientos?
+- ¿Qué ocurre cuando un pago no tiene asiento relacionado y se filtra por cuenta?
+- ¿Qué ocurre cuando un asiento tiene varias líneas con cuentas distintas?
+- ¿Qué ocurre cuando se restablecen datos con filtros aplicados?
+- ¿Qué ocurre cuando un rol sin acceso intenta usar los filtros directamente?
+- ¿Qué ocurre cuando una tabla no tiene registros?
+- ¿Qué ocurre cuando una columna no es ordenable?
+- ¿Qué ocurre cuando dos registros tienen el mismo valor en la columna ordenada?
+- ¿Qué ocurre cuando se ordena una tabla y después se aplica un filtro?
+- ¿Qué ocurre cuando se cancela una eliminación?
+- ¿Qué ocurre cuando un guardado falla por validación?
+- ¿Qué ocurre cuando un rol no tiene permiso para eliminar?
+- ¿Qué ocurre cuando el menú en celular tiene más secciones de las que caben en pantalla?
+- ¿Qué ocurre cuando cambia el ancho de pantalla?
+- ¿Qué ocurre cuando un ícono no puede mostrarse?
+- ¿Qué ocurre cuando un mensaje de confirmación aparece en una pantalla estrecha?
 
 ## Requisitos 
 
@@ -367,11 +695,11 @@ Como Tesorero o Administrador financiero, quiero ver un resumen de pagos y cobro
 - **FR-012**: El sistema DEBE informar claramente cuando un asiento contable no cumpla con la condición de igualdad entre débitos y créditos.
 - **FR-013**: El sistema DEBE permitir registrar y consultar pagos y cobros realizados por la empresa.
 - **FR-014**: El sistema DEBE permitir asociar cada pago o cobro con una entidad existente.
-- **FR-015**: El sistema DEBE permitir asociar opcionalmente un pago o cobro con un documento correspondiente.
+- **FR-015**: El sistema NO DEBE asociar pagos ni cobros con documentos en el MVP; `document_id` queda excluido del modelo operativo de `Pago`. Los documentos solo se referencian desde asientos mediante `sourceDocumentId`.
 - **FR-016**: El sistema DEBE solicitar la fecha, monto y tipo de operación para registrar un pago o cobro.
 - **FR-017**: El sistema DEBE permitir crear y consultar periodos contables indicando su nombre, fecha de inicio y fecha de término.
 - **FR-018**: El sistema DEBE validar que la fecha de término de un periodo contable sea posterior a su fecha de inicio.
-- **FR-019**: El sistema DEBE permitir cambiar el estado de un periodo contable entre abierto y cerrado.
+- **FR-019**: El sistema DEBE permitir cerrar un periodo contable abierto; el estado `cerrado` es definitivo y NO DEBE ofrecerse una acción de reapertura.
 - **FR-020**: El sistema NO DEBE permitir registrar nuevos asientos contables en periodos que se encuentren cerrados.
 - **FR-021**: El sistema DEBE mostrar el estado de cada periodo contable para facilitar su identificación.
 - **FR-022**: El sistema DEBE permitir generar y consultar reportes de movimientos contables según el periodo seleccionado.
@@ -415,7 +743,7 @@ Como Tesorero o Administrador financiero, quiero ver un resumen de pagos y cobro
 - **FR-060**: El Auditor NO DEBE ver acciones para crear, editar, eliminar ni cambiar el estado de la información.
 - **FR-061**: El sistema DEBE bloquear el acceso a una sección no permitida y mostrar un mensaje de acceso no disponible.
 - **FR-062**: El Contador DEBE poder seleccionar un periodo contable abierto al registrar un asiento sin acceder a la gestión de periodos.
-- **FR-063**: El Tesorero DEBE poder consultar la entidad o el documento asociado a un pago o cobro sin acceder a la gestión de esas estructuras.
+- **FR-063**: El Tesorero DEBE poder consultar la entidad asociada a un pago o cobro sin acceder a la gestión de esa estructura; la consulta de documentos asociados a pagos queda fuera del MVP.
 - **FR-064**: Los permisos DEBEN aplicarse de inmediato después de la autenticación y dejar de aplicarse al cerrar sesión.
 - **FR-065**: El menú presentado a cada rol DEBE ser coherente con el panel de inicio definido en la Historia de Usuario 8.
 - **FR-066**: El panel del Administrador financiero DEBE mostrar de forma visible el botón "Cargar datos de ejemplo".
@@ -454,6 +782,218 @@ Como Tesorero o Administrador financiero, quiero ver un resumen de pagos y cobro
 - **FR-099**: Los importes del resumen DEBEN mostrarse en MXN con el mismo formato utilizado en el resto del módulo.
 - **FR-100**: Cuando no existan pagos o cobros, el resumen DEBE mostrar cero en cada estado y un mensaje de estado vacío.
 - **FR-101**: Cuando un filtro no produzca resultados, el sistema DEBE mostrar un mensaje que indique que no hay pagos con ese estado.
+- **FR-102**: El menú lateral NO DEBE mostrarse antes de que una persona inicie sesión correctamente.
+- **FR-103**: El menú lateral DEBE mostrarse después de una autenticación válida únicamente con las secciones que el rol autenticado puede usar según la matriz de acceso.
+- **FR-104**: El menú lateral DEBE ocultarse al cerrar sesión y NO DEBE recuperarse navegando hacia atrás sin una nueva autenticación.
+- **FR-105**: El sistema DEBE permitir al Contador seleccionar un periodo contable para generar reportes financieros.
+- **FR-106**: El sistema DEBE permitir generar el Libro Mayor, el Balance de Comprobación, el Estado de Resultados y el Balance General para el periodo seleccionado.
+- **FR-107**: El Libro Mayor DEBE mostrar, por cada cuenta con movimientos aprobados en el periodo, código, nombre, saldo inicial, débitos, créditos y saldo final.
+- **FR-108**: El saldo inicial del Libro Mayor DEBE derivarse de los movimientos aprobados de periodos anteriores al seleccionado.
+- **FR-109**: Los reportes financieros DEBEN excluir los asientos en borrador o cancelado.
+- **FR-110**: El Balance de Comprobación DEBE listar las cuentas con saldo distinto de cero al cierre del periodo, indicando su saldo deudor o acreedor.
+- **FR-111**: El Balance de Comprobación DEBE mostrar el total de saldos deudores y el total de saldos acreedores y advertir cuando no sean iguales.
+- **FR-112**: El Estado de Resultados DEBE mostrar los ingresos, los gastos y el resultado financiero del periodo derivados de asientos aprobados.
+- **FR-113**: El resultado financiero del Estado de Resultados DEBE calcularse como ingresos menos gastos del periodo seleccionado.
+- **FR-114**: El Balance General DEBE mostrar activos, pasivos y patrimonio al cierre del periodo con sus totales correspondientes.
+- **FR-115**: El patrimonio del Balance General DEBE incluir el resultado acumulado hasta la fecha de cierre del periodo.
+- **FR-116**: El sistema DEBE advertir claramente cuando el total de activos no sea igual a la suma de pasivos y patrimonio.
+- **FR-117**: Los reportes financieros DEBEN actualizarse cuando el usuario seleccione un periodo diferente.
+- **FR-118**: Los reportes financieros DEBEN mostrar mensajes de estado vacío en español cuando no existan movimientos o saldos para el periodo seleccionado.
+- **FR-119**: Todos los importes de los reportes financieros DEBEN mostrarse en MXN con el mismo formato utilizado en el resto del módulo.
+- **FR-120**: Los reportes financieros DEBEN derivarse de los registros contables existentes y NO DEBEN permitir la captura manual de cifras.
+- **FR-121**: Los reportes financieros DEBEN poder generarse para periodos abiertos y cerrados sin modificar el estado del periodo.
+- **FR-122**: Los reportes financieros DEBEN ser de solo consulta para todos los roles que puedan verlos.
+- **FR-123**: Los reportes financieros NO DEBEN crear una nueva opción en el menú lateral ni duplicar el acceso a la sección "Reportes financieros".
+- **FR-124**: Solo los roles con acceso a "Reportes financieros" según la matriz vigente DEBEN poder consultar estos reportes.
+- **FR-125**: El sistema DEBE mostrar un mensaje de acceso no disponible y no revelar información cuando un rol sin permiso intente abrir los reportes directamente.
+- **FR-126**: Cuando existan cuentas sin un tipo clasificable, el sistema DEBE indicar qué cuentas impiden generar el Estado de Resultados o el Balance General.
+- **FR-127**: El sistema DEBE permitir únicamente al Administrador financiero cerrar un periodo contable abierto.
+- **FR-128**: El sistema DEBE solicitar confirmación antes de aplicar el cierre de un periodo.
+- **FR-129**: El sistema DEBE marcar el periodo como cerrado después de confirmar la acción.
+- **FR-130**: El sistema DEBE conservar sin cambios los asientos y pagos existentes cuando se cierra un periodo.
+- **FR-131**: El sistema NO DEBE permitir cerrar un periodo que ya esté cerrado.
+- **FR-132**: El sistema DEBE mostrar claramente el estado abierto o cerrado de cada periodo en el listado de periodos.
+- **FR-133**: El sistema NO DEBE permitir registrar asientos contables cuya fecha corresponda a un periodo cerrado.
+- **FR-134**: El sistema NO DEBE permitir modificar, eliminar ni cambiar el estado de asientos contables existentes en un periodo cerrado.
+- **FR-135**: El sistema NO DEBE permitir cambiar la fecha de un asiento o pago desde un periodo abierto hacia un periodo cerrado.
+- **FR-136**: El sistema NO DEBE permitir mover un asiento o pago desde un periodo cerrado hacia otro periodo mediante la edición de su fecha.
+- **FR-137**: El sistema NO DEBE permitir registrar pagos ni cobros cuya fecha corresponda a un periodo cerrado.
+- **FR-138**: El sistema NO DEBE permitir modificar, marcar como pagado ni eliminar pagos o cobros existentes en un periodo cerrado.
+- **FR-139**: El bloqueo de un periodo cerrado DEBE aplicarse a todos los roles, incluido el Administrador financiero.
+- **FR-140**: El sistema DEBE mostrar un mensaje claro de periodo cerrado cuando se intente registrar o modificar un movimiento en ese periodo.
+- **FR-141**: El sistema DEBE rechazar el guardado de un formulario abierto cuando su periodo correspondiente haya sido cerrado antes del guardado.
+- **FR-142**: Los roles distintos del Administrador financiero NO DEBEN ver la acción de cerrar periodos.
+- **FR-143**: El sistema DEBE bloquear el acceso directo a la acción de cierre para roles no autorizados y mostrar un mensaje de acceso no disponible.
+- **FR-144**: El cierre de un periodo NO DEBE afectar las operaciones ni el estado de otros periodos.
+- **FR-145**: Los usuarios autorizados DEBEN poder consultar asientos, pagos, cobros y reportes de un periodo cerrado sin acciones de modificación.
+- **FR-146**: La carga de datos de ejemplo NO DEBE registrar asientos ni pagos en periodos cerrados.
+- **FR-147**: El mensaje de bloqueo DEBE indicar que el periodo está cerrado y que no se pueden registrar ni modificar movimientos en ese periodo.
+- **FR-148**: El sistema DEBE permitir únicamente al Administrador financiero cerrar periodos contables abiertos.
+- **FR-149**: El sistema DEBE solicitar confirmación antes de cerrar un periodo y mantenerlo abierto si se cancela.
+- **FR-150**: El sistema DEBE identificar claramente los periodos cerrados en el listado de periodos.
+- **FR-151**: El sistema NO DEBE permitir cerrar un periodo ya cerrado ni aceptar un cierre sin periodo seleccionado.
+- **FR-152**: El sistema NO DEBE permitir registrar asientos cuya fecha corresponda a un periodo cerrado.
+- **FR-153**: El sistema NO DEBE permitir modificar, eliminar ni cambiar el estado de asientos en un periodo cerrado.
+- **FR-154**: El sistema NO DEBE permitir registrar pagos ni cobros cuya fecha corresponda a un periodo cerrado.
+- **FR-155**: El sistema NO DEBE permitir modificar, marcar como pagado ni eliminar pagos o cobros en un periodo cerrado.
+- **FR-156**: El sistema NO DEBE permitir cambiar la fecha de asientos o pagos desde o hacia un periodo cerrado.
+- **FR-157**: El sistema DEBE rechazar el guardado de un formulario abierto cuando su periodo haya sido cerrado antes de guardar.
+- **FR-158**: El bloqueo por periodo cerrado DEBE aplicarse a todos los roles, incluido el Administrador financiero.
+- **FR-159**: El sistema DEBE mostrar un mensaje claro de periodo cerrado ante cualquier intento de registro o modificación bloqueada.
+- **FR-160**: Los roles distintos del Administrador financiero NO DEBEN ver la acción de cierre y NO DEBEN poder ejecutarla directamente.
+- **FR-161**: El cierre de un periodo NO DEBE modificar los registros existentes ni afectar a otros periodos.
+- **FR-162**: Los usuarios autorizados DEBEN poder consultar listados y reportes de periodos cerrados sin acciones de modificación.
+- **FR-163**: La carga de datos de ejemplo NO DEBE crear asientos ni pagos en periodos cerrados.
+- **FR-164**: El sistema DEBE generar automáticamente eventos de auditoría al crear, editar o anular asientos contables.
+- **FR-165**: El sistema DEBE generar automáticamente eventos de auditoría al crear, editar o anular pagos y cobros.
+- **FR-166**: Cada evento de auditoría DEBE identificar al usuario responsable mediante nombre, rol y RUT de prueba.
+- **FR-167**: Cada evento de auditoría DEBE indicar la acción realizada: creación, edición o anulación.
+- **FR-168**: Cada evento de auditoría DEBE registrar y mostrar la fecha y la hora en que ocurrió la acción.
+- **FR-169**: Cada evento de edición DEBE describir los campos modificados del asiento o pago.
+- **FR-170**: Cada evento DEBE identificar el asiento o pago afectado mediante un identificador visible y datos mínimos de contexto.
+- **FR-171**: El sistema NO DEBE generar eventos de auditoría para operaciones rechazadas que no produjeron cambios.
+- **FR-172**: El sistema NO DEBE generar un segundo evento de anulación cuando el movimiento ya esté anulado.
+- **FR-173**: La anulación de un asiento DEBE conservar el registro y corresponder al estado cancelado.
+- **FR-174**: La anulación de un pago o cobro DEBE conservar el registro y dejar de incluirlo en los totales vigentes y en el resumen por estado.
+- **FR-175**: El Auditor DEBE poder consultar el historial de auditoría desde el detalle de cada asiento y de cada pago o cobro.
+- **FR-176**: El Auditor DEBE poder consultar un registro consolidado de eventos de asientos y pagos dentro de "Reportes financieros".
+- **FR-177**: El registro consolidado DEBE presentar los eventos en orden cronológico, con el más reciente primero.
+- **FR-178**: El registro consolidado DEBE ofrecer filtros locales por tipo de movimiento, acción y usuario.
+- **FR-179**: Los filtros de auditoría NO DEBEN constituir una pantalla global de búsqueda ni una nueva opción de menú.
+- **FR-180**: Los eventos de auditoría NO DEBEN poder crearse, editarse ni eliminarse manualmente.
+- **FR-181**: Los eventos de auditoría DEBEN permanecer sin cambios cuando se edite posteriormente el movimiento relacionado.
+- **FR-182**: Solo el Auditor DEBE poder consultar el registro de auditoría.
+- **FR-183**: El sistema DEBE bloquear el acceso directo de otros roles al registro de auditoría y mostrar un mensaje de acceso no disponible.
+- **FR-184**: El sistema DEBE mostrar un mensaje de estado vacío cuando no existan eventos para un movimiento o para los filtros aplicados.
+- **FR-185**: La fecha y hora de cada evento DEBEN mostrarse en un formato consistente con el resto del módulo.
+- **FR-186**: Los datos de ejemplo DEBEN incluir eventos de auditoría deterministas de creación, edición y anulación.
+- **FR-187**: Cargar datos de ejemplo dos veces DEBE producir historiales de auditoría idénticos.
+- **FR-188**: El restablecimiento de datos DEBE devolver el registro de auditoría a su estado inicial determinista sin eventos huérfanos.
+- **FR-189**: Cuando un movimiento no tenga eventos disponibles, el sistema DEBE informarlo sin mostrar datos incompletos ni inventar eventos.
+- **FR-190**: El panel del Tesorero DEBE mostrar una alerta de pagos vencidos cuando existan pagos pendientes cuya fecha de vencimiento sea anterior a la fecha de referencia.
+- **FR-191**: El panel del Tesorero DEBE mostrar una alerta de pagos que vencen esta semana cuando existan pagos pendientes cuya fecha de vencimiento esté entre la fecha de referencia y el domingo de la semana actual, inclusive.
+- **FR-192**: Cada alerta DEBE mostrar la cantidad de pagos que cumplen la condición.
+- **FR-193**: Cada alerta DEBE mostrar el total en MXN de los pagos que cumplen la condición, usando el mismo criterio de cálculo que el módulo.
+- **FR-194**: Cada alerta DEBE permitir identificar la entidad, el monto y la fecha de vencimiento de los pagos incluidos.
+- **FR-195**: Cuando existan más pagos de los que se muestran en el detalle, la alerta DEBE indicar cuántos pagos adicionales existen.
+- **FR-196**: Los pagos pagados DEBEN excluirse de ambas alertas.
+- **FR-197**: Los pagos anulados DEBEN excluirse de ambas alertas.
+- **FR-198**: Las categorías de alerta DEBEN ser mutuamente excluyentes: un pago vencido se muestra solo en la alerta de vencidos, y un pago que vence en la semana actual se muestra solo en la alerta semanal.
+- **FR-199**: Un pago con fecha de vencimiento posterior al domingo de la semana actual NO DEBE incluirse en ninguna alerta.
+- **FR-200**: Las alertas DEBEN actualizarse cuando se registre, edite, marque como pagado o anule un pago.
+- **FR-201**: Las alertas DEBEN actualizarse cuando se cambie la fecha de vencimiento de un pago.
+- **FR-202**: Cuando no existan pagos que cumplan una condición, el panel DEBE mostrar un estado sin alertas claro o bien ocultar esa alerta sin mostrar cifras engañosas.
+- **FR-203**: Las alertas DEBEN mostrarse únicamente en el panel del Tesorero.
+- **FR-204**: Las alertas NO DEBEN crear una nueva opción en el menú lateral.
+- **FR-205**: Las alertas NO DEBEN funcionar como acceso directo duplicado a la sección "Pagos y cobros".
+- **FR-206**: Las alertas DEBEN ser coherentes con la información mostrada en la sección "Pagos y cobros" para las mismas condiciones.
+- **FR-207**: La semana actual DEBE considerarse de lunes a domingo, usando la fecha de referencia definida para el panel.
+- **FR-208**: Los importes de las alertas DEBEN expresarse en MXN y usar el formato consistente del módulo.
+- **FR-209**: Las fechas de vencimiento de las alertas DEBEN mostrarse con el formato consistente del módulo.
+- **FR-210**: Los datos de ejemplo DEBEN incluir pagos que permitan demostrar las alertas de forma determinista.
+- **FR-211**: Cargar datos de ejemplo dos veces con la misma fecha de referencia DEBE producir alertas idénticas.
+- **FR-212**: El restablecimiento de datos DEBE dejar las alertas en su estado inicial coherente con la semilla.
+- **FR-213**: El sistema DEBE bloquear la visualización de las alertas para roles distintos del Tesorero.
+- **FR-214**: El encabezado del módulo DEBE mostrar el nombre exacto "Comercial Los Andes SpA".
+- **FR-215**: El encabezado DEBE mostrar un logotipo ficticio junto al nombre de la empresa.
+- **FR-216**: El nombre y el logotipo DEBEN mostrarse juntos como identidad corporativa del módulo.
+- **FR-217**: El encabezado con la identidad corporativa DEBE estar visible en todas las pantallas del módulo después de una sesión válida.
+- **FR-218**: La identidad corporativa DEBE ser la misma para todos los roles de prueba.
+- **FR-219**: El encabezado DEBE conservar la identidad corporativa al navegar entre secciones.
+- **FR-220**: El nombre de la empresa NO DEBE aparecer como una nueva opción del menú lateral.
+- **FR-221**: El nombre de la empresa NO DEBE sustituir ni duplicar el título de la pantalla activa.
+- **FR-222**: El logotipo DEBE ser propio del prototipo y NO DEBE representar una marca real.
+- **FR-223**: El nombre y el logotipo DEBEN ser claramente legibles en el encabezado.
+- **FR-224**: Cuando el logotipo no esté disponible, el encabezado DEBE conservar el nombre de la empresa y una referencia visual clara en su lugar.
+- **FR-225**: El logotipo DEBE contar con una descripción accesible que identifique a "Comercial Los Andes SpA".
+- **FR-226**: La identidad corporativa NO DEBE modificar datos financieros, filtros ni el estado de la sesión.
+- **FR-227**: La identidad corporativa DEBE permanecer igual después de cargar datos de ejemplo o restablecer datos.
+- **FR-228**: En pantallas estrechas, el nombre y el logotipo DEBEN permanecer visibles o presentarse de forma legible.
+- **FR-229**: El encabezado NO DEBE requerir una acción del usuario para mostrar la identidad corporativa.
+- **FR-230**: Cada reporte financiero DEBE incluir un botón etiquetado exactamente "Exportar PDF".
+- **FR-231**: Cada reporte financiero DEBE incluir un botón etiquetado exactamente "Exportar Excel".
+- **FR-232**: Los botones de exportación DEBEN estar disponibles en el Libro Mayor, el Balance de Comprobación, el Estado de Resultados y el Balance General.
+- **FR-233**: El botón "Exportar PDF" DEBE obtener un archivo descargable en formato PDF del reporte correspondiente.
+- **FR-234**: El botón "Exportar Excel" DEBE obtener un archivo descargable en formato Excel del reporte correspondiente.
+- **FR-235**: Los archivos exportados DEBEN corresponder al periodo seleccionado en el momento de la exportación.
+- **FR-236**: Los archivos exportados DEBEN incluir el nombre exacto "Comercial Los Andes SpA".
+- **FR-237**: Los archivos exportados DEBEN incluir el periodo seleccionado y la fecha de generación.
+- **FR-238**: Los archivos exportados DEBEN incluir los totales aplicables al tipo de reporte.
+- **FR-239**: Para el Libro Mayor, el archivo DEBE conservar saldos iniciales, débitos, créditos y saldos finales por cuenta, además de los totales generales.
+- **FR-240**: Para el Balance de Comprobación, el archivo DEBE conservar los totales de débito y crédito.
+- **FR-241**: Para el Estado de Resultados, el archivo DEBE conservar ingresos, gastos y resultado.
+- **FR-242**: Para el Balance General, el archivo DEBE conservar activos, pasivos, patrimonio y resultado acumulado cuando corresponda.
+- **FR-243**: Los archivos exportados DEBEN reflejar las mismas cifras y totales mostrados en pantalla para el mismo periodo.
+- **FR-244**: Los archivos exportados NO DEBEN incluir movimientos de periodos distintos al seleccionado.
+- **FR-245**: Cuando el reporte sea válido pero no tenga movimientos, el archivo DEBE incluir totales en cero y una indicación clara de ausencia de movimientos.
+- **FR-246**: Cuando existan datos inconsistentes que impidan validar el reporte, el sistema DEBE bloquear la exportación y mostrar la advertencia correspondiente.
+- **FR-247**: La exportación NO DEBE modificar cuentas, asientos, pagos, periodos ni filtros del módulo.
+- **FR-248**: La exportación NO DEBE generar eventos de auditoría de creación, edición ni anulación de movimientos.
+- **FR-249**: Los botones de exportación NO DEBEN crear una nueva opción de menú ni una pantalla adicional.
+- **FR-250**: Los botones de exportación DEBEN estar disponibles para los roles que pueden consultar el reporte correspondiente.
+- **FR-251**: El sistema DEBE ocultar los botones de exportación cuando el rol no pueda consultar el reporte.
+- **FR-252**: El archivo descargable DEBE tener un nombre comprensible que identifique el reporte y el periodo seleccionado.
+- **FR-253**: Cuando un archivo no pueda descargarse, el sistema DEBE mostrar un mensaje claro en español que permita reintentar la acción.
+- **FR-254**: El listado de asientos DEBE ofrecer filtros por fecha, cuenta, monto y estado.
+- **FR-255**: El listado de pagos y cobros DEBE ofrecer filtros por fecha, cuenta, monto y estado.
+- **FR-256**: El filtro de fecha DEBE permitir definir un rango con fecha inicial y fecha final, ambos inclusive.
+- **FR-257**: En asientos, el filtro de fecha DEBE aplicarse a la fecha contable del asiento.
+- **FR-258**: En pagos y cobros, el filtro de fecha DEBE aplicarse a la fecha del movimiento.
+- **FR-259**: El filtro de cuenta DEBE permitir seleccionar una cuenta contable existente.
+- **FR-260**: En asientos, el filtro de cuenta DEBE considerar coincidente un asiento cuando al menos una de sus líneas use la cuenta seleccionada.
+- **FR-261**: En pagos y cobros, el filtro de cuenta DEBE considerar coincidente un pago cuando su asiento relacionado use la cuenta seleccionada.
+- **FR-262**: Un pago sin asiento relacionado NO DEBE considerarse coincidente cuando se aplique un filtro por cuenta específica.
+- **FR-263**: El filtro de monto DEBE permitir definir un rango con monto mínimo y monto máximo, ambos inclusive.
+- **FR-264**: En asientos, el filtro de monto DEBE aplicarse al monto total del asiento.
+- **FR-265**: En pagos y cobros, el filtro de monto DEBE aplicarse al monto del pago o cobro.
+- **FR-266**: Los montos del filtro DEBEN expresarse en MXN y usar el formato consistente del módulo.
+- **FR-267**: El filtro de estado en asientos DEBE ofrecer borrador, aprobado y cancelado.
+- **FR-268**: El filtro de estado en pagos y cobros DEBE ofrecer pendiente, pagado, vencido y anulado.
+- **FR-269**: La opción inicial del filtro de estado DEBE ser "Todos", que representa ausencia de filtro por estado.
+- **FR-270**: Los filtros aplicados DEBEN combinarse entre sí con criterio de coincidencia simultánea.
+- **FR-271**: El sistema DEBE mostrar cuántos resultados cumplen los filtros aplicados.
+- **FR-272**: El sistema DEBE ofrecer una acción para limpiar todos los filtros aplicados.
+- **FR-273**: El sistema DEBE permitir limpiar un filtro individual sin afectar los demás.
+- **FR-274**: Cuando no existan resultados, el sistema DEBE mostrar un mensaje de estado vacío claro en español.
+- **FR-275**: Cuando un rango de fechas sea inválido, el sistema DEBE mostrar un mensaje específico y NO DEBE aplicar ese filtro.
+- **FR-276**: Cuando un rango de montos sea inválido, el sistema DEBE mostrar un mensaje específico y NO DEBE aplicar ese filtro.
+- **FR-277**: Cuando se ingrese un monto negativo o no numérico, el sistema DEBE rechazarlo con una explicación clara.
+- **FR-278**: Los filtros DEBEN respetar la matriz de permisos vigente.
+- **FR-279**: Los filtros NO DEBEN crear una nueva opción de menú ni una pantalla global de búsqueda.
+- **FR-280**: El filtro de estado de pagos y cobros DEBE unificarse con el control de estado existente para evitar duplicidad.
+- **FR-281**: Aplicar o limpiar filtros NO DEBE modificar cuentas, asientos, pagos ni periodos.
+- **FR-282**: Los filtros DEBEN actualizarse de forma coherente cuando cambien los datos de ejemplo o se restablezca el módulo.
+- **FR-283**: Las opciones de filtro DEBEN corresponder solo a estados y cuentas válidos para el tipo de registro.
+- **FR-284**: Todas las pantallas del módulo DEBEN usar la misma paleta de colores.
+- **FR-285**: Los colores de éxito, error, advertencia e información DEBEN ser consistentes en todo el módulo.
+- **FR-286**: Cada sección del menú DEBE mostrar un ícono junto a su texto.
+- **FR-287**: Cada encabezado de sección DEBE mostrar el ícono correspondiente a esa sección.
+- **FR-288**: Los íconos DEBEN ser consistentes entre menú y encabezado de sección.
+- **FR-289**: El texto de cada sección DEBE permanecer visible junto a su ícono.
+- **FR-290**: Las tablas del módulo DEBEN permitir ordenar registros por sus columnas aplicables.
+- **FR-291**: Cada columna ordenable DEBE permitir orden ascendente y descendente.
+- **FR-292**: La tabla DEBE indicar la columna ordenada y el sentido del orden aplicado.
+- **FR-293**: El orden por fechas DEBE respetar el valor cronológico.
+- **FR-294**: El orden por importes DEBE respetar el valor numérico.
+- **FR-295**: El orden por estados DEBE agrupar los registros de forma coherente con los estados definidos.
+- **FR-296**: Ordenar una tabla NO DEBE modificar los registros ni sus valores.
+- **FR-297**: Después de guardar un registro válido, el sistema DEBE mostrar un mensaje de confirmación de éxito.
+- **FR-298**: Antes de eliminar un registro permitido, el sistema DEBE mostrar un mensaje de confirmación.
+- **FR-299**: Cuando el usuario cancele la confirmación de eliminación, el sistema NO DEBE eliminar el registro.
+- **FR-300**: Después de confirmar una eliminación permitida, el sistema DEBE mostrar un mensaje de confirmación de eliminación.
+- **FR-301**: Cuando un guardado falle por validación, el sistema NO DEBE mostrar un mensaje de éxito.
+- **FR-302**: Cuando un registro no sea eliminable según las reglas vigentes, el sistema NO DEBE ofrecer la confirmación de eliminación.
+- **FR-303**: Los mensajes de confirmación DEBEN usar un lenguaje claro y consistente en todo el módulo.
+- **FR-304**: El menú DEBE adaptarse a pantallas de celular sin ocultar secciones permitidas para el rol.
+- **FR-305**: El menú en celular NO DEBE mostrar secciones no permitidas para el rol autenticado.
+- **FR-306**: Al seleccionar una sección desde el menú en celular, el menú DEBE dejar de ocupar la pantalla.
+- **FR-307**: Las opciones del menú en celular DEBEN ser las mismas que las del menú en pantalla amplia, respetando permisos.
+- **FR-308**: La interfaz NO DEBE requerir desplazamiento horizontal de toda la página para usar el menú en celular.
+- **FR-309**: Las mejoras de interfaz NO DEBEN modificar reglas de negocio, permisos ni datos financieros.
+- **FR-310**: La interfaz NO DEBE crear una nueva opción de menú derivada de estos cambios.
+- **FR-311**: Cuando un ícono no pueda mostrarse, el texto de la sección DEBE permanecer visible y comprensible.
+- **FR-312**: Cuando una tabla no tenga registros, DEBE mostrarse un estado vacío claro con la paleta definida.
+- **FR-313**: Cuando un mensaje de confirmación se muestre en pantalla estrecha, DEBE permanecer legible y comprensible.
 
 ### Requisitos de Extensibilidad 
 
@@ -471,7 +1011,7 @@ El módulo de Contabilidad y Finanzas DEBE:
 - **CuentaContable**: Representa una cuenta del plan contable de la empresa. Permite clasificar las operaciones financieras según su naturaleza y mantener una estructura jerárquica mediante cuentas principales y subcuentas.
 - **AsientoContable**: Representa el registro de una operación económica de la empresa. Contiene información como fecha, concepto, periodo contable, débitos y créditos.
 - **LineaAsiento**: Representa cada movimiento individual que forma parte de un asiento contable. Se relaciona con una cuenta contable y registra un monto correspondiente al debe o al haber.
-- **Pago**: Representa un movimiento de dinero correspondiente a un pago o cobro realizado por la empresa. Puede relacionarse con una entidad, un documento y un asiento contable. Posee una fecha de vencimiento y un estado pendiente, pagado o vencido.
+- **Pago**: Representa un movimiento de dinero correspondiente a un pago o cobro realizado por la empresa. Puede relacionarse con una entidad, un documento y un asiento contable. Posee una fecha de vencimiento y un estado pendiente, pagado, vencido o anulado.
 - **PeriodoContable**: Representa un intervalo de tiempo utilizado para organizar las operaciones contables. Posee una fecha de inicio, una fecha de término y un estado que indica si está abierto o cerrado.
 - **Entity (Entidad)**: Estructura heredada del módulo base ERP que representa clientes, proveedores u otras entidades relacionadas con las operaciones financieras.
 - **Document (Documento)**: Estructura heredada del módulo base ERP que permite relacionar documentos comerciales o transaccionales con las operaciones del módulo financiero.
@@ -484,8 +1024,40 @@ El módulo de Contabilidad y Finanzas DEBE:
 - **EstadoInicial**: Situación válida sin registros financieros a la que vuelve el módulo al restablecer datos, conservando los usuarios de prueba.
 - **DestinoNavegacion**: Pantalla del módulo que debe tener un único acceso visible y estar disponible solo para los roles autorizados.
 - **ControlAccion**: Botón del panel que ejecuta una acción inmediata, como cargar datos, restablecer datos o cerrar sesión, sin abrir una pantalla de navegación.
-- **EstadoPago**: Clasificación de un pago o cobro como pendiente, pagado o vencido, según su confirmación y su fecha de vencimiento.
+- **EstadoPago**: Clasificación de un pago o cobro como pendiente, pagado, vencido o anulado, según su confirmación, su fecha de vencimiento y su anulación conservando el registro.
 - **ResumenPagos**: Agrupación de pagos y cobros por estado que presenta la cantidad de registros y el total en MXN de cada grupo.
+- **ReporteFinanciero**: Consulta por periodo que presenta el Libro Mayor, el Balance de Comprobación, el Estado de Resultados o el Balance General a partir de asientos aprobados.
+- **SaldoContable**: Resultado de agregar los movimientos aprobados de una cuenta hasta una fecha determinada, utilizado para los reportes financieros.
+- **CierrePeriodo**: Acción administrativa confirmada que cambia un periodo de abierto a cerrado y bloquea el registro y la modificación de asientos y pagos en ese periodo.
+- **MensajePeriodoCerrado**: Comunicación clara que informa que la operación solicitada no está disponible porque el periodo está cerrado.
+- **EventoAuditoria**: Registro automático e inmutable de una creación, edición o anulación de un asiento o pago, con usuario responsable, fecha y hora.
+- **HistorialAuditoria**: Conjunto ordenado de eventos de auditoría asociados a un asiento o pago específico.
+- **RegistroConsolidado**: Consulta de solo lectura que reúne eventos de asientos y pagos con filtros locales para el Auditor.
+- **UsuarioResponsable**: Usuario ficticio de demostración identificado por nombre, rol y RUT, responsable de una acción registrada en auditoría.
+- **AlertaPago**: Aviso del panel del Tesorero que resume pagos con una condición de vencimiento específica.
+- **ResumenAlerta**: Cantidad de pagos y total en MXN asociados a una alerta.
+- **PanelTesorero**: Vista inicial del Tesorero donde se muestran las alertas de vencimientos de pagos.
+- **SemanaReferencia**: Intervalo de lunes a domingo usado para determinar qué pagos vencen esta semana.
+- **EntidadPago**: Cliente, proveedor u otra entidad asociada al pago, utilizada para identificar cada movimiento dentro de la alerta.
+- **EncabezadoModulo**: Área superior común del módulo que presenta la identidad de la empresa ficticia.
+- **EmpresaFicticia**: Organización demostrativa llamada "Comercial Los Andes SpA", propietaria de los datos financieros de ejemplo.
+- **LogotipoEmpresa**: Elemento visual ficticio que identifica a "Comercial Los Andes SpA" dentro del encabezado.
+- **IdentidadCorporativa**: Combinación del nombre de la empresa y su logotipo presentada de forma consistente en todas las pantallas.
+- **BotonExportacion**: Acción visible en un reporte financiero que permite obtener el archivo en PDF o Excel.
+- **ArchivoReporte**: Resultado descargable que contiene el reporte del periodo seleccionado con identidad de empresa, fecha y totales.
+- **TotalesReporte**: Conjunto de importes y saldos aplicables al tipo de reporte que deben conservarse en la exportación.
+- **FiltroFecha**: Rango inclusive de fechas aplicado a la fecha contable de un asiento o a la fecha del movimiento de un pago.
+- **FiltroCuenta**: Criterio que selecciona una cuenta contable y determina qué asientos o pagos coinciden.
+- **FiltroMonto**: Rango inclusive de montos en MXN aplicado al total de un asiento o al monto de un pago.
+- **FiltroEstado**: Criterio que selecciona uno o todos los estados válidos del tipo de registro.
+- **ListadoFiltrado**: Resultado de aplicar uno o varios filtros sobre el listado de asientos o pagos.
+- **ResultadoVacio**: Estado que informa que ningún registro cumple la combinación de filtros aplicada.
+- **PaletaColores**: Conjunto único de colores usado para encabezados, botones, mensajes y estados en todo el módulo.
+- **IconoSeccion**: Elemento visual asociado a una sección del menú y a su encabezado.
+- **TablaOrdenable**: Tabla cuyas columnas permiten ordenar registros en sentido ascendente o descendente.
+- **MensajeConfirmacion**: Aviso claro que informa el resultado de guardar o confirma una eliminación.
+- **MenuAdaptable**: Presentación del menú que se ajusta a celular conservando secciones y permisos.
+- **EstadoInterfaz**: Estado visual coherente para éxito, error, advertencia, información y ausencia de datos.
 
 ## Criterios de Éxito 
 
@@ -522,12 +1094,116 @@ El módulo de Contabilidad y Finanzas DEBE:
 - **SC-029**: En el 100% de las verificaciones, las cantidades y los totales del resumen coinciden con el listado resultante de cada filtro.
 - **SC-030**: Un usuario con acceso a pagos aplica cualquier filtro de estado y visualiza el resultado actualizado en menos de 3 segundos.
 - **SC-031**: Al menos el 95% de los usuarios con acceso a pagos identifica el estado de un movimiento sin ayuda después de usar el resumen.
+- **SC-032**: El 100% de las pruebas sin autenticación no muestra menú lateral y el 100% de las autenticaciones válidas muestra únicamente las secciones permitidas para el rol.
+- **SC-033**: El 100% de los cierres de sesión oculta el menú lateral y evita recuperarlo navegando hacia atrás sin autenticarse de nuevo.
+- **SC-034**: El 100% de los cuatro reportes financieros puede generarse para cualquier periodo que tenga al menos un asiento contable aprobado.
+- **SC-035**: El 100% de los importes mostrados en los reportes financieros coincide con los movimientos aprobados de origen correspondientes al periodo seleccionado.
+- **SC-036**: El 100% de los balances de comprobación generados cumple la igualdad entre totales deudores y acreedores cuando los datos son válidos.
+- **SC-037**: El 100% de los balances generales generados cumple la igualdad entre activos y pasivos más patrimonio cuando los datos son válidos.
+- **SC-038**: El 100% de los estados de resultados generados muestra un resultado igual a ingresos menos gastos del periodo.
+- **SC-039**: El 95% de los Contadores puede generar los cuatro reportes para un mismo periodo en menos de 2 minutos durante una prueba de uso.
+- **SC-040**: El usuario ve cada reporte financiero en menos de 5 segundos después de seleccionar el periodo y solicitarlo.
+- **SC-041**: El 100% de los periodos sin movimientos ni saldos muestra un mensaje de estado vacío en los cuatro reportes.
+- **SC-042**: El 100% de los roles sin acceso a Reportes financieros no puede consultar los reportes ni ver sus cifras.
+- **SC-043**: Al menos el 90% de los Contadores encuestados indica que los cuatro reportes le permiten comprender la situación financiera de la empresa sin consultar otras secciones.
+- **SC-044**: El 100% de los periodos cerrados queda identificado como cerrado inmediatamente después de confirmar la acción.
+- **SC-045**: El 100% de los intentos de registrar o modificar asientos en periodos cerrados se bloquea y muestra un mensaje claro.
+- **SC-046**: El 100% de los intentos de registrar o modificar pagos y cobros en periodos cerrados se bloquea y muestra un mensaje claro.
+- **SC-047**: El 100% de los intentos de mover un asiento o pago desde o hacia un periodo cerrado se bloquea.
+- **SC-048**: El 100% de los roles distintos del Administrador financiero no ve ni puede ejecutar la acción de cerrar periodos.
+- **SC-049**: El 100% de los cierres cancelados deja el periodo abierto y sin cambios.
+- **SC-050**: El 100% de los registros existentes se conserva sin modificaciones después de cerrar el periodo correspondiente.
+- **SC-051**: El 100% de los usuarios autorizados puede consultar reportes de periodos cerrados sin encontrar acciones de modificación.
+- **SC-052**: El 100% de los periodos cerrados conserva sus registros después de cargar datos de ejemplo.
+- **SC-053**: El 95% de los Administradores financieros puede cerrar un periodo y explicar sus efectos en menos de 1 minuto durante una prueba de uso.
+- **SC-054**: El 100% de los periodos cerrados queda marcado como cerrado inmediatamente después de confirmar la acción.
+- **SC-055**: El 100% de los intentos de registrar o modificar asientos en periodos cerrados se bloquea con un mensaje claro.
+- **SC-056**: El 100% de los intentos de registrar o modificar pagos y cobros en periodos cerrados se bloquea con un mensaje claro.
+- **SC-057**: El 100% de los intentos de mover asientos o pagos desde o hacia periodos cerrados se bloquea.
+- **SC-058**: El 100% de los roles distintos del Administrador financiero no ve ni ejecuta la acción de cierre.
+- **SC-059**: El 100% de los registros existentes se conserva sin cambios después de cerrar el periodo correspondiente.
+- **SC-060**: El 100% de los usuarios autorizados puede consultar reportes de periodos cerrados sin encontrar acciones de modificación.
+- **SC-061**: El 100% de los cierres cancelados deja el periodo abierto y sin cambios.
+- **SC-062**: El 100% de los periodos cerrados conserva sus registros después de cargar datos de ejemplo.
+- **SC-063**: El 95% de los usuarios puede identificar un periodo cerrado en el listado sin ayuda en menos de 5 segundos.
+- **SC-064**: El 100% de las creaciones, ediciones y anulaciones de asientos genera un evento de auditoría completo.
+- **SC-065**: El 100% de las creaciones, ediciones y anulaciones de pagos y cobros genera un evento de auditoría completo.
+- **SC-066**: El 100% de los eventos muestra usuario, rol, acción, fecha y hora del momento en que ocurrió la acción.
+- **SC-067**: El 100% de los historiales por movimiento muestra sus eventos en orden cronológico descendente.
+- **SC-068**: El 100% de los eventos de edición identifica los campos modificados.
+- **SC-069**: El 100% de los intentos de modificar o eliminar eventos de auditoría es bloqueado.
+- **SC-070**: El 100% de los roles distintos del Auditor no puede consultar el registro de auditoría.
+- **SC-071**: El 100% de las consultas con filtros devuelve únicamente los eventos que coinciden con la selección.
+- **SC-072**: El 100% de las cargas de datos de ejemplo produce historiales idénticos en usuarios, acciones, fechas y horas.
+- **SC-073**: El 100% de los restablecimientos deja el registro de auditoría en su estado inicial sin eventos huérfanos.
+- **SC-074**: El Auditor localiza el evento de creación, edición o anulación de un movimiento en menos de 1 minuto en el 95% de las pruebas.
+- **SC-075**: Al menos el 90% de los Auditores encuestados indica que el registro de auditoría le permite identificar responsables de cambios y apoyar el control de riesgos.
+- **SC-076**: El 100% de los pagos pendientes vencidos se refleja en la alerta de vencidos con cantidad y total correctos.
+- **SC-077**: El 100% de los pagos pendientes que vencen en la semana actual se refleja en la alerta semanal con cantidad y total correctos.
+- **SC-078**: El 100% de los pagos pagados o anulados se excluye de ambas alertas.
+- **SC-079**: El 100% de las alertas muestra importes en MXN y fechas con el formato consistente del módulo.
+- **SC-080**: El 100% de los cambios de estado o fecha de vencimiento se refleja en las alertas después de actualizar el panel.
+- **SC-081**: El 100% de los roles distintos del Tesorero no ve las alertas en su panel.
+- **SC-082**: El 100% de las pruebas con datos de ejemplo produce alertas idénticas para la misma fecha de referencia.
+- **SC-083**: El 100% de los restablecimientos deja las alertas coherentes con la semilla inicial.
+- **SC-084**: El Tesorero identifica los pagos vencidos y de la semana actual en menos de 10 segundos desde su panel en el 95% de las pruebas.
+- **SC-085**: Al menos el 90% de los Tesoreros encuestados indica que las alertas del panel le ayudan a priorizar los vencimientos.
+- **SC-086**: El 100% de las alertas coincide con la información de "Pagos y cobros" al aplicar las mismas condiciones.
+- **SC-087**: No se introduce ninguna opción de menú adicional ni acceso duplicado derivado de las alertas.
+- **SC-088**: El 100% de las pantallas posteriores al inicio de sesión muestra el nombre exacto "Comercial Los Andes SpA" en el encabezado.
+- **SC-089**: El 100% de las pantallas posteriores al inicio de sesión muestra el logotipo junto al nombre de la empresa.
+- **SC-090**: El 100% de las verificaciones de texto confirma que el nombre no tiene errores de escritura ni variaciones.
+- **SC-091**: El 100% de los roles de prueba ve la misma identidad corporativa en el encabezado.
+- **SC-092**: El 100% de las navegaciones entre pantallas conserva el nombre y el logotipo sin cambios.
+- **SC-093**: El 100% de las pruebas de carga y restablecimiento de datos conserva la identidad corporativa.
+- **SC-094**: El 100% de las pruebas sin logotipo disponible mantiene el nombre visible y una referencia visual clara.
+- **SC-095**: No se crea ninguna opción adicional de menú a partir de la identidad corporativa.
+- **SC-096**: El 95% de los usuarios identifica el nombre de la empresa en el encabezado en menos de 3 segundos.
+- **SC-097**: Al menos el 90% de los usuarios encuestados indica que el encabezado ayuda a reconocer la empresa ficticia del módulo.
+- **SC-098**: El 100% de los reportes financieros muestra los botones "Exportar PDF" y "Exportar Excel".
+- **SC-099**: El 100% de las exportaciones genera un archivo descargable en el formato seleccionado.
+- **SC-100**: El 100% de los archivos exportados incluye el nombre exacto "Comercial Los Andes SpA".
+- **SC-101**: El 100% de los archivos exportados incluye el periodo seleccionado y la fecha de generación.
+- **SC-102**: El 100% de los archivos exportados incluye los totales aplicables al reporte.
+- **SC-103**: El 100% de las comparaciones entre pantalla y archivo muestra cifras y totales idénticos.
+- **SC-104**: El 100% de las exportaciones bloqueadas por datos inconsistentes muestra una advertencia comprensible.
+- **SC-105**: El 100% de las exportaciones de reportes vacíos válidos muestra totales en cero y una indicación de ausencia de movimientos.
+- **SC-106**: El 100% de las exportaciones conserva el estado del módulo y no genera eventos de auditoría de movimientos.
+- **SC-107**: No se crea ninguna opción de menú ni pantalla adicional para la exportación.
+- **SC-108**: El 95% de los Contadores obtiene el archivo correcto en menos de 10 segundos desde que abre el reporte.
+- **SC-109**: Al menos el 90% de los Contadores encuestados indica que los archivos exportados contienen la información necesaria para revisar el periodo seleccionado.
+- **SC-110**: El 100% de los asientos que cumplen los filtros aplicados aparece en el listado filtrado.
+- **SC-111**: El 100% de los pagos y cobros que cumplen los filtros aplicados aparece en el listado filtrado.
+- **SC-112**: El 100% de los registros que no cumplen los filtros queda excluido del listado filtrado.
+- **SC-113**: El 100% de las combinaciones de filtros respeta coincidencia simultánea de todos los criterios aplicados.
+- **SC-114**: El 100% de los rangos de fecha y monto incluye sus valores límite.
+- **SC-115**: El 100% de las opciones de estado corresponde a los estados válidos del tipo de registro.
+- **SC-116**: El 100% de las acciones de limpiar filtros restaura el listado completo permitido para el rol.
+- **SC-117**: El 100% de las entradas inválidas de fecha o monto muestra un mensaje claro y no altera el listado.
+- **SC-118**: El 100% de los roles ve filtros solo en los listados a los que tiene acceso.
+- **SC-119**: No se crea ninguna opción de menú ni pantalla de búsqueda global derivada de los filtros.
+- **SC-120**: El 95% de los usuarios localiza un asiento o pago específico usando filtros en menos de 15 segundos.
+- **SC-121**: Al menos el 90% de los usuarios encuestados indica que los filtros le ayudan a revisar movimientos con mayor rapidez.
+- **SC-122**: El 100% de las pantallas del módulo usa la paleta de colores definida.
+- **SC-123**: El 100% de los mensajes de éxito, error, advertencia e información usa colores consistentes.
+- **SC-124**: El 100% de las secciones del menú muestra un ícono junto a su texto.
+- **SC-125**: El 100% de los encabezados de sección muestra el ícono correspondiente.
+- **SC-126**: El 100% de las tablas aplicables permite ordenar por columnas en ambos sentidos.
+- **SC-127**: El 100% de las ordenaciones por fecha, monto y estado produce el orden esperado.
+- **SC-128**: El 100% de las acciones de ordenar conserva los datos originales.
+- **SC-129**: El 100% de los guardados válidos muestra un mensaje de confirmación de éxito.
+- **SC-130**: El 100% de las eliminaciones permitidas solicita confirmación antes de realizarse.
+- **SC-131**: El 100% de las cancelaciones de eliminación conserva el registro sin cambios.
+- **SC-132**: El 100% de las secciones permitidas sigue accesible desde el menú en celular.
+- **SC-133**: El 100% de los roles ve el mismo conjunto de secciones en menú amplio y menú de celular, según sus permisos.
+- **SC-134**: El 95% de los usuarios encuentra una sección o dato ordenado en menos de 10 segundos.
+- **SC-135**: Al menos el 90% de los usuarios encuestados percibe la interfaz como profesional y coherente.
 
 ## Suposiciones
 
 - El módulo de Contabilidad y Finanzas se desarrolla como una extensión del sistema ERP base proporcionado.
 - Las estructuras Entity y Document del módulo base se reutilizan para mantener la relación con clientes, proveedores y documentos asociados a las operaciones financieras.
-- El módulo se enfoca en funcionalidades básicas de contabilidad y finanzas, sin implementar procesos avanzados de auditoría, tributación o conciliación bancaria.
+- El módulo se enfoca en funcionalidades básicas de contabilidad y finanzas, sin implementar procesos avanzados de auditoría, tributación o conciliación bancaria; el registro de auditoría de la Historia de Usuario 16 se limita a trazabilidad básica de creación, edición y anulación.
 - Los asientos contables deben cumplir el principio de partida doble, por lo que la suma de débitos debe ser igual a la suma de créditos.
 - Cada asiento contable debe contener al menos dos líneas contables.
 - Los asientos contables siguen el ciclo de vida borrador → aprobado → cancelado; solo los borradores admiten edición y borrado físico.
@@ -572,6 +1248,96 @@ El módulo de Contabilidad y Finanzas DEBE:
 - El estado pagado se obtiene de la confirmación del movimiento y no elimina el registro del listado ni del resumen.
 - "Todos" es la selección inicial del filtro y representa la ausencia de filtro, no un estado adicional.
 - Los importes del resumen se expresan en MXN y utilizan las utilidades de formato compartidas del módulo.
+- El menú lateral es la navegación principal del módulo después del inicio de sesión; por eso solo se muestra cuando existe una sesión válida.
+- Las secciones visibles del menú lateral se derivan de la matriz de acceso por rol y excluyen Entidades, Documentos y Búsqueda para todos los roles.
+- Los reportes financieros se incorporan dentro de la sección existente "Reportes financieros", sin crear una nueva opción de menú ni una pantalla duplicada.
+- El Contador es el actor principal que solicita los reportes financieros; el Administrador financiero y el Auditor pueden consultarlos porque ya tienen acceso a "Reportes financieros", pero sin acciones de modificación.
+- Solo los asientos contables aprobados se consideran válidos para generar reportes; los asientos en borrador o cancelado se excluyen.
+- Los periodos cerrados pueden consultarse con fines históricos y su estado no cambia al generar reportes.
+- El tipo de cuenta contable permite clasificar cada cuenta como activo, pasivo, patrimonio, ingreso o gasto para los reportes que lo requieren.
+- El saldo inicial de una cuenta se obtiene de los movimientos aprobados de periodos anteriores al periodo consultado; si no existen, el saldo inicial es cero.
+- El Balance de Comprobación incluye cuentas con saldo distinto de cero al cierre del periodo.
+- El Estado de Resultados incluye cuentas de ingreso y gasto con movimientos aprobados en el periodo.
+- El Balance General incluye cuentas de activo, pasivo y patrimonio con saldo distinto de cero al cierre del periodo.
+- El resultado acumulado se presenta dentro del patrimonio del Balance General para conservar la igualdad contable.
+- Los reportes financieros son de solo consulta y no permiten crear, editar, eliminar ni cambiar estados de movimientos contables.
+- Si existen datos inconsistentes que impiden validar una igualdad contable, el sistema muestra una advertencia clara en español en lugar de presentar el reporte como válido.
+- El Administrador financiero es el único rol autorizado para cerrar periodos, conforme a la matriz de permisos vigente.
+- "Pagos" incluye tanto pagos como cobros, de acuerdo con la terminología de la sección "Pagos y cobros" del módulo.
+- Se considera modificación cualquier cambio sobre un registro, incluida su edición, eliminación, cambio de estado y cambio de fecha.
+- La pertenencia de un asiento o pago a un periodo se determina por su fecha contable o fecha del movimiento.
+- El cierre es una acción administrativa con confirmación y, dentro de esta historia, no se contempla la reapertura del periodo.
+- El cierre no altera los registros existentes; solo cambia el estado del periodo y activa el bloqueo de operaciones posteriores.
+- El bloqueo se aplica a todos los roles, incluido el Administrador financiero, para garantizar la integridad de la información cerrada.
+- Los reportes financieros y las consultas de periodos cerrados permanecen disponibles para los roles autorizados.
+- La semilla de datos de ejemplo respeta los periodos cerrados y no crea movimientos dentro de ellos.
+- El restablecimiento de datos sigue siendo una acción administrativa independiente y devuelve el módulo a su estado inicial según las reglas ya definidas.
+- Los mensajes de bloqueo y de acceso no disponible se muestran en español y en un lenguaje comprensible para usuarios no técnicos.
+- El registro de auditoría es una consulta de solo lectura para el Auditor y se ofrece dentro de "Reportes financieros" y desde el detalle de cada movimiento, sin crear una nueva opción de menú.
+- Solo el Auditor puede consultar el registro de auditoría; los demás roles no ven esta información.
+- Los eventos de auditoría se generan automáticamente, no pueden crearse, editarse ni eliminarse manualmente y permanecen sin cambios cuando se edita el movimiento relacionado.
+- La anulación de un asiento equivale a su estado cancelado, mientras que la anulación de un pago o cobro conserva el registro y lo excluye de totales vigentes y del resumen por estado.
+- La identificación del usuario responsable usa los usuarios ficticios de demostración, incluyendo nombre, rol y RUT de prueba.
+- Los eventos se generan solo para acciones que produjeron cambios reales; los intentos fallidos o rechazados no generan eventos.
+- Los datos de ejemplo incluyen eventos deterministas de creación, edición y anulación, y el restablecimiento devuelve el historial a su estado inicial sin eventos huérfanos.
+- Los filtros de auditoría son locales a la consulta y no sustituyen ni reactivan una pantalla global de búsqueda.
+- Cuando un movimiento no tenga eventos disponibles, se muestra un mensaje claro en español en lugar de información incompleta o eventos inventados.
+- Las alertas de pagos de la Historia de Usuario 17 se muestran únicamente en el panel del Tesorero.
+- Las alertas son informativas, no crean una nueva opción de menú ni un acceso directo duplicado a "Pagos y cobros".
+- Un pago vencido es un pago pendiente cuya fecha de vencimiento es anterior a la fecha de referencia del panel.
+- Un pago que vence esta semana es un pago pendiente cuya fecha de vencimiento cae entre la fecha de referencia y el domingo de la semana actual, inclusive.
+- La semana se entiende de lunes a domingo.
+- Las categorías de alerta son mutuamente excluyentes para evitar duplicar un mismo pago en ambas alertas.
+- Los pagos pagados y anulados se excluyen de ambas alertas.
+- Con la misma fecha de referencia, las alertas basadas en datos de ejemplo deben ser deterministas.
+- El detalle de cada alerta muestra una cantidad limitada de pagos e indica cuándo existen más, sin sustituir a la sección "Pagos y cobros".
+- La identidad corporativa se muestra en el encabezado principal del módulo una vez que existe una sesión válida.
+- La pantalla de inicio de sesión no forma parte del alcance de la Historia de Usuario 18.
+- El nombre de la empresa es exactamente "Comercial Los Andes SpA" en todas las pantallas.
+- El logotipo es ficticio, propio del prototipo y no representa una marca real.
+- No se solicita configurar ni cambiar el nombre o el logotipo desde la interfaz.
+- El encabezado es un elemento de identidad, no una opción de menú ni una acción.
+- El nombre de la empresa no reemplaza el título de cada pantalla.
+- La identidad corporativa no altera datos financieros, filtros ni el estado de la sesión.
+- Cuando el logotipo no esté disponible, se mantiene el nombre y se muestra una referencia visual clara en su lugar.
+- Los reportes financieros cubiertos por la Historia de Usuario 19 son Libro Mayor, Balance de Comprobación, Estado de Resultados y Balance General.
+- El Contador es el actor principal de la exportación de reportes.
+- El Administrador financiero y el Auditor, que ya pueden consultar reportes financieros, también pueden exportarlos porque la exportación no modifica información.
+- Los roles sin acceso a un reporte no ven los botones de exportación de ese reporte.
+- El nombre de la empresa en los archivos exportados es exactamente "Comercial Los Andes SpA".
+- La fecha requerida en el archivo incluye tanto el periodo seleccionado como la fecha de generación de la exportación.
+- Los totales exportados son los aplicables a cada tipo de reporte y deben coincidir con los mostrados en pantalla.
+- Solo se exportan movimientos aprobados y coherentes con las reglas ya definidas para los reportes financieros.
+- Un reporte válido sin movimientos puede exportarse con totales en cero y una indicación de ausencia de movimientos.
+- Un reporte con datos inconsistentes no puede exportarse hasta que la advertencia sea atendida.
+- La exportación es una acción de solo lectura: no cambia datos financieros, filtros, periodos ni eventos de auditoría.
+- Los usuarios con acceso a asientos pueden usar los filtros en el listado de asientos.
+- Los usuarios con acceso a pagos y cobros pueden usar los filtros en ese listado.
+- Los roles sin acceso a un listado no ven sus filtros.
+- El filtro de fecha de asientos se aplica a la fecha contable.
+- El filtro de fecha de pagos y cobros se aplica a la fecha del movimiento, no a la fecha de vencimiento.
+- El filtro de cuenta en asientos busca coincidencias en las líneas del asiento.
+- El filtro de cuenta en pagos y cobros busca coincidencias a través del asiento relacionado.
+- Los pagos sin asiento relacionado no coinciden cuando se filtra por una cuenta específica.
+- El filtro de monto se expresa como un rango en MXN con límites inclusivos.
+- Los estados disponibles son borrador, aprobado y cancelado para asientos, y pendiente, pagado, vencido y anulado para pagos y cobros.
+- "Todos" es la selección inicial del filtro de estado y significa ausencia de filtro.
+- Los filtros son locales a cada listado y no constituyen una pantalla global de búsqueda.
+- El filtro de estado de pagos y cobros sustituye al control de estado existente para evitar duplicidad.
+- Aplicar o limpiar filtros no modifica registros financieros ni el estado del módulo.
+- La interfaz profesional se aplica a todas las pantallas del módulo sin cambiar su funcionalidad financiera.
+- La paleta de colores es única para todo el módulo.
+- Los colores de estado significan lo mismo en todas las pantallas.
+- Cada sección del menú y su encabezado comparten el mismo ícono.
+- El texto de la sección siempre acompaña al ícono para evitar ambigüedad.
+- Las tablas aplicables incluyen listados de cuentas, asientos, pagos, periodos, reportes y registros de auditoría.
+- Las columnas que representan fechas, montos y estados deben ser ordenables cuando estén presentes.
+- El orden de una tabla no modifica datos ni permisos.
+- Guardar un registro válido muestra confirmación después de la acción.
+- Eliminar un registro permitido requiere confirmación antes de la acción y muestra confirmación después de realizarla.
+- Las reglas vigentes sobre qué registros pueden eliminarse se mantienen sin cambios.
+- El menú en celular conserva las mismas secciones y permisos del menú amplio.
+- Las mejoras de interfaz no crean nuevas opciones de menú.
 
 ---
 

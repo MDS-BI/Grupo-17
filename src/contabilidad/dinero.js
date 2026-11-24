@@ -36,9 +36,28 @@ export function desdeCentavos(centavos) {
 }
 
 export function formatearMXN(centavos) {
-  return FORMATO_MXN.format((Number(centavos) || 0) / 100);
+  return FORMATO_MXN.format(desdeCentavos(centavos));
+}
+
+export function formatearMXNCompacto(centavos) {
+  const valor = desdeCentavos(centavos);
+  const absoluto = Math.abs(valor);
+  if (absoluto >= 1000000) return `$${(valor / 1000000).toLocaleString('es-MX', { maximumFractionDigits: 1 })}M`;
+  if (absoluto >= 1000) return `$${(valor / 1000).toLocaleString('es-MX', { maximumFractionDigits: 1 })}k`;
+  return `$${valor.toLocaleString('es-MX', { maximumFractionDigits: 0 })}`;
 }
 
 export function sumarCentavos(importes) {
-  return importes.reduce((total, valor) => total + (Number(valor) || 0), 0);
+  if (!Array.isArray(importes)) throw new TypeError('La lista de importes debe ser un arreglo');
+  const total = importes.reduce((acumulado, valor) => {
+    const centavos = typeof valor === 'string' && /^-?\d+$/.test(valor.trim())
+      ? Number(valor.trim())
+      : valor;
+    if (!Number.isSafeInteger(centavos)) {
+      throw new TypeError('Todos los importes deben ser centavos enteros');
+    }
+    return acumulado + centavos;
+  }, 0);
+  if (!Number.isSafeInteger(total)) throw new RangeError('La suma excede el rango permitido');
+  return total;
 }

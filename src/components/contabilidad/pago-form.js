@@ -12,7 +12,6 @@ const ERRORES = [
   'error-pago-tipo',
   'error-pago-method',
   'error-pago-entity',
-  'error-pago-document',
   'error-pago-asiento',
   'error-pago-series',
   'error-pago-folio',
@@ -23,14 +22,7 @@ export function poblarEntidadesPago(entidades = [], valor = '') {
   poblarSelect(qs('pago-entity'), entidades.map((e) => ({
     value: e.entity_id,
     label: `${e.name} — ${e.code}`
-  })), { placeholder: '-- Selecciona una entidad --', valor });
-}
-
-export function poblarDocumentosPago(documentos = [], valor = '') {
-  poblarSelect(qs('pago-document'), documentos.map((d) => ({
-    value: d.id,
-    label: `${d.series || 'DOC'}-${d.folio}`
-  })), { placeholder: '-- Sin documento --', valor });
+  })), { placeholder: '-- Selecciona un cliente o proveedor --', valor });
 }
 
 export function poblarAsientosPago(asientos = [], valor = '') {
@@ -40,7 +32,7 @@ export function poblarAsientosPago(asientos = [], valor = '') {
   })), { placeholder: '-- Sin asiento --', valor });
 }
 
-export function clearPagoForm({ entidades = [], documentos = [], asientos = [] } = {}) {
+export function clearPagoForm({ entidades = [], asientos = [] } = {}) {
   qs('pago-id').value = '';
   qs('pago-date').value = '';
   qs('pago-fecha-vencimiento').value = '';
@@ -52,14 +44,13 @@ export function clearPagoForm({ entidades = [], documentos = [], asientos = [] }
   qs('pago-status').value = 'pendiente';
   qs('pago-notes').value = '';
   poblarEntidadesPago(entidades);
-  poblarDocumentosPago(documentos);
   poblarAsientosPago(asientos);
   limpiarErrores(ERRORES);
   qs('pago-cancel-edit').hidden = true;
   qs('pago-submit').textContent = 'Guardar pago';
 }
 
-export function startPagoEdit(pago, { entidades = [], documentos = [], asientos = [] } = {}) {
+export function startPagoEdit(pago, { entidades = [], asientos = [] } = {}) {
   qs('pago-id').value = pago.id;
   qs('pago-date').value = pago.date || '';
   qs('pago-fecha-vencimiento').value = pago.fechaVencimiento || '';
@@ -71,7 +62,6 @@ export function startPagoEdit(pago, { entidades = [], documentos = [], asientos 
   qs('pago-status').value = pago.status || 'pendiente';
   qs('pago-notes').value = pago.notes || '';
   poblarEntidadesPago(entidades, pago.entity_id || '');
-  poblarDocumentosPago(documentos, pago.document_id || '');
   poblarAsientosPago(asientos, pago.asiento_id || '');
   limpiarErrores(ERRORES);
   qs('pago-cancel-edit').hidden = false;
@@ -86,7 +76,6 @@ export function collectPagoPayload() {
     tipo: qs('pago-tipo').value,
     method: qs('pago-method').value,
     entity_id: qs('pago-entity').value,
-    document_id: qs('pago-document').value || null,
     asiento_id: qs('pago-asiento').value || null,
     series: qs('pago-series').value,
     folio: qs('pago-folio').value,
@@ -96,13 +85,12 @@ export function collectPagoPayload() {
 }
 
 export function showPagoErrors(errores = {}) {
-  mostrarError('error-pago-date', errores.date);
+  mostrarError('error-pago-date', errores.date || errores.periodo || errores.period_id);
   mostrarError('error-pago-fecha-vencimiento', errores.fechaVencimiento);
   mostrarError('error-pago-amount', errores.amount);
   mostrarError('error-pago-tipo', errores.tipo);
   mostrarError('error-pago-method', errores.method);
   mostrarError('error-pago-entity', errores.entity_id);
-  mostrarError('error-pago-document', errores.document_id);
   mostrarError('error-pago-asiento', errores.asiento_id);
   mostrarError('error-pago-series', errores.series || errores.numero);
   mostrarError('error-pago-folio', errores.folio);

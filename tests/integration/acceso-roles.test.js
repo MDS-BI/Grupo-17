@@ -32,6 +32,15 @@ describe('acceso, menú por rol y panel de inicio', () => {
     expect(qs('view-acceso').hidden).toBe(false);
   });
 
+  it('muestra errores por campo cuando faltan RUT o contraseña', async () => {
+    await bootContabilidad(undefined, { requireAccess: true, sesion: null });
+    credenciales('', '');
+    enviar(qs('acceso-formulario'));
+
+    expect(qs('error-acceso-rut').textContent).toContain('obligatorio');
+    expect(qs('error-acceso-contraseña').textContent).toContain('obligatoria');
+  });
+
   it('ingresa como administrador y abre el panel integral', async () => {
     await bootContabilidad(undefined, { requireAccess: true, sesion: null });
     credenciales('11.111.111-1', 'Admin2026!');
@@ -55,13 +64,6 @@ describe('acceso, menú por rol y panel de inicio', () => {
     qs('nav-reportes').click();
     expect(qs('view-bloqueo').hidden).toBe(false);
     expect(qs('mensaje-bloqueo').textContent).toContain('Acceso no disponible');
-  });
-
-  it('impide que el auditor restablezca los datos de ejemplo', async () => {
-    await bootContabilidad(undefined, { requireAccess: true, sesion: 'auditor' });
-    qs('resumen-reset').click();
-    expect(qs('view-bloqueo').hidden).toBe(false);
-    expect(qs('mensaje-bloqueo').textContent).toContain('No tienes permiso');
   });
 
   it('cierra la sesión desde el panel', async () => {

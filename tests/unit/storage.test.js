@@ -1,17 +1,21 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { clearAll, loadEntities, addEntity, updateEntity, deleteEntity, validateEntity, searchEntities, loadDocuments, addDocument, updateDocument, deleteDocument, deleteDocumentsForEntity, validateDocument } from '../../src/storage.js';
+import { clearAll, loadEntities, addEntity, updateEntity, deleteEntity, validateEntity, searchEntities, loadDocuments, addDocument, updateDocument, deleteDocument, deleteDocumentsForEntity, validateDocument, leerValor, escribirValor, obtenerAlmacenSesion, migrarAlmacenLegado } from '../../src/storage.js';
 import { setActiveConfig } from '../../src/module-config.js';
 
 const store = new Map();
-globalThis.localStorage = {
-  getItem: (k) => (store.has(k) ? store.get(k) : null),
-  setItem: (k, v) => store.set(k, String(v)),
-  removeItem: (k) => store.delete(k),
-  clear: () => store.clear()
-};
+const sessionStore = new Map();
+const crearAlmacen = (mapa) => ({
+  getItem: (k) => (mapa.has(k) ? mapa.get(k) : null),
+  setItem: (k, v) => mapa.set(k, String(v)),
+  removeItem: (k) => mapa.delete(k),
+  clear: () => mapa.clear()
+});
+globalThis.localStorage = crearAlmacen(store);
+globalThis.sessionStorage = crearAlmacen(sessionStore);
 
 beforeEach(() => {
   store.clear();
+  sessionStore.clear();
   setActiveConfig(null);
 });
 
@@ -324,5 +328,30 @@ describe('clearAll', () => {
     clearAll();
     expect(loadEntities().length).toBe(0);
     expect(loadDocuments().length).toBe(0);
+  });
+});
+
+describe('migración de almacenamiento', () => {
+  it('migra claves contables de localStorage a sessionStorage una sola vez', () => {
+    store.set('erp_contabilidad:cuentas', 'cuentas-legacy');
+    store.set('erp_contabilidad_sesion_activa', 'sesion-legacy');
+
+    expect(migrarAlmacenLegado()).toBe(true);
+    expect(sessionStore.get('erp_contabilidad:cuentas')).toBe('cuentas-legacy');
+    expect(sessionStore.get('erp_contabilidad:sesion')).toBe('sesion-legacy');
+    expect(store.has('erp_contabilidad:cuentas')).toBe(false);
+    expect(store.has('erp_contabilidad_sesion_activa')).toBe(false);
+
+    store.set('erp_contabilidad:cuentas', 'modificada-despues');
+    expect(leerValor('erp_contabilidad:cuentas')).toBe('cuentas-legacy');
+    expect(migrarAlmacenLegado()).toBe(false);
+    expect(store.get('erp_contabilidad:cuentas')).toBe('modificada-despues');
+  });
+
+  it('usa exclusivamente sessionStorage para lecturas y escrituras', () => {
+    expect(obtenerAlmacenSesion()).toBe(globalThis.sessionStorage);
+    escribirValor('erp_contabilidad:periodos', 'periodos-sesion');
+    expect(sessionStore.get('erp_contabilidad:periodos')).toBe('periodos-sesion');
+    expect(store.has('erp_contabilidad:periodos')).toBe(false);
   });
 });

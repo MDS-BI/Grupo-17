@@ -25,6 +25,9 @@ describe('navegación simplificada', () => {
       .filter((boton) => !boton.hidden)
       .map((boton) => boton.dataset.destino);
     expect(destinos.length).toBe(new Set(destinos).size);
+    for (const id of ['action-nuevo-asiento', 'action-cuentas', 'action-registrar-pago', 'action-ver-reportes']) {
+      expect(qs(id)).toBeNull();
+    }
   });
 
   it('muestra Sección no disponible al intentar una ruta eliminada', async () => {

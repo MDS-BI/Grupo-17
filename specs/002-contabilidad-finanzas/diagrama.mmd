@@ -2,6 +2,10 @@ erDiagram
     Rol ||--|{ Usuario : "rol asignado"
     Usuario ||--o| Sesion : "autentica"
     Rol ||--o| Sesion : "permisos vigentes"
+    Usuario ||--o{ RegistroActividad : "responsable"
+    Rol ||--o{ RegistroActividad : "rol vigente"
+    AsientoContable |o--o{ RegistroActividad : "eventos de asiento"
+    Pago |o--o{ RegistroActividad : "eventos de pago"
     Entity ||--o{ Document : "documentos (base)"
     Entity |o--o{ CuentaContable : "cuenta auxiliar (opcional)"
     Entity |o--o{ AsientoContable : "tercero relacionado (opcional)"
@@ -37,6 +41,19 @@ erDiagram
         string panelInicio
         string estado "autenticada o cerrada"
         string iniciadaEn
+    }
+    RegistroActividad {
+        string id PK
+        string fechaHora
+        string accion "crear, editar o anular"
+        string tipoMovimiento "asiento o pago"
+        string movimientoId "referencia lógica"
+        string numero
+        string usuarioRut FK
+        string usuarioNombre
+        string rolId FK
+        string rolNombre
+        object camposModificados "CampoModificado[]"
     }
     Entity {
         string entity_id PK
@@ -117,4 +134,6 @@ erDiagram
         string currency
         string method
         string status "pendiente o pagado"
+        boolean anulado "anulación lógica"
+        string anuladoEn
     }

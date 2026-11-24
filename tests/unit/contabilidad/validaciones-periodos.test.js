@@ -27,6 +27,9 @@ describe('validación de periodos contables', () => {
     const invertido = validarPeriodo(periodoBase({ startDate: '2026-12-31', endDate: '2026-12-01' }));
     expect(invertido.errores.endDate).toContain('posterior');
 
+    const igual = validarPeriodo(periodoBase({ startDate: '2026-12-01', endDate: '2026-12-01' }));
+    expect(igual.errores.endDate).toContain('posterior');
+
     const periodos = [{ id: 'per-1', name: '2026-12', startDate: '2026-12-01', endDate: '2026-12-31' }];
     const duplicado = validarPeriodo(periodoBase(), { periodos });
     expect(duplicado.errores.name).toContain('Ya existe');
@@ -47,15 +50,13 @@ describe('gestión de periodos y bloqueo contable', () => {
     inicializarContabilidad();
   });
 
-  it('crea, cierra y reabre un periodo', () => {
+  it('crea y cierra un periodo sin opción de reapertura', () => {
     const creado = crearPeriodo(periodoBase());
-    expect(listarPeriodos()).toHaveLength(5);
+    expect(listarPeriodos()).toHaveLength(6);
 
     const cerrado = cambiarEstadoPeriodo(creado.id, 'cerrado');
     expect(cerrado.status).toBe('cerrado');
-
-    const abierto = cambiarEstadoPeriodo(creado.id, 'abierto');
-    expect(abierto.status).toBe('abierto');
+    expect(() => cambiarEstadoPeriodo(creado.id, 'abierto')).toThrow('no pueden reabrirse');
   });
 
   it('no elimina un periodo con asientos, lo cierra en su lugar', () => {

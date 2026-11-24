@@ -1,5 +1,5 @@
 import { listarCuentas } from '../../contabilidad/cuentas.js';
-import { normalizarImporte, desdeCentavos, formatearMXN } from '../../contabilidad/dinero.js';
+import { normalizarImporte, desdeCentavos, formatearMXN, sumarCentavos } from '../../contabilidad/dinero.js';
 import { poblarSelect, limpiarErrores, mostrarError } from './comun.js';
 
 function qs(id) {
@@ -133,23 +133,25 @@ export function quitarLinea(boton) {
 export function actualizarTotalesAsiento() {
   const contenedor = qs('asiento-lineas');
   if (!contenedor) return;
-  let debitos = 0;
-  let creditos = 0;
+  const importesDebe = [];
+  const importesHaber = [];
   contenedor.querySelectorAll('[data-linea]').forEach((fila) => {
     const debe = fila.querySelector('[data-campo="debit"]');
     const haber = fila.querySelector('[data-campo="credit"]');
     const d = normalizarImporte(debe ? debe.value : '');
     const h = normalizarImporte(haber ? haber.value : '');
-    if (d.valido) debitos += d.centavos;
-    if (h.valido) creditos += h.centavos;
+    if (d.valido) importesDebe.push(d.centavos);
+    if (h.valido) importesHaber.push(h.centavos);
   });
+  const debitos = sumarCentavos(importesDebe);
+  const creditos = sumarCentavos(importesHaber);
   const totalDebe = qs('asiento-total-debitos');
   const totalHaber = qs('asiento-total-creditos');
   const diferencia = qs('asiento-diferencia');
   if (totalDebe) totalDebe.textContent = formatearMXN(debitos);
   if (totalHaber) totalHaber.textContent = formatearMXN(creditos);
   if (diferencia) {
-    const delta = debitos - creditos;
+    const delta = sumarCentavos([debitos, -creditos]);
     diferencia.textContent = formatearMXN(delta);
     diferencia.classList.toggle('negative', delta !== 0);
   }
@@ -168,7 +170,7 @@ export function poblarEntidadesAsiento(entidades = [], valor = '') {
   poblarSelect(select, entidades.map((e) => ({
     value: e.entity_id,
     label: `${e.name} — ${e.code}`
-  })), { placeholder: '-- Sin entidad --', valor });
+  })), { placeholder: '-- Sin cliente o proveedor --', valor });
 }
 
 export function clearAsientoForm({ periodos = [], entidades = [] } = {}) {

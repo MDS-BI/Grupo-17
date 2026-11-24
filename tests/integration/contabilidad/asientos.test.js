@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { crearDom, bootContabilidad, qs, enviar } from '../../setup/contabilidad.js';
-import { loadAsientos, loadLineas } from '../../../src/contabilidad/almacenamiento.js';
+import { inicializarContabilidad, loadAsientos, loadLineas, loadPeriodos, savePeriodos } from '../../../src/contabilidad/almacenamiento.js';
 import { formatearMXN } from '../../../src/contabilidad/dinero.js';
 
 let dom;
@@ -39,6 +39,18 @@ describe('registro de asientos contables', () => {
     expect(qs('asientos-empty').hidden).toBe(true);
   });
 
+  it('muestra el historial de auditoría dentro del detalle del asiento', async () => {
+    await abrirAsientos();
+    const asiento = loadAsientos()[0];
+
+    document.querySelector(`[data-action="ver-historial-asiento"][data-id="${asiento.id}"]`).click();
+
+    const detalle = qs('asiento-detalle');
+    expect(detalle.hidden).toBe(false);
+    expect(detalle.textContent).toContain('Historial de auditoría');
+    expect(detalle.querySelector('[data-historial-detalle="asiento"] #historial-movimiento-empty')).not.toBeNull();
+  });
+
   it('registra un asiento cuadrado y lo aprueba y cancela desde el listado', async () => {
     await abrirAsientos();
     llenarCabecera();
@@ -73,7 +85,12 @@ describe('registro de asientos contables', () => {
   });
 
   it('no permite registrar asientos en un periodo cerrado', async () => {
-    await abrirAsientos();
+    await bootContabilidad();
+    inicializarContabilidad();
+    savePeriodos(loadPeriodos().map((periodo) => (
+      periodo.id === 'per-2026-09' ? { ...periodo, status: 'cerrado' } : periodo
+    )));
+    qs('nav-asientos').click();
     const antes = loadAsientos().length;
     llenarCabecera({ date: '2026-09-15', concept: 'Asiento en periodo cerrado', periodo: 'per-2026-09' });
     llenarLinea(0, 'cta-1010', '100', '');

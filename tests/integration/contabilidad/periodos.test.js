@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { crearDom, bootContabilidad, qs, enviar } from '../../setup/contabilidad.js';
 import { loadPeriodos } from '../../../src/contabilidad/almacenamiento.js';
 
@@ -43,9 +43,25 @@ describe('gestión de periodos contables', () => {
     expect(creado.status).toBe('abierto');
     expect(qs('periodos-lista').textContent).toContain('2026-12');
 
-    document.querySelector(`[data-action="alternar-periodo"][data-id="${creado.id}"]`).click();
+    document.querySelector(`[data-action="cerrar-periodo"][data-id="${creado.id}"]`).click();
     expect(loadPeriodos().find((p) => p.id === creado.id).status).toBe('cerrado');
-    expect(qs('periodos-lista').textContent).toContain('Abrir');
+    expect(qs('periodos-lista').textContent).not.toContain('Abrir');
+    const filaCerrada = [...document.querySelectorAll('#periodos-lista tbody tr')]
+      .find((fila) => fila.textContent.includes('2026-12'));
+    expect(filaCerrada.querySelector('[data-action="editar-periodo"]')).toBeNull();
+    expect(filaCerrada.querySelector('[data-action="eliminar-periodo"]')).toBeNull();
+  });
+
+  it('pide confirmación antes de cerrar desde el formulario y conserva el estado al cancelar', async () => {
+    await abrirPeriodos();
+    llenarPeriodo({ name: '2026-12-confirm' });
+    qs('periodo-status').value = 'cerrado';
+    vi.mocked(globalThis.confirm).mockReturnValueOnce(false);
+
+    enviar(qs('periodo-form'));
+
+    expect(loadPeriodos().some((periodo) => periodo.name === '2026-12-confirm')).toBe(false);
+    expect(qs('periodo-status').value).toBe('abierto');
   });
 
   it('rechaza periodos solapados', async () => {
@@ -66,7 +82,7 @@ describe('gestión de periodos contables', () => {
     llenarPeriodo();
     enviar(qs('periodo-form'));
     const creado = loadPeriodos().find((p) => p.name === '2026-12');
-    document.querySelector(`[data-action="alternar-periodo"][data-id="${creado.id}"]`).click();
+    document.querySelector(`[data-action="cerrar-periodo"][data-id="${creado.id}"]`).click();
 
     qs('nav-asientos').click();
     qs('asiento-date').value = '2026-12-10';
