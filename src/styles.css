@@ -1416,9 +1416,11 @@ button.danger:hover {
 .alerta-detalle-item { background: var(--primary-softer); }
 .alerta-detalle-fecha { color: var(--muted); }
 
-.chart-swatch-ingresos, .chart-swatch-gastos, .chart-swatch-resultado,
-.chart-bar-ingresos, .chart-bar-gastos, .chart-line, .chart-dot { background: var(--primary); }
-.chart-bar-ingresos, .chart-bar-gastos { fill: var(--primary); }
+.chart-swatch-ingresos { background: var(--exito); }
+.chart-swatch-gastos { background: var(--danger); }
+.chart-swatch-resultado { background: var(--primary); }
+.chart-bar-ingresos { fill: var(--exito); }
+.chart-bar-gastos { fill: var(--danger); }
 .chart-line { stroke: var(--primary); }
 .chart-dot { fill: var(--primary); stroke: var(--surface); }
 .chart-dot-negative { fill: var(--danger); }
@@ -1503,14 +1505,7 @@ button.danger:hover {
   .resumen-pago-card strong { font-size: clamp(1rem, 6vw, 1.35rem); }
   .encabezado-usuario { gap: .35rem; }
   .encabezado-usuario .usuario-rol { display: none; }
-  .ventana-formulario-panel { max-height: 95vh; padding: .75rem; }
 }
-
-#view-acceso[data-acceso-pantalla] { display: flex; flex-direction: column; align-items: center; }
-#acceso-formulario[data-acceso-centrado] { width: min(100%, 420px); margin: 0 auto; }
-#acceso-formulario[data-acceso-centrado] .form-actions { margin-top: 0; flex-direction: column; align-items: stretch; }
-#acceso-formulario[data-acceso-centrado] .form-actions .error:empty { display: none; }
-#acceso-formulario[data-acceso-centrado] .form-actions .primary { width: 100%; }
 
 .encabezado-usuario { display: flex; align-items: center; gap: .6rem; margin-left: auto; }
 .encabezado-usuario .usuario-nombre { font-weight: 700; }
@@ -1522,21 +1517,7 @@ button.danger:hover {
 .side-nav { align-items: flex-start; padding-left: 0; }
 
 #view-cuentas, #view-asientos, #view-pagos, #view-periodos { display: flex; flex-direction: column; gap: 1rem; }
-#view-cuentas > section, #view-asientos > section, #view-pagos > section, #view-periodos > section { order: 1; }
-#view-cuentas > [data-lista-principal], #view-asientos > [data-lista-principal],
-#view-pagos > [data-lista-principal], #view-periodos > [data-lista-principal] { order: 2; }
-#view-cuentas > [data-formulario-nuevo], #view-asientos > [data-formulario-nuevo],
-#view-pagos > [data-formulario-nuevo], #view-periodos > [data-formulario-nuevo] { order: 3; }
-
-.lista-cabecera { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
-.lista-cabecera .boton-nuevo { margin-left: auto; }
-[hidden] .boton-nuevo { display: none; }
-
-.ventana-formulario { position: fixed; inset: 0; z-index: 100; background: rgba(4, 20, 28, .55); display: flex; align-items: center; justify-content: center; padding: 1rem; }
-.ventana-formulario-panel { background: var(--surface); border-radius: var(--radius); box-shadow: 0 20px 60px rgba(0,0,0,.25); width: min(720px, 100%); max-height: 90vh; overflow: auto; padding: 1rem; }
-.ventana-formulario-cabecera { display: flex; align-items: center; justify-content: space-between; gap: 1rem; border-bottom: 1px solid var(--border); padding-bottom: .75rem; margin-bottom: .75rem; }
-.ventana-formulario-cabecera h2 { margin: 0; font-size: 1.15rem; }
-[data-formulario-en-ventana].card { box-shadow: none; border: 0; padding: 0; }
+#view-cuentas > section, #view-asientos > section, #view-pagos > section, #view-periodos > section { order: initial; }
 
 .tabla-financiera tfoot tr.fila-totales th,
 .tabla-financiera tfoot tr.fila-totales td { border-top: 2px solid var(--border-strong); font-weight: 700; }

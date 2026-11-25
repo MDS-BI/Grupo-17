@@ -43,5 +43,5 @@
 - Validación aplicada tras agregar la Historia de Usuario 19 para exportar cada reporte financiero a PDF y Excel con nombre de empresa, fecha y totales.
 - Validación aplicada tras agregar la Historia de Usuario 20 para filtrar asientos y pagos por fecha, cuenta, monto y estado.
 - Validación aplicada tras agregar la Historia de Usuario 21 para colores, íconos, tablas ordenables, confirmaciones y menú adaptable en celular.
-- Validación aplicada tras actualizar la Historia de Usuario 8 con formateo automático del RUT, aceptación de k mayúscula o minúscula, validación del dígito verificador, mensaje "El RUT ingresado no es válido" y control de apertura y cierre del menú lateral desde el botón "Menú" del encabezado; los RUT de prueba fueron corregidos para cumplir la validación y uno termina en K.
+- Validación aplicada tras actualizar la Historia de Usuario 8 con formateo automático del RUT, aceptación de k mayúscula o minúscula, validación del dígito verificador, mensaje "El RUT ingresado no es válido" y control de apertura y cierre del menú lateral desde el botón "Menú" del encabezado; los RUT de prueba cumplen la validación y la aceptación de `k`/`K` se comprueba con un RUT válido terminado en K, como `1.111.119-K`.
 - La especificación está lista para la planificación y la implementación.

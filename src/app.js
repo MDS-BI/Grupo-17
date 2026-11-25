@@ -39,7 +39,7 @@ import * as ResumenPagos from './contabilidad/resumen-pagos.js';
 import * as FiltrosMovimientos from './contabilidad/filtros-movimientos.js';
 import * as Auditoria from './contabilidad/auditoria.js';
 import { confirmarEliminacion, mostrarMensaje, ordenarRegistros, paleta } from './contabilidad/interfaz-config.js';
-import { configurarVentanasNuevo, cerrarVentanaFormulario, MENSAJE_LISTA_VACIA } from './components/contabilidad/comun.js';
+import { MENSAJE_LISTA_VACIA } from './components/contabilidad/comun.js';
 
 function qs(id){ return document.getElementById(id); }
 
@@ -128,12 +128,6 @@ function puedeSeccion(seccion, accion){
   return Boolean(permiso[equivalencias[accion]]);
 }
 
-function sincronizarBotonesNuevo(){
-  document.querySelectorAll('[data-nuevo]').forEach(boton => {
-    boton.hidden = !puedeSeccion(boton.dataset.permisoNuevo, 'crear');
-  });
-}
-
 function aplicarMensajesListaVacia(){
   document.querySelectorAll('[data-estado-vacio-filtro]').forEach(nodo => {
     nodo.textContent = MENSAJE_LISTA_VACIA;
@@ -159,7 +153,6 @@ function exigirAuditoriaMovimiento(){
 }
 
 function ocultarVistas(){
-  cerrarVentanaFormulario();
   Object.values(VIEWS).forEach(id => { const vista = qs(id); if(vista) vista.hidden = true; });
 }
 
@@ -179,7 +172,6 @@ function establecerVisibilidadMenu(visible){
 function mostrarAcceso(mensaje = ''){
   ocultarVistas();
   actualizarIdentidadEncabezado(null);
-  sincronizarBotonesNuevo();
   establecerVisibilidadMenu(false);
   document.querySelectorAll('.nav-module').forEach(boton => { boton.hidden = true; });
   const vista = qs(VIEWS.acceso);
@@ -217,7 +209,6 @@ function aplicarSesion(){
     return false;
   }
   actualizarIdentidadEncabezado(sesion);
-  sincronizarBotonesNuevo();
   const dato = datosPanel();
   renderizarPanelInicio(sesion, dato);
   actualizarAlertasPanel();
@@ -642,8 +633,7 @@ function showModule(name, opts = {}){
       }
     }
     actualizarIdentidadEncabezado(sesion);
-    sincronizarBotonesNuevo();
-    establecerVisibilidadMenu(true);
+      establecerVisibilidadMenu(true);
     renderizarMenu(sesion.permisos, { ...sesion, pantallaActiva: name });
   }
   ocultarVistas();
@@ -1380,7 +1370,6 @@ function wireEvents(){
   on('view-panel-inicio', 'click', handlePanelClick);
   document.addEventListener('click', handleAccionesGlobales);
   document.addEventListener('keydown', handleAccionesGlobalesTeclado);
-  configurarVentanasNuevo();
 
   const conectarFiltro = (id, manejador) => {
     on(id, 'change', manejador);

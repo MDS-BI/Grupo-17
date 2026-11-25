@@ -15,8 +15,8 @@ afterEach(() => {
   dom.window.close();
 });
 
-describe('acceso centrado y angosto', () => {
-  it('centra el formulario y coloca Ingresar junto a los campos en pantallas amplias y estrechas', async () => {
+describe('acceso con formato anterior', () => {
+  it('mantiene el formulario y la tabla de usuarios visibles sin centrado especial', async () => {
     await bootContabilidad(undefined, { requireAccess: true, sesion: null });
 
     const vista = qs('view-acceso');
@@ -24,19 +24,13 @@ describe('acceso centrado y angosto', () => {
     const boton = qs('acceso-ingresar');
 
     expect(vista.hidden).toBe(false);
-    expect(vista.hasAttribute('data-acceso-pantalla')).toBe(true);
-    expect(formulario.hasAttribute('data-acceso-centrado')).toBe(true);
+    expect(vista.hasAttribute('data-acceso-pantalla')).toBe(false);
+    expect(formulario.hasAttribute('data-acceso-centrado')).toBe(false);
     expect(qs('acceso-rut').compareDocumentPosition(boton) & dom.window.Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(qs('acceso-contraseña').compareDocumentPosition(boton) & dom.window.Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-    expect(css).toMatch(/#view-acceso\[data-acceso-pantalla\][^}]*align-items:\s*center/s);
-    expect(css).toMatch(/#acceso-formulario\[data-acceso-centrado\][^}]*width:\s*min\(100%,\s*420px\)/s);
-    expect(css).toMatch(/#acceso-formulario\[data-acceso-centrado\]\s*\.form-actions[^}]*margin-top:\s*0/s);
-    expect(css).toMatch(/#acceso-formulario\[data-acceso-centrado\]\s*\.form-actions[^}]*flex-direction:\s*column/s);
-    expect(css).toMatch(/#acceso-formulario\[data-acceso-centrado\]\s*\.form-actions\s*\.error:empty[^}]*display:\s*none/s);
-    expect(qs('error-acceso').parentElement.classList.contains('form-actions')).toBe(true);
-    expect(css).toMatch(/\.acceso-usuarios\s*\{[^}]*width:\s*min\(100%,\s*420px\)/s);
-    expect(css).toMatch(/\.acceso-usuarios\s*\{[^}]*margin:\s*18px auto 0/s);
-    expect(css).toMatch(/\.tabla-usuarios\s*\{[^}]*width:\s*100%/s);
+    expect(qs('usuarios-prueba-body')).not.toBeNull();
+    expect(css).not.toMatch(/#view-acceso\[data-acceso-pantalla\]/);
+    expect(css).not.toMatch(/#acceso-formulario\[data-acceso-centrado\]/);
   });
 
   it('formatea el RUT en el formulario real y valida el dígito verificador', async () => {

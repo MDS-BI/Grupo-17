@@ -1,6 +1,10 @@
+import fs from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { crearDom, bootContabilidad, qs, elegir } from '../../setup/contabilidad.js';
 import { loadAsientos, saveAsientos, loadLineas, saveLineas } from '../../../src/contabilidad/almacenamiento.js';
+
+const css = fs.readFileSync(fileURLToPath(new URL('../../../src/styles.css', import.meta.url)), 'utf8');
 
 let dom;
 
@@ -31,6 +35,13 @@ describe('gráficas del panel financiero', () => {
     expect(qs('chart-gastos-cuenta').querySelector('.chart-donut-total').textContent).toMatch(/^\$-?[\d.,]+[kM]?$/);
     const etiquetasEje = [...document.querySelectorAll('.chart-axis-label')].map((etiqueta) => etiqueta.textContent);
     expect(etiquetasEje.some((etiqueta) => /^(\$|-\$)/.test(etiqueta))).toBe(true);
+  });
+
+  it('usa colores distintos para ingresos y gastos', () => {
+    expect(css).toMatch(/\.chart-bar-ingresos\s*\{\s*fill:\s*var\(--exito\)/);
+    expect(css).toMatch(/\.chart-bar-gastos\s*\{\s*fill:\s*var\(--danger\)/);
+    expect(css).toMatch(/\.chart-swatch-ingresos\s*\{\s*background:\s*var\(--exito\)/);
+    expect(css).toMatch(/\.chart-swatch-gastos\s*\{\s*background:\s*var\(--danger\)/);
   });
 
   it('actualiza las gráficas al cambiar de periodo', async () => {

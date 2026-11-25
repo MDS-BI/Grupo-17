@@ -20,7 +20,7 @@
 **Entrada adicional**: Descripción del usuario: "En la especificación 002-contabilidad-finanzas, agregar una nueva historia de usuario: como usuario, quiero filtrar asientos y pagos por fecha, cuenta, monto y estado."
 **Entrada adicional**: Descripción del usuario: "En la especificación 002-contabilidad-finanzas, agregar una nueva historia de usuario: como usuario, quiero una interfaz profesional: mismos colores en todo el módulo, íconos en cada sección, tablas ordenables, mensaje de confirmación al guardar o eliminar, y menú adaptable en celular."
 **Entrada adicional**: Descripción del usuario: "En la especificación 002-contabilidad-finanzas, actualizar la historia de inicio de sesión: el campo RUT se formatea automáticamente mientras el usuario escribe (agrega puntos y guion, acepta k mayúscula o minúscula), valida el dígito verificador y muestra un mensaje si el RUT no es válido. El botón Menú del encabezado abre y cierra el menú lateral."
-**Entrada adicional**: Descripción del usuario: "Mejora la usabilidad sin cambiar funciones: login centrado y angosto, sin espacio vacío antes de Ingresar; menú lateral alineado a la izquierda; 'Cerrar sesión' en el encabezado junto al usuario y su rol; montos en formato chileno ($5.000, sin decimales); en cada pantalla mostrar primero la lista y un botón 'Nuevo' que abra el formulario en una ventana; la '×' de los filtros sin encimarse con la flecha; alinear la fila de totales del Libro Mayor; y mensajes claros cuando una lista está vacía."
+**Entrada adicional**: Descripción del usuario: "Mejora la usabilidad sin cambiar funciones: mantener el formulario arriba y la lista abajo, ambos siempre visibles y sin botón 'Nuevo'; 'Cerrar sesión' en el encabezado junto al usuario y su rol; montos en formato chileno ($5.000, sin decimales); la '×' de los filtros sin encimarse con la flecha; alinear la fila de totales del Libro Mayor; y mensajes claros cuando una lista está vacía."
 **Entrada adicional**: Descripción del usuario: "En la especificación 002-contabilidad-finanzas, agregar una nueva historia de usuario: como Auditor, quiero ver la unidad CLP en los encabezados monetarios y consultar el detalle detrás de cada total de los reportes financieros, para rastrear cada cifra hasta sus movimientos de origen sin modificar los datos."
 **Entrada adicional**: Descripción del usuario: "La empresa es chilena: usa CLP como única moneda en todo el módulo, con formato $5.000 sin decimales; renombra las cuentas de IVA a 'IVA Débito Fiscal' e 'IVA Crédito Fiscal'; actualiza los datos de ejemplo y la especificación."
 
@@ -165,6 +165,7 @@ Como gerente o analista financiero, quiero visualizar gráficas de ingresos, gas
 3. **Dado** que existen movimientos contables aprobados, **cuando** se renderizan las gráficas, **entonces** los valores provienen de los mismos cálculos de resumen y saldos utilizados por los reportes.
 4. **Dado** que no existen periodos o movimientos registrados, **cuando** se cargan las gráficas, **entonces** se muestran mensajes de estado vacío en español en lugar de gráficas sin información.
 5. **Dado** que el usuario consulta una gráfica, **cuando** revisa las etiquetas o herramientas de cada punto, **entonces** los importes se muestran en CLP con el mismo formato que el resto del módulo.
+6. **Dado** que se compara la gráfica de barras, **cuando** se revisan sus series, **entonces** ingresos y gastos usan colores diferentes y diferenciables.
 
 ---
 
@@ -189,7 +190,7 @@ Como administrador financiero, contador, tesorero o auditor, quiero acceder al m
 9. **Dado** que un usuario ha iniciado sesión, **cuando** selecciona "Cerrar sesión", **entonces** el sistema finaliza el acceso, vuelve a la pantalla de inicio de sesión y no permite continuar en el panel anterior sin volver a autenticarse.
 10. **Dado** que un usuario escribe su RUT en la pantalla de acceso, **cuando** ingresa solo los dígitos, **entonces** el campo muestra el RUT con puntos de agrupación y guion antes del dígito verificador sin borrar ni duplicar caracteres.
 11. **Dado** que el usuario continúa escribiendo el RUT, **cuando** llega al dígito verificador, **entonces** el guion se mantiene en la posición correcta y el valor final queda con el formato chileno esperado.
-12. **Dado** que el RUT de prueba termina en K, **cuando** el usuario escribe `k` en minúscula o `K` en mayúscula, **entonces** el sistema acepta ambas formas como equivalentes, las presenta de forma consistente y permite continuar con la autenticación.
+12. **Dado** que se ingresa un RUT válido terminado en K (p. ej., `1.111.119-K`), **cuando** el usuario escribe `k` en minúscula o `K` en mayúscula, **entonces** el sistema acepta ambas formas como equivalentes y aplica el mismo formateo chileno.
 13. **Dado** que un usuario pega un RUT sin formato, **cuando** el valor se coloca en el campo, **entonces** el sistema aplica el mismo formateo automático que al escribirlo manualmente.
 14. **Dado** que un usuario corrige o borra caracteres del RUT, **cuando** edita el campo, **entonces** el formato se recalcula sin impedir la corrección ni dejar signos sobrantes.
 15. **Dado** que el usuario completa un RUT con un dígito verificador que no coincide con la validación chilena, **cuando** confirma el acceso, **entonces** el sistema muestra el mensaje "El RUT ingresado no es válido" y no abre ningún panel.
@@ -203,10 +204,10 @@ Como administrador financiero, contador, tesorero o auditor, quiero acceder al m
 
 | Rol | RUT | Contraseña | Panel de inicio esperado |
 |-----|-----|------------|--------------------------|
-| Administrador financiero | 11.111.111-4 | Admin2026! | Resumen integral, periodos y asuntos prioritarios |
-| Contador | 22.222.222-8 | Contador2026! | Cuentas, asientos y reportes contables |
-| Tesorero | 33.333.333-1 | Tesorero2026! | Pagos, cobros y flujo de efectivo |
-| Auditor | 88.888.888-K | Auditor2026! | Trazabilidad, reportes e historial |
+| Administrador financiero | 11.111.111-1 | Admin2026! | Resumen integral, periodos y asuntos prioritarios |
+| Contador | 22.222.222-2 | Contador2026! | Cuentas, asientos y reportes contables |
+| Tesorero | 33.333.333-3 | Tesorero2026! | Pagos, cobros y flujo de efectivo |
+| Auditor | 44.444.444-4 | Auditor2026! | Trazabilidad, reportes e historial |
 
 ---
 
@@ -567,21 +568,21 @@ Como usuario, quiero una interfaz profesional con colores coherentes, íconos po
 
 ---
 
-### Historia de Usuario 22 - Centrar y estrechar el acceso (Prioridad: P1)
+### Historia de Usuario 22 - Mantener el acceso en el formato anterior (Prioridad: P1)
 
-Como usuario del módulo, quiero que la pantalla de acceso esté centrada y sea angosta, con el botón "Ingresar" inmediatamente después de los campos, para concentrarme en las credenciales sin buscar el control de acceso.
+Como usuario del módulo, quiero que la pantalla de acceso conserve su disposición original, con el formulario y la tabla de credenciales visibles, para identificarme usando la presentación conocida del módulo.
 
-**Por qué esta prioridad**: El acceso es la primera interacción con el módulo; una presentación clara reduce errores y tiempo de ingreso.
+**Por qué esta prioridad**: Mantener una disposición estable evita cambios innecesarios en la primera interacción con el módulo.
 
-**Prueba Independiente**: Se abre la pantalla de acceso en una pantalla amplia y en una estrecha, y se verifica que el formulario esté centrado, angosto y que el botón "Ingresar" no tenga un espacio vacío superior que lo separe del último campo.
+**Prueba Independiente**: Se abre la pantalla de acceso en una pantalla amplia y en una estrecha, y se verifica que el formulario y la tabla de usuarios de prueba estén visibles sin centrado especial ni espacio vacío superior antes de "Ingresar".
 
 **Escenarios de Aceptación**:
 
-1. **Dado** que se abre la pantalla de acceso, **cuando** se revisa su disposición, **entonces** el formulario aparece centrado en el área visible.
-2. **Dado** que la pantalla es amplia, **cuando** se compara el ancho del formulario con el ancho de la pantalla, **entonces** el formulario es angosto y no ocupa todo el ancho disponible.
+1. **Dado** que se abre la pantalla de acceso, **cuando** se revisa su disposición, **entonces** el formulario aparece en el flujo normal de la página sin un centrado especial.
+2. **Dado** que la pantalla es amplia, **cuando** se compara el ancho del formulario con el ancho de la pantalla, **entonces** conserva el ancho definido para el módulo y no usa una limitación exclusiva para acceso.
 3. **Dado** que se completan los campos de acceso, **cuando** se revisa la posición del botón "Ingresar", **entonces** aparece inmediatamente después del último campo sin un espacio vacío superior.
-4. **Dado** que se visualiza la pantalla en un dispositivo estrecho, **cuando** se revisa el acceso, **entonces** los campos y el botón permanecen legibles y sin desplazamiento horizontal de toda la página.
-5. **Dado** que se cambia el tamaño de la ventana, **cuando** se revisa el acceso, **entonces** el formulario conserva su centrado y su carácter angosto.
+4. **Dado** que se visualiza la pantalla en un dispositivo estrecho, **cuando** se revisa el acceso, **entonces** los campos, el botón y la tabla permanecen legibles y sin desplazamiento horizontal de toda la página.
+5. **Dado** que la tabla de usuarios de prueba está visible, **cuando** se revisa el formulario, **entonces** ambos contenidos se muestran sin ocultarse mutuamente.
 
 ---
 
@@ -639,23 +640,23 @@ Como usuario del módulo, quiero ver todos los montos en formato chileno, con s�
 
 ---
 
-### Historia de Usuario 26 - Mostrar primero la lista y abrir el formulario desde "Nuevo" (Prioridad: P1)
+### Historia de Usuario 26 - Mantener formulario y listado visibles (Prioridad: P1)
 
-Como usuario con permisos de creación, quiero ver primero la lista de registros y usar un botón "Nuevo" que abra el formulario en una ventana, para consultar el contexto existente antes de crear un registro sin perder el listado de fondo.
+Como usuario del módulo, quiero ver el formulario de captura sobre el listado de registros y sin un botón "Nuevo", para crear y consultar en la misma pantalla sin pasos adicionales.
 
-**Por qué esta prioridad**: Priorizar la lista refuerza la consulta como primera acción y la ventana de formulario mantiene visible el contexto mientras se captura información.
+**Por qué esta prioridad**: Mantener ambas áreas visibles simplifica la captura y permite comprobar de inmediato el efecto de cada registro en el listado.
 
-**Prueba Independiente**: Se abre una pantalla con registros, se verifica que la lista aparezca antes que el formulario, se selecciona "Nuevo", se interactúa con la ventana y se cierra sin guardar comprobando que el listado y sus filtros no cambiaron.
+**Prueba Independiente**: Se abre cada pantalla con registros, se comprueba que el formulario aparece antes que la lista, que ambos son visibles sin acciones adicionales y que no existe un botón "Nuevo" ni una ventana modal.
 
 **Escenarios de Aceptación**:
 
-1. **Dado** que se abre una pantalla con registros, **cuando** se revisa su contenido, **entonces** la lista aparece antes que cualquier formulario de creación.
-2. **Dado** que el usuario tiene permiso para crear, **cuando** se revisa la pantalla, **entonces** encuentra un botón visible identificado como "Nuevo".
-3. **Dado** que el usuario selecciona "Nuevo", **cuando** se abre el formulario, **entonces** este aparece en una ventana dentro del módulo sin reemplazar la lista de fondo.
-4. **Dado** que la ventana del formulario está abierta, **cuando** se revisa la lista de fondo, **entonces** los filtros y los registros previamente visibles permanecen sin cambios.
-5. **Dado** que el usuario cierra la ventana sin guardar, **cuando** se revisa la pantalla, **entonces** el listado, los filtros y los datos permanecen igual.
-6. **Dado** que el usuario confirma un registro válido, **cuando** se cierra la ventana, **entonces** la lista se actualiza conservando las reglas y validaciones vigentes.
-7. **Dado** que un rol no puede crear registros, **cuando** revisa la pantalla, **entonces** no ve el botón "Nuevo".
+1. **Dado** que se abre una pantalla con registros, **cuando** se revisa su contenido, **entonces** el formulario aparece antes que el listado.
+2. **Dado** que la pantalla está visible, **cuando** se revisa el listado, **entonces** este permanece visible sin necesidad de abrir ventanas ni pulsar botones adicionales.
+3. **Dado** que se revisa cualquier pantalla con registros, **cuando** se buscan controles de creación, **entonces** no se muestra un botón identificado como "Nuevo".
+4. **Dado** que el usuario aplica filtros al listado, **cuando** usa el formulario visible, **entonces** los filtros y los datos existentes permanecen sin cambios.
+5. **Dado** que el usuario confirma un registro válido, **cuando** termina el guardado, **entonces** el listado se actualiza conservando las reglas y validaciones vigentes.
+6. **Dado** que un rol no puede crear registros, **cuando** revisa la pantalla, **entonces** los permisos vigentes siguen gobernando la creación sin depender de un botón "Nuevo".
+7. **Dado** que se cierra y vuelve a abrir una pantalla, **cuando** se revisa su contenido, **entonces** el formulario y el listado siguen visibles en el mismo orden.
 
 ---
 
@@ -889,12 +890,12 @@ Como usuario del módulo, quiero que todas las cifras, unidades y datos de ejemp
 - ¿Qué ocurre cuando la pantalla de acceso se abre en una ventana muy estrecha?
 - ¿Qué ocurre cuando el nombre del usuario o su rol son extensos en el encabezado?
 - ¿Qué ocurre cuando un monto es cero, tiene tres cifras o supera los miles?
-- ¿Qué ocurre cuando se abre el formulario "Nuevo" con filtros aplicados en la lista?
-- ¿Qué ocurre cuando se cierra la ventana del formulario sin guardar?
+- ¿Qué ocurre cuando se completa el formulario visible con filtros aplicados en la lista?
+- ¿Qué ocurre cuando se abandonan los campos del formulario visible sin guardar?
 - ¿Qué ocurre cuando una opción de filtro tiene un texto extenso y la "×" y la flecha compiten por espacio?
 - ¿Qué ocurre cuando el Libro Mayor no tiene movimientos y solo muestra totales en cero?
 - ¿Qué ocurre cuando una lista está vacía porque el rol no tiene registros disponibles?
-- ¿Qué ocurre cuando cambia el ancho de la pantalla mientras una ventana de formulario está abierta?
+- ¿Qué ocurre cuando cambia el ancho de la pantalla mientras el formulario y el listado están visibles?
 - ¿Qué ocurre cuando se aplican mejoras visuales en una pantalla con permisos reducidos?
 
 ## Requisitos 
@@ -935,7 +936,7 @@ Como usuario del módulo, quiero que todas las cifras, unidades y datos de ejemp
 - **FR-032**: El sistema DEBE impedir eliminar un documento que tenga asientos contables asociados, conservando la referencia al documento de origen.
 - **FR-033**: El sistema DEBE impedir crear un periodo contable cuyas fechas se superpongan con las de otro periodo existente, independientemente de su estado.
 - **FR-034**: El sistema DEBE operar con una sola moneda (CLP) y NO DEBE realizar conversiones de moneda durante el MVP.
-- **FR-035**: El sistema DEBE mostrar en el panel principal una gráfica de barras con los ingresos y gastos de cada periodo contable.
+- **FR-035**: El sistema DEBE mostrar en el panel principal una gráfica de barras con los ingresos y gastos de cada periodo contable, usando colores diferentes e inequívocos para cada serie.
 - **FR-036**: El sistema DEBE mostrar en el panel principal una gráfica de línea con la evolución del resultado financiero por periodo contable.
 - **FR-037**: El sistema DEBE mostrar en el panel principal una gráfica de distribución de los gastos por cuenta del periodo seleccionado.
 - **FR-038**: El sistema DEBE actualizar las gráficas cuando el usuario seleccione un periodo contable diferente y mostrar mensajes de estado vacío cuando no existan datos.
@@ -1229,8 +1230,8 @@ Como usuario del módulo, quiero que todas las cifras, unidades y datos de ejemp
 - **FR-326**: El botón "Menú" NO DEBE crear una entrada adicional en el menú lateral ni duplicar el acceso a una pantalla existente.
 - **FR-327**: Después de cerrar sesión, el botón "Menú" NO DEBE abrir el menú lateral sin una nueva autenticación válida.
 - **FR-328**: Abrir o cerrar el menú lateral desde el encabezado NO DEBE modificar reglas de negocio, permisos, filtros, datos financieros ni el estado de autenticación.
-- **FR-329**: La pantalla de acceso DEBE presentar el formulario de inicio de sesión centrado en el área visible.
-- **FR-330**: El formulario de acceso DEBE ser angosto y NO DEBE ocupar todo el ancho de la pantalla en dispositivos amplios.
+- **FR-329**: La pantalla de acceso DEBE presentar el formulario de inicio de sesión en el flujo normal de la página, sin atributos ni estilos de centrado exclusivo.
+- **FR-330**: El formulario de acceso DEBE conservar el ancho definido para el módulo y NO DEBE aplicar una limitación exclusiva de ancho en dispositivos amplios.
 - **FR-331**: El botón "Ingresar" DEBE aparecer inmediatamente después del último campo obligatorio, sin un espacio vacío superior que lo separe de dicho campo.
 - **FR-332**: La pantalla de acceso NO DEBE mostrar información financiera antes de una autenticación válida, además de la ocultación del menú lateral definida en FR-102.
 - **FR-333**: El menú lateral DEBE estar alineado al borde izquierdo del área de trabajo cuando esté visible.
@@ -1243,13 +1244,13 @@ Como usuario del módulo, quiero que todas las cifras, unidades y datos de ejemp
 - **FR-340**: El formato monetario DEBE aplicarse de forma consistente a listados, formularios, resúmenes, reportes y mensajes que contengan montos.
 - **FR-341**: Un importe de cinco mil DEBE presentarse como "$5.000" cuando se muestre al usuario.
 - **FR-342**: El cambio de presentación de los importes NO DEBE modificar los valores numéricos, los cálculos ni las reglas contables vigentes.
-- **FR-343**: Cada pantalla con registros DEBE mostrar primero el listado disponible para el usuario.
-- **FR-344**: Cada pantalla con registros DEBE ofrecer un botón visible identificado como "Nuevo" cuando el usuario tenga permiso para crear.
-- **FR-345**: Al seleccionar "Nuevo", el sistema DEBE abrir el formulario correspondiente en una ventana dentro del módulo, sin reemplazar el listado de fondo.
-- **FR-346**: La ventana del formulario DEBE conservar el listado y los filtros previamente aplicados sin cambios mientras esté abierta.
-- **FR-347**: La ventana del formulario DEBE poder cerrarse sin guardar, dejando los datos y el listado sin modificaciones.
-- **FR-348**: La creación de registros desde la ventana DEBE conservar las validaciones, reglas de negocio y permisos vigentes.
-- **FR-349**: El botón "Nuevo" NO DEBE mostrarse en pantallas donde el rol autenticado no pueda crear registros.
+- **FR-343**: Cada pantalla con registros DEBE mostrar el formulario de captura antes que el listado disponible para el usuario.
+- **FR-344**: El formulario y el listado DEBEN permanecer visibles al mismo tiempo, sin exigir acciones adicionales para alternar entre ellos.
+- **FR-345**: Las pantallas con registros NO DEBEN mostrar un botón identificado como "Nuevo".
+- **FR-346**: No se DEBE usar una ventana modal para el formulario de captura; este DEBE permanecer en el flujo normal de la pantalla.
+- **FR-347**: Los filtros y los registros existentes DEBEN conservarse mientras el usuario completa el formulario visible.
+- **FR-348**: La creación de registros desde el formulario visible DEBE conservar las validaciones, reglas de negocio y permisos vigentes.
+- **FR-349**: Los permisos por rol DEBEN aplicarse a las acciones de creación sin depender de la visibilidad de un botón "Nuevo".
 - **FR-350**: El control "×" para limpiar un filtro NO DEBE superponerse con la flecha del selector.
 - **FR-351**: La "×" de un filtro DEBE limpiar únicamente ese filtro sin activar el selector de opciones.
 - **FR-352**: La flecha del selector DEBE abrir las opciones del filtro sin activar la acción de limpiar.
@@ -1347,9 +1348,8 @@ El módulo de Contabilidad y Finanzas DEBE:
 - **MenuLateral**: Navegación principal alineada al borde izquierdo del área de trabajo, con las secciones permitidas por el rol.
 - **IdentificacionUsuario**: Nombre y rol del usuario con sesión válida, mostrados juntos en el encabezado.
 - **ImporteFormateado**: Presentación de un valor monetario con símbolo "$", separador de miles y sin decimales, equivalente al valor numérico usado en cálculos.
-- **ListadoPrincipal**: Primer contenido visible de una pantalla con registros, conservando filtros y datos mientras se abre un formulario.
-- **BotonNuevo**: Control visible que abre el formulario de creación en una ventana dentro del módulo.
-- **VentanaFormulario**: Área temporal donde se captura o edita información sin reemplazar el listado de fondo.
+- **FormularioVisible**: Formulario de captura ubicado antes del listado y visible sin acciones adicionales.
+- **ListadoPrincipal**: Contenido visible junto al formulario en una pantalla con registros, conservando filtros y datos mientras se captura información.
 - **ControlFiltro**: Elemento de filtro que incluye la opción de limpiar y el selector de valores sin superposición entre ambos controles.
 - **FilaTotales**: Fila del Libro Mayor que presenta los totales alineados con saldo inicial, débitos, créditos y saldo final.
 - **MensajeListaVacia**: Aviso claro y legible que informa que no hay registros o que un filtro no produjo resultados.
@@ -1494,22 +1494,22 @@ El módulo de Contabilidad y Finanzas DEBE:
 - **SC-134**: El 95% de los usuarios encuentra una sección o dato ordenado en menos de 10 segundos.
 - **SC-135**: Al menos el 90% de los usuarios encuestados percibe la interfaz como profesional y coherente.
 - **SC-136**: El 100% de los RUT introducidos sin puntos ni guion se presenta con formato chileno antes de confirmar el acceso, sin perder ni duplicar caracteres.
-- **SC-137**: El 100% de los RUT de prueba autentica correctamente cuando el dígito verificador se escribe en mayúscula o minúscula.
+- **SC-137**: El 100% de los RUT con dígito verificador `k` acepta `k` y `K` como equivalentes y los presenta de forma consistente.
 - **SC-138**: El 100% de los RUT con dígito verificador inválido muestra el mensaje "El RUT ingresado no es válido" y no otorga acceso.
 - **SC-139**: El 100% de los intentos con un RUT válido no registrado o una contraseña incorrecta muestra el mensaje "RUT o contraseña incorrectos" y no abre ningún panel.
 - **SC-140**: El 100% de las selecciones del botón "Menú" cambia el estado del menú lateral en menos de 1 segundo.
 - **SC-141**: El 100% de los roles ve exactamente las mismas secciones al abrir el menú desde el botón del encabezado que las definidas en su matriz de acceso.
 - **SC-142**: El 100% de los cierres del menú conserva la pantalla activa, la sesión y los datos del módulo sin cambios.
 - **SC-143**: Al menos el 95% de los usuarios identifica cómo abrir y cerrar el menú lateral sin ayuda en menos de 5 segundos.
-- **SC-144**: El 100% de las revisiones de la pantalla de acceso confirma que el formulario está centrado y es angosto en pantallas amplias.
+- **SC-144**: El 100% de las revisiones de la pantalla de acceso confirma que el formulario y la tabla de usuarios de prueba están visibles sin centrado ni limitación exclusiva de ancho en pantallas amplias.
 - **SC-145**: El 100% de los usuarios de prueba localiza el botón "Ingresar" sin desplazamiento adicional en menos de 5 segundos.
 - **SC-146**: El 100% de las pantallas posteriores al acceso muestra el menú lateral alineado al borde izquierdo.
 - **SC-147**: El 100% de las sesiones válidas muestra en el encabezado el nombre del usuario, su rol y "Cerrar sesión" de forma agrupada.
 - **SC-148**: El 100% de los importes visibles usa el formato chileno con "$", puntos de miles y sin decimales.
 - **SC-149**: El 100% de los cálculos financieros conserva idénticos resultados después del cambio de formato de los importes.
-- **SC-150**: El 100% de las pantallas con registros muestra el listado antes que cualquier formulario de creación.
-- **SC-151**: El 100% de los formularios abiertos desde "Nuevo" aparece en una ventana sin reemplazar el listado de fondo.
-- **SC-152**: El 100% de los cierres de ventana sin guardar conserva el listado, los filtros y los datos sin cambios.
+- **SC-150**: El 100% de las pantallas con registros muestra el formulario antes que el listado disponible para el usuario.
+- **SC-151**: El 100% de las pantallas con registros mantiene el formulario y el listado visibles al mismo tiempo, sin botón "Nuevo" ni ventana modal.
+- **SC-152**: El 100% de los cambios de filtros y capturas conserva el listado, los filtros y los datos existentes sin modificaciones involuntarias.
 - **SC-153**: Se detectan 0 superposiciones entre la "×" de los filtros y la flecha del selector en las revisiones de pantalla.
 - **SC-154**: El 100% de las filas de totales del Libro Mayor está alineada con sus columnas correspondientes.
 - **SC-155**: El 100% de los listados vacíos muestra un mensaje claro en español dentro del área del listado.
@@ -1545,7 +1545,7 @@ El módulo de Contabilidad y Finanzas DEBE:
 - La autenticación se simula dentro de la experiencia de demostración del módulo; no se contempla un servicio de identidad externo.
 - Los cuatro usuarios de prueba son ficticios, deterministas y se restauran al estado inicial al comenzar una demostración.
 - El RUT se acepta con formato chileno de 7 u 8 dígitos y dígito verificador numérico o K; se admite K en mayúscula o minúscula, se formatea automáticamente mientras se escribe y se valida su dígito verificador antes de intentar el acceso.
-- Los cuatro RUT de prueba cumplen la validación del dígito verificador y el del Auditor termina en K para permitir probar la aceptación de mayúscula y minúscula.
+- Los cuatro RUT de prueba cumplen la validación del dígito verificador; la aceptación de `k`/`K` se comprueba con un RUT válido terminado en K, como `1.111.119-K`.
 - Las contraseñas de prueba distinguen mayúsculas y minúsculas y son de uso exclusivo para demostración.
 - Los paneles de inicio son vistas de acceso y resumen; las reglas de permisos se detallan en la Historia de Usuario 9.
 - La Historia de Usuario 9 define el menú y los permisos vigentes y prevalece sobre menciones genéricas de roles en historias anteriores; una acción descrita para un rol solo se considera habilitada si su menú la incluye.
@@ -1668,7 +1668,7 @@ El módulo de Contabilidad y Finanzas DEBE:
 - El menú en celular conserva las mismas secciones y permisos del menú amplio.
 - Las mejoras de interfaz no crean nuevas opciones de menú.
 - El alcance de las Historias de Usuario 22 a 29 se limita a la presentación y disposición visual; no se agregan, eliminan ni modifican funciones, datos, permisos ni reglas de negocio.
-- "Ventana" significa una ventana dentro del módulo que se abre y cierra sobre el listado, sin reemplazar la pantalla ni abrir una pestaña separada del navegador.
+- El formulario de captura permanece en el flujo normal de la pantalla; no se abre ni cierra una ventana modal sobre el listado.
 - El formulario de acceso conserva los campos, las validaciones y las credenciales definidos en la Historia de Usuario 8 de la especificación base.
 - El menú lateral conserva las secciones, etiquetas y permisos definidos en la matriz de acceso vigente.
 - El encabezado muestra el nombre y el rol del usuario autenticado tal como aparecen en los usuarios de prueba de la especificación base.

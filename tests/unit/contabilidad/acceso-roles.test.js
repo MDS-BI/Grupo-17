@@ -48,6 +48,21 @@ describe('acceso por roles', () => {
     expect(panelDelRol('auditor')).toBe('auditoria');
   });
 
+  it('valida los RUT de prueba y autentica con formato sin puntos ni guion', () => {
+    const usuarios = loadUsuarios();
+    expect(usuarios).toHaveLength(4);
+    for (const usuario of usuarios) {
+      expect(validarDigitoVerificador(usuario.rut)).toBe(true);
+      expect(normalizarRUT(usuario.rut)).toBe(usuario.rutNormalizado);
+    }
+    const conPuntos = iniciarSesion('44.444.444-4', 'Auditor2026!');
+    expect(conPuntos.ok).toBe(true);
+    expect(conPuntos.sesion.rolId).toBe('auditor');
+    const sinFormato = iniciarSesion('444444444', 'Auditor2026!');
+    expect(sinFormato.ok).toBe(true);
+    expect(normalizarRUT(sinFormato.sesion.usuarioRut)).toBe('444444444');
+  });
+
   it('rechaza credenciales inválidas con mensaje genérico', () => {
     const resultado = iniciarSesion('11.111.111-1', 'incorrecta');
     expect(resultado.ok).toBe(false);

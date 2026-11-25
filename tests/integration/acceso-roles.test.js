@@ -41,6 +41,27 @@ describe('acceso, menú por rol y panel de inicio', () => {
     expect(qs('error-acceso-contraseña').textContent).toContain('obligatoria');
   });
 
+  it('formatea el RUT en el campo de acceso mientras se escribe', async () => {
+    await bootContabilidad(undefined, { requireAccess: true, sesion: null });
+    const rut = qs('acceso-rut');
+    for (const digito of '111111111') {
+      rut.value += digito;
+      rut.setSelectionRange(rut.value.length, rut.value.length);
+      rut.dispatchEvent(new window.Event('input', { bubbles: true }));
+    }
+    expect(rut.value).toBe('11.111.111-1');
+    expect(rut.selectionStart).toBe(rut.value.length);
+  });
+
+  it('formatea también un RUT pegado sin puntos ni guion', async () => {
+    await bootContabilidad(undefined, { requireAccess: true, sesion: null });
+    const rut = qs('acceso-rut');
+    rut.value = '111111111';
+    rut.setSelectionRange(9, 9);
+    rut.dispatchEvent(new window.Event('input', { bubbles: true }));
+    expect(rut.value).toBe('11.111.111-1');
+  });
+
   it('ingresa como administrador y abre el panel integral', async () => {
     await bootContabilidad(undefined, { requireAccess: true, sesion: null });
     credenciales('11.111.111-1', 'Admin2026!');

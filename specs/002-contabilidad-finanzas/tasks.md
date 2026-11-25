@@ -809,7 +809,7 @@ Task: "Implementar balanceGeneral con activos, pasivos, patrimonio y resultado a
 
 ### Pruebas para US22
 
-- [X] T299 [P] [US22] Agregar pruebas de integración del acceso centrado, angosto y sin espacio vacío superior antes de "Ingresar" en pantallas amplias y estrechas en `tests/integration/contabilidad/acceso-usabilidad.test.js` per `spec.md` HU22, FR-329–FR-332, SC-144–SC-145
+- [X] T299 [P] [US22] Agregar pruebas de integración del acceso en formato anterior, con formulario y tabla visibles y sin espacio vacío superior antes de "Ingresar" en pantallas amplias y estrechas en `tests/integration/contabilidad/acceso-usabilidad.test.js` per `spec.md` HU22, FR-329–FR-332, SC-144–SC-145
 
 ### Implementación para US22
 
@@ -859,17 +859,17 @@ Task: "Implementar balanceGeneral con activos, pasivos, patrimonio y resultado a
 
 ---
 
-## Fase 33: Historia de Usuario 26 - Mostrar primero la lista y abrir el formulario desde "Nuevo" (Prioridad: P1)
+## Fase 33: Historia de Usuario 26 - Mantener formulario y listado visibles (Prioridad: P1)
 
-**Propósito**: Mostrar primero el listado y abrir el formulario de creación en una ventana que conserve el contexto y los filtros.
+**Propósito**: Mantener el formulario de creación visible sobre el listado, sin botón "Nuevo" ni ventana modal, conservando el contexto y los filtros.
 
 ### Pruebas para US26
 
-- [X] T307 [P] [US26] Agregar pruebas de integración de listado previo, botón "Nuevo", ventana sobre el listado, cierre sin guardar y ocultación por rol en `tests/integration/contabilidad/formulario-ventana.test.js` per `spec.md` HU26, FR-343–FR-349, SC-150–SC-152
+- [X] T307 [P] [US26] Agregar pruebas de integración de formulario visible antes del listado, ausencia de botón "Nuevo" y de ventana modal, conservación de filtros y permisos vigentes en `tests/integration/contabilidad/formulario-ventana.test.js` per `spec.md` HU26, FR-343–FR-349, SC-150–SC-152
 
 ### Implementación para US26
 
-- [X] T308 [US26] Agregar el botón "Nuevo" y una ventana reutilizable en `src/components/contabilidad/comun.js`, `index.html` y las vistas con creación permitida, conservando validaciones, reglas y permisos vigentes per `spec.md` HU26, FR-343–FR-349
+- [X] T308 [US26] Mantener el formulario en el flujo normal de `index.html` antes de cada listado, retirar la ventana reutilizable de `src/components/contabilidad/comun.js` y conservar validaciones, reglas y permisos vigentes per `spec.md` HU26, FR-343–FR-349
 
 ---
 
