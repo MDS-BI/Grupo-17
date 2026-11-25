@@ -1,7 +1,8 @@
 import { formatearMXN, sumarCentavos } from './dinero.js';
 import { formatearFecha } from './fechas.js';
+import { IDENTIDAD_EMPRESA } from './interfaz-config.js';
 
-export const NOMBRE_EMPRESA = 'Comercial Los Andes SpA';
+export const NOMBRE_EMPRESA = IDENTIDAD_EMPRESA.nombre;
 
 export const REPORTES_EXPORTABLES = Object.freeze([
   'libroMayor',
@@ -39,7 +40,8 @@ const COLUMNAS = Object.freeze({
     { clave: 'nombre', etiqueta: 'Cuenta', tipo: 'texto' },
     { clave: 'tipo', etiqueta: 'Tipo', tipo: 'texto' },
     { clave: 'ingresos', etiqueta: 'Ingresos', tipo: 'monto' },
-    { clave: 'gastos', etiqueta: 'Gastos', tipo: 'monto' }
+    { clave: 'gastos', etiqueta: 'Gastos', tipo: 'monto' },
+    { clave: 'resultado', etiqueta: 'Resultado', tipo: 'monto' }
   ],
   balanceGeneral: [
     { clave: 'concepto', etiqueta: 'Concepto', tipo: 'texto' },
@@ -155,8 +157,9 @@ function filasDeReporte(clave, datos) {
       detalle.nombre ?? detalle.name ?? '',
       detalle.tipo ?? '',
       num(detalle.ingresos),
-      num(detalle.gastos)
-    ], { cuentaId: detalle.cuentaId ?? detalle.id, ...detalle }));
+      num(detalle.gastos),
+      sumarCentavos([num(detalle.ingresos), -num(detalle.gastos)])
+    ], { cuentaId: detalle.cuentaId ?? detalle.id, ...detalle, resultado: sumarCentavos([num(detalle.ingresos), -num(detalle.gastos)]) }));
   }
   if (clave === 'balanceGeneral') {
     return [
@@ -310,7 +313,7 @@ function advertenciasHtml(modelo) {
 
 export function serializarReporteHtml(modelo) {
   const seript = '<script>window.addEventListener("load", function () { window.print(); });<\/script>';
-  return `<!doctype html><html lang="es"><head><meta charset="utf-8"><title>${escaparHtml(modelo.empresa || NOMBRE_EMPRESA)} - ${escaparHtml(modelo.etiqueta || modelo.reporte)}</title><style>body{font-family:Arial,sans-serif;margin:2rem;color:#111}table{width:100%;border-collapse:collapse;margin-top:1rem}th,td{border:1px solid #999;padding:.45rem;text-align:left}.num{text-align:right}thead{background:#eee}.totales{margin-top:1rem;display:flex;gap:1.5rem;flex-wrap:wrap}.advertencias{color:#9a3412;margin-top:1rem}@media print{body{margin:1cm}}</style></head><body>${encabezadoHtml(modelo)}${construirTablaHtml(modelo)}${advertenciasHtml(modelo)}${seript}</body></html>`;
+  return `<!doctype html><html lang="es"><head><meta charset="utf-8"><title>${escaparHtml(modelo.empresa || NOMBRE_EMPRESA)} - ${escaparHtml(modelo.etiqueta || modelo.reporte)}</title><style>body{font-family:Arial,sans-serif;margin:2rem;color:#0b3946}table{width:100%;border-collapse:collapse;margin-top:1rem}th,td{border:1px solid rgba(15,76,92,.2);padding:.45rem;text-align:left}.num{text-align:right}thead{background:#f7fafb}.totales{margin-top:1rem;display:flex;gap:1.5rem;flex-wrap:wrap}.advertencias{color:#b42318;margin-top:1rem}@media print{body{margin:1cm}}</style></head><body>${encabezadoHtml(modelo)}${construirTablaHtml(modelo)}${advertenciasHtml(modelo)}${seript}</body></html>`;
 }
 
 export function serializarReporteXlsHtml(modelo) {

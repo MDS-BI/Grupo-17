@@ -329,6 +329,8 @@ export function validarSemilla(datos = {}, { fechaReferencia = fechaHoyISO() } =
     const periodo = periodosPorId.get(asiento.period_id);
     if (!periodo) {
       errores.push(`El asiento ${asiento.id} no pertenece a un periodo`);
+    } else if (periodo.status === 'cerrado') {
+      errores.push(`El asiento ${asiento.id} está en el periodo cerrado ${periodo.name}`);
     }
     const lineas = (datos.lineas || []).filter((linea) => linea.asiento_id === asiento.id);
     if (lineas.some((linea) => !idsCuentas.has(linea.cuenta_id))) {
@@ -340,6 +342,8 @@ export function validarSemilla(datos = {}, { fechaReferencia = fechaHoyISO() } =
     const periodo = periodos.find((item) => periodoContieneFecha(item, pago.date));
     if (!periodo) {
       errores.push(`El pago ${pago.numero} no pertenece a un periodo`);
+    } else if (periodo.status === 'cerrado') {
+      errores.push(`El pago ${pago.numero} está en el periodo cerrado ${periodo.name}`);
     }
     if (pago.asiento_id && !idsAsientos.has(pago.asiento_id)) {
       errores.push(`El pago ${pago.numero} referencia un asiento inexistente`);
@@ -413,8 +417,8 @@ export function generarSemilla({ entidades = [], documentos = [], fechaReferenci
     asiento('asi-0001', 'DI', 1001, '2026-10-03', 'per-2026-10', 'Venta de mercancía a crédito', 'aprobado', clienteId),
     asiento('asi-0002', 'DI', 1002, '2026-10-08', 'per-2026-10', 'Pago de renta del mes', 'aprobado', proveedorId),
     asiento('asi-0003', 'DI', 1003, '2026-10-15', 'per-2026-10', 'Compra de papelería', 'borrador', proveedorId),
-    asiento('asi-0004', 'DI', 1004, '2026-09-05', 'per-2026-09', 'Venta de servicios profesionales', 'aprobado', clienteId),
-    asiento('asi-0005', 'DI', 1005, '2026-09-20', 'per-2026-09', 'Pago de sueldos de septiembre', 'cancelado', null),
+    asiento('asi-0004', 'DI', 1004, '2026-08-06', 'per-2026-08', 'Venta de servicios profesionales', 'aprobado', clienteId),
+    asiento('asi-0005', 'DI', 1005, '2026-08-21', 'per-2026-08', 'Pago de sueldos de agosto', 'cancelado', null),
     asiento('asi-0006', 'DI', 1006, '2026-08-10', 'per-2026-08', 'Aportación de capital inicial', 'aprobado', null),
     asiento('asi-0007', 'DI', 1007, '2026-08-12', 'per-2026-08', 'Cobro de clientes de agosto', 'aprobado', clienteId),
     asiento('asi-0008', 'DI', 1008, '2026-08-18', 'per-2026-08', 'Pago de servicios de agosto', 'aprobado', proveedorId),
@@ -487,7 +491,7 @@ export function generarSemilla({ entidades = [], documentos = [], fechaReferenci
       series: 'PAG',
       folio: 1001,
       tipo: 'pago',
-      date: '2026-09-08',
+      date: '2026-08-08',
       fechaVencimiento: '2026-12-08',
       entity_id: proveedorId,
       asiento_id: null,

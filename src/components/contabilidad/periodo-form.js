@@ -6,12 +6,18 @@ function qs(id) {
 
 const ERRORES = ['error-periodo-name', 'error-periodo-start', 'error-periodo-end', 'error-periodo-status'];
 
+function opcionAbierto() {
+  return [...qs('periodo-status').options].find((opcion) => opcion.value === 'abierto');
+}
+
 export function clearPeriodoForm() {
   qs('periodo-id').value = '';
   qs('periodo-name').value = '';
   qs('periodo-start').value = '';
   qs('periodo-end').value = '';
   qs('periodo-status').value = 'abierto';
+  const abierto = opcionAbierto();
+  if (abierto) abierto.disabled = false;
   limpiarErrores(ERRORES);
   qs('periodo-cancel-edit').hidden = true;
   qs('periodo-submit').textContent = 'Guardar periodo';
@@ -23,6 +29,8 @@ export function startPeriodoEdit(periodo) {
   qs('periodo-start').value = periodo.startDate || '';
   qs('periodo-end').value = periodo.endDate || '';
   qs('periodo-status').value = periodo.status || 'abierto';
+  const abierto = opcionAbierto();
+  if (abierto) abierto.disabled = periodo.status === 'cerrado';
   limpiarErrores(ERRORES);
   qs('periodo-cancel-edit').hidden = false;
   qs('periodo-submit').textContent = 'Actualizar periodo';

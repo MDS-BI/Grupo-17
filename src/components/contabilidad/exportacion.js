@@ -29,6 +29,10 @@ function formatoDe(boton) {
   return '';
 }
 
+function mensajeFalloExportacion(detalle = 'error inesperado') {
+  return `No se pudo exportar el reporte: ${detalle}. Reintente la descarga.`;
+}
+
 export function mostrarAdvertenciaExportacion(mensaje, raiz = null) {
   const contenedor = raiz?.querySelector?.('[data-advertencia-exportacion]')
     || document.querySelector('[data-advertencia-exportacion]');
@@ -65,14 +69,15 @@ export function conectarEventosExportacion(contenedor, opciones = {}) {
         ? actuales.onExportar(formato, modelo)
         : exportarSegunFormato(formato, modelo, actuales.opcionesExportador);
       if (resultado && resultado.ok === false) {
-        mostrarAdvertenciaExportacion(resultado.advertencia, actuales.raiz || contenedor);
-        actuales.onError?.(resultado.advertencia, formato);
+        const mensaje = mensajeFalloExportacion(resultado.advertencia || 'error inesperado');
+        mostrarAdvertenciaExportacion(mensaje, actuales.raiz || contenedor);
+        actuales.onError?.(mensaje, formato);
       } else {
         mostrarAdvertenciaExportacion('', actuales.raiz || contenedor);
         actuales.onSuccess?.(resultado, formato);
       }
     } catch (error) {
-      const mensaje = `No se pudo exportar el reporte: ${error?.message || 'error inesperado'}`;
+      const mensaje = mensajeFalloExportacion(error?.message || 'error inesperado');
       mostrarAdvertenciaExportacion(mensaje, actuales.raiz || contenedor);
       actuales.onError?.(mensaje, formato);
     }

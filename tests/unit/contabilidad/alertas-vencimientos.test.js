@@ -13,6 +13,7 @@ describe('alertas-vencimientos', () => {
     const ref = new Date('2026-03-10T12:00:00');
     expect(clasificarAlertaPago({ estado: 'anulado', fechaVencimiento: '2026-03-01' }, ref)).toBe('anulado');
     expect(clasificarAlertaPago({ estado: 'pagado', fechaVencimiento: '2026-03-01' }, ref)).toBe('pagado');
+    expect(clasificarAlertaPago({ anulado: true, status: 'pendiente', fechaVencimiento: '2026-03-01' }, ref)).toBe('anulado');
   });
 
   it('agrupa alertas por severidad con totales', () => {

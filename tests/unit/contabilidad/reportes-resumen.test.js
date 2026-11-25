@@ -29,11 +29,11 @@ describe('resumen financiero', () => {
   });
 
   it('excluye asientos cancelados del cálculo', () => {
-    const septiembre = calcularResumen('per-2026-09');
-    expect(septiembre.ingresos).toBe(50000);
-    expect(septiembre.gastos).toBe(0);
-    expect(septiembre.resultado).toBe(50000);
-    expect(septiembre.movimientos).toBe(1);
+    const agosto = calcularResumen('per-2026-08');
+    expect(agosto.ingresos).toBe(240000);
+    expect(agosto.gastos).toBe(90000);
+    expect(agosto.resultado).toBe(150000);
+    expect(agosto.movimientos).toBe(5);
   });
 
   it('reporta un periodo sin movimientos como vacío', () => {

@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { instalarAlmacen } from '../../setup/contabilidad.js';
-import { generarSemilla, generarRoles, generarUsuarios, generarSemillaBase } from '../../../src/contabilidad/semilla.js';
+import { generarSemilla, generarRoles, generarUsuarios, generarSemillaBase, validarSemilla } from '../../../src/contabilidad/semilla.js';
 import { calcularEstadoPago } from '../../../src/contabilidad/pagos.js';
 
 describe('semilla de datos de ejemplo', () => {
@@ -23,10 +23,10 @@ describe('semilla de datos de ejemplo', () => {
     expect(datos.periodos).toHaveLength(5);
     const cerrados = datos.periodos.filter((periodo) => periodo.status === 'cerrado');
     expect(cerrados.map((periodo) => periodo.id)).toEqual(['per-2026-07', 'per-2026-09']);
-    expect(cerrados.some((periodo) => datos.asientos.some((asiento) => asiento.period_id === periodo.id)
-      || datos.pagos.some((pago) => pago.date.startsWith(periodo.startDate.slice(0, 7))))).toBe(true);
-    expect(cerrados.some((periodo) => !datos.asientos.some((asiento) => asiento.period_id === periodo.id)
-      && !datos.pagos.some((pago) => pago.date.startsWith(periodo.startDate.slice(0, 7))))).toBe(true);
+    for (const periodo of cerrados) {
+      expect(datos.asientos.some((asiento) => asiento.period_id === periodo.id)).toBe(false);
+      expect(datos.pagos.some((pago) => pago.date.startsWith(periodo.startDate.slice(0, 7)))).toBe(false);
+    }
     expect(datos.cuentas.length).toBeGreaterThanOrEqual(8);
     expect(datos.asientos.filter((asiento) => asiento.status === 'aprobado').length).toBeGreaterThanOrEqual(8);
     expect(datos.pagos.length).toBeGreaterThanOrEqual(4);
@@ -42,6 +42,34 @@ describe('semilla de datos de ejemplo', () => {
     expect(estados).toContain('pendiente');
     expect(estados).toContain('anulado');
     expect(datos.pagos.find((pago) => pago.anulado)).toMatchObject({ anulado: true, status: 'pendiente' });
+  });
+
+  it('rechaza asientos y pagos ubicados en periodos cerrados', () => {
+    const datos = generarSemilla({ ...generarSemillaBase(), fechaReferencia: '2026-11-23' });
+    datos.asientos.push({
+      id: 'asi-cerrado',
+      series: 'DI',
+      folio: 9999,
+      date: '2026-09-10',
+      period_id: 'per-2026-09',
+      concept: 'Movimiento en periodo cerrado',
+      status: 'aprobado',
+      totalDebit: 1000,
+      totalCredit: 1000
+    });
+    datos.pagos.push({
+      id: 'pag-cerrado',
+      numero: 'PAG-9999',
+      date: '2026-09-11',
+      fechaVencimiento: '2026-12-11',
+      amount: 1000,
+      status: 'pendiente'
+    });
+
+    const revision = validarSemilla(datos, { fechaReferencia: '2026-11-23' });
+    expect(revision.valido).toBe(false);
+    expect(revision.errores.some((error) => error.includes('asi-cerrado') && error.includes('cerrado'))).toBe(true);
+    expect(revision.errores.some((error) => error.includes('PAG-9999') && error.includes('cerrado'))).toBe(true);
   });
 
   it('incluye usuarios y roles para los cuatro perfiles', () => {

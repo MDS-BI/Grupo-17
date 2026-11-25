@@ -33,7 +33,10 @@ describe('panel de inicio de Contabilidad y Finanzas', () => {
     ]);
     expect(vista.textContent).toContain('Ingresos del periodo');
     expect(vista.textContent).toContain('Abiertos: 3 · Cerrados: 2');
-    expect(vista.textContent).toContain('2026-11 · abierto');
+    const filaPeriodo = [...vista.querySelectorAll('.panel-tabla-periodos tbody tr')]
+      .find((fila) => fila.cells[0].textContent.trim() === '2026-11');
+    expect(filaPeriodo).toBeTruthy();
+    expect(filaPeriodo.cells[1].textContent.trim()).toBe('abierto');
     expect(vista.querySelector('[data-accion="cargar-datos"]').textContent.trim()).toBe('Cargar datos de ejemplo');
     expect(vista.querySelector('[data-accion="cargar-datos"]').classList.contains('boton-destacado')).toBe(true);
     expect(vista.querySelector('[data-accion="restablecer-datos"]').textContent.trim()).toBe('Restablecer datos');

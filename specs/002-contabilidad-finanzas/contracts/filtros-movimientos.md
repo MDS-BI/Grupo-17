@@ -16,17 +16,20 @@ FiltroMovimientos = {
   estado: "todos" | string
 }
 
-ListadoFiltrado = { registros: [], totalesCentavos, sinResultados: boolean }
+ListadoFiltrado = { registros: [], totalCentavos, sinResultados: boolean }
 ```
 
 Los montos se capturan en MXN pero se comparan como enteros en centavos.
 
 ## API
 
-- `filtrarAsientos(asientos, filtro)`: aplica fecha contable, líneas por cuenta, total del asiento y estado.
-- `filtrarPagos(pagos, filtro)`: aplica fecha del movimiento, cuenta del asiento relacionado, monto y estado visible.
-- `validarFiltro(filtro)`: verifica fechas válidas y rango `desde <= hasta`.
+- `filtrarAsientosDetallado(asientos, filtro)`: API canónica; aplica fecha contable, líneas por cuenta, total del asiento y estado y devuelve `ListadoFiltrado`.
+- `filtrarPagosDetallado(pagos, filtro)`: API canónica; aplica fecha del movimiento, cuenta del asiento relacionado, monto y estado visible y devuelve `ListadoFiltrado`.
+- `filtrarAsientos(asientos, filtro)` y `filtrarPagos(pagos, filtro)`: envoltorios de compatibilidad que devuelven solo `registros`.
+- `validarFiltro(filtro)`: verifica fechas ISO reales, montos no negativos y rango `desde <= hasta`.
 - `limpiarFiltros()`: restaura el estado sin filtros.
+
+Cuando `validarFiltro()` falla, las APIs canónicas no aplican el filtro inválido: devuelven el listado de entrada sin activar `sinResultados`. La interfaz conserva el último filtro válido mientras muestra el mensaje de error.
 
 ## Puntos de Montaje
 

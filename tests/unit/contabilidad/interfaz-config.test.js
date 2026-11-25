@@ -1,36 +1,74 @@
-﻿import { describe, it, expect, beforeEach } from 'vitest';
-import { obtenerConfigInterfaz, guardarConfigInterfaz, restablecerConfigInterfaz, CLAVE_CONFIG_INTERFAZ, NOMBRE_EMPRESA } from '../../../src/contabilidad/interfaz-config.js';
+﻿import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { crearDom } from '../../setup/contabilidad.js';
+import {
+  IDENTIDAD_EMPRESA,
+  NOMBRE_EMPRESA,
+  PALETA_ESTADOS,
+  paleta,
+  confirmarEliminacion,
+  mostrarMensaje,
+  obtenerOpcionesMenu
+} from '../../../src/contabilidad/interfaz-config.js';
+import { claseEstado } from '../../../src/components/contabilidad/comun.js';
+
+const ADMIN = { rolId: 'administrador' };
+const TESORERO = { rolId: 'tesorero' };
 
 describe('interfaz-config', () => {
+  let dom;
+
   beforeEach(() => {
-    const store = new Map();
-    globalThis.sessionStorage = {
-      getItem: (k) => (store.has(k) ? store.get(k) : null),
-      setItem: (k, v) => store.set(k, String(v)),
-      removeItem: (k) => store.delete(k),
-      clear: () => store.clear()
-    };
-    sessionStorage.clear();
+    dom = crearDom();
   });
 
-  it('devuelve defaults cuando no hay configuración', () => {
-    const cfg = obtenerConfigInterfaz();
-    expect(cfg.nombreEmpresa).toBe(NOMBRE_EMPRESA);
-    expect(cfg.logoEmpresa).toBe('');
+  afterEach(() => {
+    dom.window.close();
   });
 
-  it('guarda y recupera configuración en sessionStorage', () => {
-    const guardada = guardarConfigInterfaz({ nombreEmpresa: 'Empresa Test', logoEmpresa: 'data:image/png;base64,abc' });
-    expect(guardada.nombreEmpresa).toBe('Empresa Test');
-    const cfg = obtenerConfigInterfaz();
-    expect(cfg.logoEmpresa).toContain('data:image/png');
-    expect(sessionStorage.getItem(CLAVE_CONFIG_INTERFAZ)).toBeTruthy();
+  it('mantiene la identidad corporativa inmutable', () => {
+    expect(Object.isFrozen(IDENTIDAD_EMPRESA)).toBe(true);
+    expect(IDENTIDAD_EMPRESA.nombre).toBe(NOMBRE_EMPRESA);
+    expect(IDENTIDAD_EMPRESA.nombre).toBe('Comercial Los Andes SpA');
+    expect(IDENTIDAD_EMPRESA.logotipo).toBe('svg-en-linea');
   });
 
-  it('restablece defaults', () => {
-    guardarConfigInterfaz({ nombreEmpresa: 'Otra', logoEmpresa: 'x' });
-    const cfg = restablecerConfigInterfaz();
-    expect(cfg.nombreEmpresa).toBe(NOMBRE_EMPRESA);
-    expect(cfg.logoEmpresa).toBe('');
+  it('expone la paleta contractual y la reutilizan las insignias de estado', () => {
+    expect(Object.keys(paleta)).toEqual(expect.arrayContaining([
+      'primario', 'exito', 'error', 'advertencia', 'informacion', 'texto', 'fondo'
+    ]));
+    expect(claseEstado('pagado')).toBe(PALETA_ESTADOS.pagado);
+    expect(claseEstado('pendiente')).toBe(PALETA_ESTADOS.pendiente);
+    expect(claseEstado('vencido')).toBe(PALETA_ESTADOS.vencido);
+  });
+
+  it('confirma eliminaciones a través del diálogo del navegador', () => {
+    globalThis.confirm = vi.fn(() => false);
+    dom.window.confirm = globalThis.confirm;
+    expect(confirmarEliminacion('¿Eliminar?')).toBe(false);
+    expect(globalThis.confirm).toHaveBeenCalledWith('¿Eliminar?');
+  });
+
+  it('muestra mensajes con el token semántico compartido', () => {
+    const contenedor = document.querySelector('[data-mensaje="global"]');
+    expect(contenedor).not.toBeNull();
+
+    mostrarMensaje('exito', 'Guardado correctamente.');
+    expect(contenedor.textContent).toBe('Guardado correctamente.');
+    expect(contenedor.dataset.tipo).toBe('exito');
+    expect(contenedor.hidden).toBe(false);
+
+    mostrarMensaje('error', '');
+    expect(contenedor.hidden).toBe(true);
+  });
+
+  it('deriva las mismas opciones para menú amplio y drawer móvil', () => {
+    const amplio = obtenerOpcionesMenu(ADMIN, 1280).map((opcion) => opcion.pantalla);
+    const movil = obtenerOpcionesMenu(ADMIN, 640).map((opcion) => opcion.pantalla);
+    expect(amplio).toEqual(movil);
+    expect(amplio).toEqual(expect.arrayContaining(['dashboard', 'cuentas', 'asientos', 'pagos', 'periodos', 'reportes']));
+
+    const tesorero = obtenerOpcionesMenu(TESORERO, 640).map((opcion) => opcion.pantalla);
+    expect(tesorero).toContain('pagos');
+    expect(tesorero).not.toContain('cuentas');
   });
 });

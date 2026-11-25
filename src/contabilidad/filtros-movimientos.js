@@ -1,4 +1,4 @@
-﻿import { sumarCentavos } from './dinero.js';
+﻿import { aCentavos, normalizarImporte, sumarCentavos } from './dinero.js';
 
 function normalizarTexto(valor) {
   return String(valor ?? '')
@@ -8,12 +8,12 @@ function normalizarTexto(valor) {
     .trim();
 }
 
-function aCentavos(valor) {
-  if (valor === null || valor === undefined || valor === '') return null;
-  if (Number.isInteger(valor) && Math.abs(valor) >= 1000) return valor; // heurística conservadora no usada por defecto
-  const num = Number(valor);
-  if (!Number.isFinite(num)) return null;
-  return Math.round(num * 100);
+function esFechaISOValida(valor) {
+  const texto = String(valor || '');
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(texto)) return false;
+  const [anio, mes, dia] = texto.split('-').map(Number);
+  const fecha = new Date(Date.UTC(anio, mes - 1, dia));
+  return fecha.getUTCFullYear() === anio && fecha.getUTCMonth() === mes - 1 && fecha.getUTCDate() === dia;
 }
 
 function montoCentavosRegistro(registro) {
@@ -30,8 +30,7 @@ function montoCentavosRegistro(registro) {
   return Math.round(Number(registro?.monto ?? registro?.total ?? 0) * 100);
 }
 
-function fechaRegistro(registro, tipo) {
-  if (tipo === 'pago') return String(registro?.fechaPago || registro?.fecha || registro?.date || registro?.fechaVencimiento || registro?.fecha_vencimiento || '').slice(0, 10);
+function fechaRegistro(registro) {
   return String(registro?.fecha || registro?.date || registro?.fechaContable || registro?.fecha_contable || '').slice(0, 10);
 }
 
@@ -41,8 +40,6 @@ function estadoRegistro(registro) {
 
 function cuentaIdsRegistro(registro) {
   const ids = [];
-  if (registro?.cuentaId) ids.push(registro.cuentaId);
-  if (registro?.cuenta_id) ids.push(registro.cuenta_id);
   if (registro?.asientoCuentaId) ids.push(registro.asientoCuentaId);
   if (Array.isArray(registro?.cuentaIds)) ids.push(...registro.cuentaIds);
   if (Array.isArray(registro?.lineas)) {
@@ -62,14 +59,17 @@ export function validarFiltro(filtro = {}) {
   const errores = {};
   const desde = String(filtro.fechaDesde || '').slice(0, 10);
   const hasta = String(filtro.fechaHasta || '').slice(0, 10);
-  if (desde && hasta && desde > hasta) errores.fecha = 'La fecha desde no puede ser mayor que la fecha hasta.';
+  const fechasInvalidas = (desde && !esFechaISOValida(desde)) || (hasta && !esFechaISOValida(hasta));
+  if (fechasInvalidas) errores.fecha = 'Las fechas deben ser válidas en formato ISO (YYYY-MM-DD).';
+  else if (desde && hasta && desde > hasta) errores.fecha = 'La fecha desde no puede ser mayor que la fecha hasta.';
+
   const min = filtro.montoMin ?? filtro.montoDesde;
   const max = filtro.montoMax ?? filtro.montoHasta;
-  const minN = min === '' || min === null || min === undefined ? null : Number(min);
-  const maxN = max === '' || max === null || max === undefined ? null : Number(max);
-  if (minN !== null && !Number.isFinite(minN)) errores.monto = 'El monto mínimo no es válido.';
-  if (maxN !== null && !Number.isFinite(maxN)) errores.monto = 'El monto máximo no es válido.';
-  if (minN !== null && maxN !== null && Number.isFinite(minN) && Number.isFinite(maxN) && minN > maxN) {
+  const minRevision = min === '' || min === null || min === undefined ? null : normalizarImporte(min);
+  const maxRevision = max === '' || max === null || max === undefined ? null : normalizarImporte(max);
+  if (minRevision && (!minRevision.valido || minRevision.centavos < 0)) errores.monto = 'El monto mínimo no es válido.';
+  if (maxRevision && (!maxRevision.valido || maxRevision.centavos < 0)) errores.monto = 'El monto máximo no es válido.';
+  if (minRevision?.valido && maxRevision?.valido && minRevision.centavos > maxRevision.centavos) {
     errores.monto = 'El monto mínimo no puede ser mayor que el monto máximo.';
   }
   return { valido: Object.keys(errores).length === 0, errores };
@@ -78,7 +78,14 @@ export function validarFiltro(filtro = {}) {
 function filtrarLista(registros, filtro = {}, tipo) {
   const lista = Array.isArray(registros) ? registros : [];
   const validacion = validarFiltro(filtro);
-  if (!validacion.valido) return { registros: [], errores: validacion.errores, totalCentavos: 0 };
+  if (!validacion.valido) {
+    return {
+      registros: lista,
+      errores: validacion.errores,
+      totalCentavos: sumarCentavos(lista.map(montoCentavosRegistro)),
+      sinResultados: lista.length === 0
+    };
+  }
   const desde = String(filtro.fechaDesde || '').slice(0, 10);
   const hasta = String(filtro.fechaHasta || '').slice(0, 10);
   const cuentaId = String(filtro.cuentaId || filtro.cuenta || '').trim();
@@ -86,12 +93,11 @@ function filtrarLista(registros, filtro = {}, tipo) {
   const texto = normalizarTexto(filtro.texto || filtro.q || '');
   const min = filtro.montoMin ?? filtro.montoDesde;
   const max = filtro.montoMax ?? filtro.montoHasta;
-  const factor = (valor) => (filtro.unidad === 'mxn' ? 100 : (Number.isInteger(Number(valor)) && Math.abs(Number(valor)) >= 100 ? 1 : 100));
-  const minCent = min === '' || min === null || min === undefined ? null : Math.round(Number(min) * factor(min));
-  const maxCent = max === '' || max === null || max === undefined ? null : Math.round(Number(max) * factor(max));
+  const minCent = min === '' || min === null || min === undefined ? null : aCentavos(min);
+  const maxCent = max === '' || max === null || max === undefined ? null : aCentavos(max);
 
   const resultado = lista.filter((registro) => {
-    const fecha = fechaRegistro(registro, tipo);
+    const fecha = fechaRegistro(registro);
     if (desde && (!fecha || fecha < desde)) return false;
     if (hasta && (!fecha || fecha > hasta)) return false;
     if (cuentaId) {

@@ -12,6 +12,7 @@ import {
 import { validarCierrePeriodo, MENSAJE_PERIODO_CERRADO } from '../../../src/contabilidad/validaciones-periodos.js';
 import {
   crearPeriodo,
+  actualizarPeriodo,
   cerrarPeriodo,
   cambiarEstadoPeriodo,
   obtenerPeriodo,
@@ -120,6 +121,7 @@ describe('cierre integral de periodos contables', () => {
   it('no permite reabrir un periodo cerrado', () => {
     cerrarPeriodo('per-2026-11', ADMIN);
     expect(() => cambiarEstadoPeriodo('per-2026-11', 'abierto', { sesion: ADMIN })).toThrow('no pueden reabrirse');
+    expect(() => actualizarPeriodo('per-2026-11', { status: 'abierto' }, { sesion: ADMIN })).toThrow('no pueden reabrirse');
     expect(obtenerPeriodo('per-2026-11').status).toBe('cerrado');
     expect(listarEventos({ accion: 'abrir', entidadId: 'per-2026-11' })).toHaveLength(0);
   });

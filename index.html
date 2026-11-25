@@ -17,58 +17,58 @@
             <span id="empresa-nombre" class="brand-modulo">Comercial Los Andes SpA</span>
           </div>
         </div>
-        <button type="button" id="menu-toggle" class="menu-toggle" aria-controls="sidebar-nav" aria-expanded="false" aria-label="Abrir menú de navegación" hidden>
-          <span aria-hidden="true">☰</span><span class="menu-toggle-texto">Menú</span>
+        <button type="button" id="menu-toggle" class="menu-toggle" data-menu-movil aria-controls="sidebar-nav" aria-expanded="false" aria-label="Abrir menú de navegación" hidden>
+          <svg class="menu-toggle-icono" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" data-lucide="menu" aria-hidden="true"><path d="M4 6h16"></path><path d="M4 12h16"></path><path d="M4 18h16"></path></svg><span class="menu-toggle-texto">Menú</span>
         </button>
       </header>
 
       <aside class="sidebar" id="sidebar-nav" hidden>
         <nav class="side-nav" aria-label="Módulos" data-menu-principal>
           <button type="button" class="nav-module active" data-module="dashboard" id="nav-dashboard" aria-current="page">
-            <span class="nav-icono" aria-hidden="true">⌂</span><svg class="nav-svg" viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="6" height="6" rx="1"></rect><rect x="11" y="3" width="6" height="6" rx="1"></rect><rect x="3" y="11" width="6" height="6" rx="1"></rect><rect x="11" y="11" width="6" height="6" rx="1"></rect></svg>
+            <span class="nav-icono" aria-hidden="true"></span>
             <span class="nav-label" id="nav-dashboard-label">Panel</span>
           </button>
           <button type="button" class="nav-module" data-module="entities" id="nav-entities" hidden>
-            <span class="nav-icono" aria-hidden="true">•</span><svg class="nav-svg" viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 2.5 3.5 6v8L10 17.5 16.5 14V6L10 2.5z"></path><path d="M3.5 6 10 9.5 16.5 6"></path><path d="M10 9.5v8"></path></svg>
+            <span class="nav-icono" aria-hidden="true"></span>
             <span class="nav-label" id="nav-entities-label">Entidades</span>
           </button>
           <button type="button" class="nav-module" data-module="documents" id="nav-documents" hidden>
-            <span class="nav-icono" aria-hidden="true">•</span><svg class="nav-svg" viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.5 2.5h6l4 4v11h-10z"></path><path d="M11.5 2.5v4h4"></path><path d="M8 10h5"></path><path d="M8 13h5"></path></svg>
+            <span class="nav-icono" aria-hidden="true"></span>
             <span class="nav-label" id="nav-documents-label">Documentos</span>
           </button>
           <button type="button" class="nav-module" data-module="search" id="nav-search" hidden>
-            <span class="nav-icono" aria-hidden="true">•</span><svg class="nav-svg" viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="9" r="5"></circle><path d="m12.8 12.8 4.2 4.2"></path></svg>
+            <span class="nav-icono" aria-hidden="true"></span>
             <span class="nav-label" id="nav-search-label">Búsqueda</span>
           </button>
           <button type="button" class="nav-module" data-module="resumen" id="nav-resumen">
-            <span class="nav-icono" aria-hidden="true">▤</span><svg class="nav-svg" viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v14h14"></path><path d="M6 13V8"></path><path d="M10 13V5"></path><path d="M14 13V9"></path></svg>
+            <span class="nav-icono" aria-hidden="true"></span>
             <span class="nav-label" id="nav-resumen-label">Resumen financiero</span>
           </button>
           <button type="button" class="nav-module" data-module="cuentas" id="nav-cuentas">
-            <span class="nav-icono" aria-hidden="true">☰</span><svg class="nav-svg" viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5.5h14"></path><path d="M3 10h14"></path><path d="M3 14.5h9"></path><circle cx="15.5" cy="14.5" r="1.5"></circle></svg>
+            <span class="nav-icono" aria-hidden="true"></span>
             <span class="nav-label" id="nav-cuentas-label">Cuentas contables</span>
           </button>
           <button type="button" class="nav-module" data-module="asientos" id="nav-asientos">
-            <span class="nav-icono" aria-hidden="true">✎</span><svg class="nav-svg" viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 2.5h10v15H5z"></path><path d="M7.5 6h5"></path><path d="M7.5 9.5h5"></path><path d="M7.5 13h3"></path></svg>
+            <span class="nav-icono" aria-hidden="true"></span>
             <span class="nav-label" id="nav-asientos-label">Asientos contables</span>
           </button>
           <button type="button" class="nav-module" data-module="pagos" id="nav-pagos">
-            <span class="nav-icono" aria-hidden="true">$</span><svg class="nav-svg" viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="5" width="15" height="10" rx="2"></rect><path d="M2.5 8.5h15"></path><path d="M6 12.5h4"></path></svg>
+            <span class="nav-icono" aria-hidden="true"></span>
             <span class="nav-label" id="nav-pagos-label">Pagos</span>
           </button>
           <button type="button" class="nav-module" data-module="periodos" id="nav-periodos">
-            <span class="nav-icono" aria-hidden="true">◷</span><svg class="nav-svg" viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4.5" width="14" height="12" rx="1.5"></rect><path d="M3 8h14"></path><path d="M6.5 2.5v4"></path><path d="M13.5 2.5v4"></path></svg>
+            <span class="nav-icono" aria-hidden="true"></span>
             <span class="nav-label" id="nav-periodos-label">Periodos contables</span>
           </button>
           <button type="button" class="nav-module" data-module="reportes" id="nav-reportes">
-            <span class="nav-icono" aria-hidden="true">▥</span><svg class="nav-svg" viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 16.5V3.5"></path><path d="M4 16.5h12"></path><path d="m6.5 12 3-3 2.5 2 4-5"></path></svg>
+            <span class="nav-icono" aria-hidden="true"></span>
             <span class="nav-label" id="nav-reportes-label">Reportes financieros</span>
           </button>
         </nav>
       </aside>
 
       <main class="content" id="app">
-        <div id="mensaje-confirmacion" class="muted confirmacion-global" role="status" aria-live="polite" hidden></div>
+        <div id="mensaje-confirmacion" class="muted confirmacion-global" data-mensaje="global" role="status" aria-live="polite" hidden></div>
         <section id="view-acceso" aria-labelledby="acceso-heading">
           <h1 id="acceso-heading">Acceso al módulo</h1>
           <form id="acceso-formulario" class="card acceso-card" data-acceso="formulario">
@@ -122,26 +122,6 @@
         <section id="view-dashboard" aria-labelledby="dashboard-heading" hidden>
           <h1 id="dashboard-heading">Panel financiero</h1>
           <p id="dashboard-subtitle" class="muted">Administra cuentas, asientos, pagos, periodos y reportes financieros en un solo lugar.</p>
-
-          <section id="config-interfaz" class="card config-interfaz" data-config-interfaz hidden aria-labelledby="config-interfaz-heading">
-            <h2 id="config-interfaz-heading">Identidad corporativa</h2>
-            <p class="muted">Configura el nombre y logo mostrados en el encabezado del módulo.</p>
-            <form id="form-config-interfaz" class="config-interfaz-form" novalidate>
-              <div>
-                <label for="config-nombre-empresa">Nombre de la empresa</label>
-                <input id="config-nombre-empresa" name="nombreEmpresa" type="text" maxlength="120" autocomplete="organization" />
-              </div>
-              <div>
-                <label for="config-logo-empresa">Logo de la empresa (URL o data URL)</label>
-                <input id="config-logo-empresa" name="logoEmpresa" type="url" placeholder="https://... o data:image/..." />
-              </div>
-              <div class="form-actions">
-                <button type="submit" class="primary" id="config-interfaz-guardar">Guardar identidad</button>
-                <button type="button" class="secondary" id="config-interfaz-restablecer">Restablecer</button>
-              </div>
-              <p id="config-interfaz-mensaje" class="muted" aria-live="polite"></p>
-            </form>
-          </section>
 
           <div id="dashboard-alertas" class="alertas-dashboard" data-alertas-tesorero hidden>
             <section class="alerta-bloque alerta-vencidos" data-alerta-vencidos aria-live="polite"></section>

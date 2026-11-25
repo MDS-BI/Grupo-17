@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { crearDom, bootContabilidad, qs, enviar } from '../../setup/contabilidad.js';
 import { loadPeriodos } from '../../../src/contabilidad/almacenamiento.js';
+import { clearPeriodoForm, startPeriodoEdit } from '../../../src/components/contabilidad/periodo-form.js';
 
 let dom;
 
@@ -61,6 +62,20 @@ describe('gestión de periodos contables', () => {
     enviar(qs('periodo-form'));
 
     expect(loadPeriodos().some((periodo) => periodo.name === '2026-12-confirm')).toBe(false);
+    expect(qs('periodo-status').value).toBe('abierto');
+  });
+
+  it('deshabilita la opción Abierto al editar un periodo cerrado', async () => {
+    await abrirPeriodos();
+    const cerrado = loadPeriodos().find((periodo) => periodo.id === 'per-2026-09');
+    startPeriodoEdit(cerrado);
+
+    expect(qs('periodo-status').value).toBe('cerrado');
+    const opcionAbierto = [...qs('periodo-status').options].find((opcion) => opcion.value === 'abierto');
+    expect(opcionAbierto.disabled).toBe(true);
+
+    clearPeriodoForm();
+    expect(opcionAbierto.disabled).toBe(false);
     expect(qs('periodo-status').value).toBe('abierto');
   });
 

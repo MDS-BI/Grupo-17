@@ -1,4 +1,5 @@
 ﻿import { sumarCentavos } from './dinero.js';
+import { calcularEstadoPago } from './pagos.js';
 
 function normalizarFecha(valor) {
   if (!valor) return null;
@@ -37,11 +38,16 @@ function normalizarEstado(estado) {
   return String(estado || '').normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase().trim();
 }
 
+function pagoParaEstado(pago) {
+  const estado = normalizarEstado(pago?.estado || pago?.estadoPago || '');
+  const estados = { anulado: 'cancelado', cancelado: 'cancelado', pagado: 'pagado', cobrado: 'pagado' };
+  if (!estados[estado] || pago?.status) return pago;
+  return { ...pago, status: estados[estado] };
+}
+
 export function clasificarAlertaPago(pago, fechaReferencia = new Date()) {
-  const estado = normalizarEstado(pago?.estado || pago?.estadoPago || pago?.status || '') || 'pendiente';
-  if (estado === 'anulado' || estado === 'cancelado') return 'anulado';
-  if (estado === 'pagado' || estado === 'cobrado') return 'pagado';
-  if (estado !== 'pendiente') return estado;
+  const estado = calcularEstadoPago(pagoParaEstado(pago), fechaReferencia);
+  if (estado === 'anulado' || estado === 'pagado') return estado;
 
   const fechaVencimiento = normalizarFecha(pago?.fechaVencimiento || pago?.fecha_vencimiento || pago?.vencimiento);
   if (!fechaVencimiento) return 'pendiente';

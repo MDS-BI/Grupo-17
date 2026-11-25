@@ -29,8 +29,9 @@ describe('reportes financieros por periodo', () => {
 
   it('filtra por periodo y marca como vacío un periodo sin movimientos', () => {
     const septiembre = obtenerMovimientos('per-2026-09');
-    expect(septiembre.movimientos.every((m) => m.date.startsWith('2026-09'))).toBe(true);
-    expect(septiembre.totalDebit).toBe(58000);
+    expect(septiembre.vacio).toBe(true);
+    expect(septiembre.movimientos).toHaveLength(0);
+    expect(septiembre.totalDebit).toBe(0);
 
     const noviembreInicial = obtenerMovimientos('per-2026-11');
     expect(noviembreInicial.vacio).toBe(false);

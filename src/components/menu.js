@@ -1,5 +1,6 @@
 ﻿import { SECCIONES_EXCLUIDAS, normalizarSeccion, permisosEfectivos } from '../contabilidad/permisos.js';
 import { iconoSeccion } from '../contabilidad/interfaz-config.js';
+import { iconoSvgLucide } from './iconos-lucide.js';
 
 export const MAPA_NAVEGACION = Object.freeze([
   Object.freeze({ pantalla: 'dashboard', control: 'Panel', seccion: 'panel', roles: ['administrador', 'contador', 'tesorero', 'auditor'] }),
@@ -45,6 +46,10 @@ export function navegar(pantalla, permisos = []) {
   return { permitido: true, mensaje: '' };
 }
 
+function escaparTexto(valor) {
+  return String(valor ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+}
+
 export function renderizarIconosMenu(botones = []) {
   const elementos = botones.length > 0
     ? botones
@@ -52,7 +57,9 @@ export function renderizarIconosMenu(botones = []) {
   for (const boton of elementos) {
     const destino = boton.dataset.module || boton.dataset.destino;
     const icono = boton.querySelector('.nav-icono');
-    if (icono) icono.textContent = iconoSeccion(destino === 'dashboard' ? 'dashboard' : destino);
+    if (!icono) continue;
+    const glifo = iconoSeccion(destino === 'dashboard' ? 'dashboard' : destino);
+    icono.innerHTML = `<span class="nav-icono-glifo">${escaparTexto(glifo)}</span>${iconoSvgLucide(destino)}`;
   }
   return elementos;
 }
@@ -83,7 +90,8 @@ export function renderizarMenu(permisos = [], sesion = null, botones = []) {
     if (sesion) boton.dataset.rol = sesion.rolId || '';
     const etiqueta = boton.querySelector('.nav-label');
     if (etiqueta && !etiqueta.dataset.base) etiqueta.dataset.base = etiqueta.textContent;
-    if (permitido && sesion && sesion.pantallaActiva === destino) {
+    const activo = sesion?.pantallaActiva === destino || (destino === 'dashboard' && sesion?.pantallaActiva === 'panel');
+    if (permitido && sesion && activo) {
       boton.setAttribute('aria-current', 'page');
       boton.classList.add('active');
     } else {

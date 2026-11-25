@@ -29,6 +29,8 @@ describe('cargar y restablecer datos de ejemplo', () => {
     expect(loadPeriodos()).toHaveLength(antes);
     expect(loadPeriodos().find((periodo) => periodo.id === 'per-2026-09').status).toBe('cerrado');
     expect(loadPeriodos().find((periodo) => periodo.id === 'per-2026-07').status).toBe('cerrado');
+    expect(asientosCerrados).toEqual([]);
+    expect(loadPagos().filter((pago) => pago.date.startsWith('2026-09'))).toEqual([]);
     expect(loadAsientos().filter((asiento) => asiento.period_id === 'per-2026-09').map((asiento) => asiento.id)).toEqual(asientosCerrados);
     expect(qs('mensaje-panel').textContent).toContain('Datos de ejemplo cargados');
   });

@@ -131,6 +131,6 @@ describe('User Story 13 - branded ERP workspace shell', () => {
 
   it('falls back to the default accent when the color is invalid', async () => {
     await bootWith({ moduleName: 'X', theme: { accentColor: 'not-a-color' } });
-    expect(document.documentElement.style.getPropertyValue('--accent')).toBe('#0f766e');
+    expect(document.documentElement.style.getPropertyValue('--accent')).toBe('#0f4c5c');
   });
 });

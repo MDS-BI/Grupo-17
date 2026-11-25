@@ -86,7 +86,10 @@ function panelAdministrador(datos) {
   const resultado = Number(cifras.resultado) || 0;
   const varianteResultado = resultado > 0 ? 'positivo' : resultado < 0 ? 'negativo' : 'neutro';
   const detallePeriodos = periodos.length
-    ? `<ul class="panel-rol-lista">${periodos.map((periodo) => `<li>${escapeHtml(periodo.name || periodo.id)} · ${escapeHtml(periodo.status || 'sin estado')}</li>`).join('')}</ul>`
+    ? `<div class="tabla-wrap"><table class="panel-tabla-periodos">
+        <thead><tr><th scope="col">Periodo</th><th scope="col">Estado</th></tr></thead>
+        <tbody>${periodos.map((periodo) => `<tr><td>${escapeHtml(periodo.name || periodo.id)}</td><td>${escapeHtml(periodo.status || 'sin estado')}</td></tr>`).join('')}</tbody>
+      </table></div>`
     : '<p class="muted">No hay periodos registrados.</p>';
   return `
     ${seccion('resumen-integral', 'Resumen integral', `
@@ -96,13 +99,17 @@ function panelAdministrador(datos) {
         ${tarjeta('Resultado del periodo', formatearMXN(resultado), varianteResultado)}
         ${tarjeta('Asientos contables', String(Number(cifras.movimientos) || 0), 'neutro')}
       </div>`)}
-    ${seccion('estado-periodos', 'Estado de periodos', `
-      <p class="muted">Abiertos: ${abiertos.length} · Cerrados: ${cerrados.length}</p>
-      ${detallePeriodos}`, 'panel-seccion-periodos')}
-    ${seccion('asuntos-prioritarios', 'Asuntos prioritarios', `
-      <p class="muted">Periodos abiertos: ${abiertos.length}</p>
-      <p class="muted">Asientos en borrador: ${borradores.length}</p>
-      <p class="muted">Cuentas contables: ${lista(datos.cuentas).length}</p>`, 'panel-seccion-prioritarios')}
+    <div class="panel-secciones-duo">
+      ${seccion('estado-periodos', 'Estado de periodos', `
+        <p class="muted">Abiertos: ${abiertos.length} · Cerrados: ${cerrados.length}</p>
+        ${detallePeriodos}`, 'panel-seccion-periodos')}
+      ${seccion('asuntos-prioritarios', 'Asuntos prioritarios', `
+        <ul class="panel-rol-lista">
+          <li>Periodos abiertos: ${abiertos.length}</li>
+          <li>Asientos en borrador: ${borradores.length}</li>
+          <li>Cuentas contables: ${lista(datos.cuentas).length}</li>
+        </ul>`, 'panel-seccion-prioritarios')}
+    </div>
   `;
 }
 
@@ -217,7 +224,7 @@ function descripcionSeccion(seccion) {
     cuentas: 'Catálogo y administración de cuentas contables.',
     asientos: 'Registro y control de asientos contables.',
     pagos: 'Gestión de pagos, cobros y vencimientos.',
-    periodos: 'Apertura, cierre y reapertura de periodos.',
+    periodos: 'Consulta y cierre de periodos.',
     reportes: 'Reportes financieros y exportación de información.',
     auditoria: 'Consulta de eventos y trazabilidad del sistema.',
     alertas: 'Seguimiento de pagos vencidos y próximos a vencer.',

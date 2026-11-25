@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { crearDom, bootContabilidad, qs, enviar, elegir } from '../../setup/contabilidad.js';
-import { loadPagos } from '../../../src/contabilidad/almacenamiento.js';
+import { loadPagos, loadPeriodos, savePeriodos } from '../../../src/contabilidad/almacenamiento.js';
 import { formatearMXN } from '../../../src/contabilidad/dinero.js';
 
 let dom;
@@ -93,6 +93,9 @@ describe('registro y consulta de pagos y cobros', () => {
 
   it('mapea el error de periodo cerrado al marcar un pago como pagado', async () => {
     await abrirPagos();
+    savePeriodos(loadPeriodos().map((periodo) => (
+      periodo.id === 'per-2026-08' ? { ...periodo, status: 'cerrado' } : periodo
+    )));
     const accion = document.createElement('button');
     accion.dataset.action = 'marcar-pagado';
     accion.dataset.id = 'pag-0002';

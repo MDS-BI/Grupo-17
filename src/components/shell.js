@@ -1,5 +1,7 @@
 ﻿import { getConfig, labelFor } from '../module-config.js';
-import { IDENTIDAD_EMPRESA, NOMBRE_EMPRESA, iconoSeccion, obtenerConfigInterfaz } from '../contabilidad/interfaz-config.js';
+import { IDENTIDAD_EMPRESA, NOMBRE_EMPRESA, iconoSeccion } from '../contabilidad/interfaz-config.js';
+import { iconoSvgLucide } from './iconos-lucide.js';
+
 
 
 function escapeHtml(valor){ return String(valor ?? '').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;'); }
@@ -29,11 +31,9 @@ export function monogramFor(name){
 }
 
 export function obtenerIdentidadEmpresa(){
-  const cfg = typeof obtenerConfigInterfaz === 'function' ? obtenerConfigInterfaz() : {};
-  const config = getConfig();
   return {
-    nombreEmpresa: String(cfg.nombreEmpresa || config?.theme?.nombreEmpresa || NOMBRE_EMPRESA).trim() || NOMBRE_EMPRESA,
-    logoEmpresa: String(cfg.logoEmpresa || config?.theme?.logoEmpresa || '').trim()
+    nombreEmpresa: IDENTIDAD_EMPRESA.nombre || NOMBRE_EMPRESA,
+    logoEmpresa: ''
   };
 }
 
@@ -44,25 +44,23 @@ export function renderizarIconosEncabezados(){
     const encabezado = document.getElementById(id);
     if(!encabezado) return;
     encabezado.setAttribute('data-icono', iconoSeccion(seccion));
+    encabezado.setAttribute('data-icono-seccion', seccion);
+    encabezado.querySelectorAll('.encabezado-icono').forEach((icono) => icono.remove());
+    encabezado.insertAdjacentHTML('afterbegin', `<span class="encabezado-icono" aria-hidden="true">${iconoSvgLucide(seccion, { clase: 'encabezado-icono-svg', tamano: 20 })}</span>`);
     actualizados.push(encabezado);
   });
   return actualizados;
 }
 
+
 export function renderLogo(container){
   if(!container) return;
-  const { nombreEmpresa, logoEmpresa } = obtenerIdentidadEmpresa();
-  if(logoEmpresa){
-    container.innerHTML = `<img src="${escapeHtml(logoEmpresa)}" alt="Logo de ${escapeHtml(nombreEmpresa)}" class="logo-empresa-img" width="34" height="34" />`;
-    return;
-  }
+  const nombreEmpresa = IDENTIDAD_EMPRESA.nombre || NOMBRE_EMPRESA;
   const modulo = String(getConfig()?.moduleName || nombreEmpresa);
   const letras = monogramFor(modulo);
-  const ariaLabel = nombreEmpresa === NOMBRE_EMPRESA && IDENTIDAD_EMPRESA?.ariaLabel
-    ? IDENTIDAD_EMPRESA.ariaLabel
-    : `Logo de ${nombreEmpresa}`;
-  container.innerHTML = `<svg viewBox="0 0 40 40" width="40" height="40" role="img" aria-label="${escapeHtml(ariaLabel)}" class="logo-mark-svg"><rect x="1" y="1" width="38" height="38" rx="10" fill="currentColor" opacity="0.14"></rect><text x="20" y="25" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor">${escapeHtml(letras)}</text></svg>`;
+  container.innerHTML = `<svg viewBox="0 0 40 40" width="40" height="40" role="img" aria-label="${escapeHtml(IDENTIDAD_EMPRESA.ariaLabel || `Logo de ${nombreEmpresa}`)}" class="logo-mark-svg"><rect x="1" y="1" width="38" height="38" rx="10" fill="currentColor" opacity="0.14"></rect><text x="20" y="25" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor">${escapeHtml(letras)}</text></svg>`;
 }
+
 
 export function applyShellLabels(){
   const identidad = obtenerIdentidadEmpresa();
@@ -91,9 +89,10 @@ export function applyShellLabels(){
 }
 
 export function setActiveModule(name){
+  const destino = name === 'panel' ? 'dashboard' : name;
 
   document.querySelectorAll('.nav-module').forEach(btn => {
-    const active = btn.dataset.module === name;
+    const active = btn.dataset.module === destino;
     btn.classList.toggle('active', active);
     if(active) btn.setAttribute('aria-current', 'page');
     else btn.removeAttribute('aria-current');

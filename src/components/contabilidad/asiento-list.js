@@ -12,10 +12,10 @@ function acciones(asiento, puedeVerHistorial) {
   if (asiento.status === 'borrador') {
     botones.push(`<button type="button" class="secondary" data-action="editar-asiento" data-id="${escapeHtml(asiento.id)}">Editar</button>`);
     botones.push(`<button type="button" class="primary" data-action="aprobar-asiento" data-id="${escapeHtml(asiento.id)}">Aprobar</button>`);
-    botones.push(`<button type="button" class="danger" data-action="eliminar-asiento" data-id="${escapeHtml(asiento.id)}">Eliminar</button>`);
+    botones.push(`<button type="button" class="danger" data-action="eliminar-asiento" data-confirmar-eliminacion data-id="${escapeHtml(asiento.id)}">Eliminar</button>`);
   }
   if (asiento.status !== 'cancelado') {
-    botones.push(`<button type="button" class="danger" data-action="cancelar-asiento" data-id="${escapeHtml(asiento.id)}">Cancelar</button>`);
+    botones.push(`<button type="button" class="danger" data-action="cancelar-asiento" data-confirmar-eliminacion data-id="${escapeHtml(asiento.id)}">Cancelar</button>`);
   }
   return botones.join('');
 }
@@ -43,7 +43,7 @@ export function renderAsientoList(container, asientos, opciones = {}) {
         <th scope="col">Concepto</th>
         <th scope="col">Líneas</th>
         ${encabezadoOrdenable('asientos', 'totalDebit', 'Débitos', 'amount', orden, 'num')}
-        <th scope="col" class="num">Créditos</th>
+        ${encabezadoOrdenable('asientos', 'totalCredit', 'Créditos', 'amount', orden, 'num')}
         ${encabezadoOrdenable('asientos', 'status', 'Estado', 'status', orden)}
         <th scope="col">Acciones</th>
       </tr>

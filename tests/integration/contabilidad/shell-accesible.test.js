@@ -3,6 +3,7 @@ import { fileURLToPath } from 'node:url';
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { crearDom, bootContabilidad, qs } from '../../setup/contabilidad.js';
 import { iconoSeccion } from '../../../src/contabilidad/interfaz-config.js';
+import { nombreIconoLucide } from '../../../src/components/iconos-lucide.js';
 import { cerrarDrawerNavegacion, renderizarIconosEncabezados } from '../../../src/components/shell.js';
 
 const ENCABEZADOS = {
@@ -40,7 +41,10 @@ describe('shell accesible de contabilidad', () => {
       expect(encabezado).not.toBeNull();
       expect(encabezado.tagName).toBe('H1');
       expect(encabezado.getAttribute('data-icono')).toBe(iconoSeccion(seccion));
-      expect(encabezado.children.length).toBe(0);
+      expect(encabezado.getAttribute('data-icono-seccion')).toBe(seccion);
+      const svg = encabezado.querySelector('svg[data-lucide]');
+      expect(svg).not.toBeNull();
+      expect(svg.getAttribute('data-lucide')).toBe(nombreIconoLucide(seccion));
     });
 
     expect(qs('dashboard-heading').textContent).toBe('Contabilidad y Finanzas');
@@ -55,8 +59,8 @@ describe('shell accesible de contabilidad', () => {
     await bootContabilidad(undefined, { requireAccess: true, sesion: 'administrador' });
     qs('nav-cuentas').click();
 
-    const iconoMenu = qs('nav-cuentas').querySelector('.nav-icono').textContent;
-    expect(qs('cuentas-view-heading').getAttribute('data-icono')).toBe(iconoMenu);
+    const iconoMenu = qs('nav-cuentas').querySelector('.nav-icono svg').getAttribute('data-lucide');
+    expect(qs('cuentas-view-heading').querySelector('svg[data-lucide]').getAttribute('data-lucide')).toBe(iconoMenu);
   });
 
   it('describe el logotipo con el nombre de la empresa', async () => {
@@ -77,7 +81,12 @@ describe('shell accesible de contabilidad', () => {
       expect(etiqueta.textContent.length).toBeGreaterThan(0);
     });
 
-    expect(css).toMatch(/h1\[data-icono\]::before\s*\{[^}]*content:\s*attr\(data-icono\)[^}]*margin-right:/s);
+    expect(css).toMatch(/\.encabezado-icono-svg\s*\{[^}]*margin-right:/s);
+    expect(css).toMatch(/--exito\s*:/);
+    expect(css).toMatch(/--advertencia\s*:/);
+    expect(css).toMatch(/--informacion\s*:/);
+    expect(css).toMatch(/--error\s*:/);
+    expect(css).toMatch(/\.estado-ok\{color:var\(--exito\)/);
     expect(css).not.toMatch(/\.nav-module\s+\.nav-label\s*\{[^}]*display:\s*none/s);
 
     const mediaEstrecho = css.slice(css.lastIndexOf('@media (max-width: 640px)'));

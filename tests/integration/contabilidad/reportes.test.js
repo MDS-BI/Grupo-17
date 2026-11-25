@@ -52,9 +52,9 @@ describe('vista de reportes financieros', () => {
     qs('nav-reportes').click();
     vaciarMovimientos('per-2026-11');
 
-    elegir(qs('reportes-periodo'), 'per-2026-09');
-    expect(qs('reportes-movimientos').querySelectorAll('tr')).toHaveLength(3);
-    expect(qs('reportes-total-debitos').textContent).toBe(formatearMXN(58000));
+    elegir(qs('reportes-periodo'), 'per-2026-08');
+    expect(qs('reportes-movimientos').querySelectorAll('tr')).toHaveLength(11);
+    expect(qs('reportes-total-debitos').textContent).toBe(formatearMXN(838000));
 
     elegir(qs('reportes-periodo'), 'per-2026-11');
     expect(qs('reportes-movimientos').querySelectorAll('tr')).toHaveLength(0);

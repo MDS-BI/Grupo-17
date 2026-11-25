@@ -8,7 +8,7 @@ function nombreEntidad(entidades, entityId) {
   return entidad ? entidad.name : 'Cliente o proveedor desconocido';
 }
 
-function acciones(pago, estado, permitirMarcar, puedeVerHistorial) {
+function acciones(pago, estado, permitirMarcar, puedeVerHistorial, puedeEditar, puedeAnular, eliminable = true) {
   const id = escapeHtml(pago.id);
   const menuId = `acciones-pago-${id}`;
   const botones = [
@@ -18,14 +18,18 @@ function acciones(pago, estado, permitirMarcar, puedeVerHistorial) {
     botones.push(`<button type="button" class="secondary" data-action="ver-historial-pago" data-id="${id}">Historial</button>`);
   }
   if (!pago.soloLectura && estado !== 'anulado' && estado !== 'pagado') {
-    botones.push(`<button type="button" class="secondary" data-action="editar-pago" data-id="${id}">Editar</button>`);
+    if (puedeEditar) {
+      botones.push(`<button type="button" class="secondary" data-action="editar-pago" data-id="${id}">Editar</button>`);
+    }
     if (permitirMarcar) {
       botones.push(`<button type="button" class="secondary" data-action="marcar-pagado" data-id="${id}">Marcar pagado</button>`);
     }
-    if (estado === 'pendiente' || estado === 'vencido') {
-      botones.push(`<button type="button" class="danger" data-action="eliminar-pago" data-id="${id}">Eliminar</button>`);
+    if (puedeAnular) {
+      if (eliminable && (estado === 'pendiente' || estado === 'vencido')) {
+        botones.push(`<button type="button" class="danger" data-action="eliminar-pago" data-confirmar-eliminacion data-id="${id}">Eliminar</button>`);
+      }
+      botones.push(`<button type="button" class="danger" data-action="cancelar-pago" data-confirmar-eliminacion data-id="${id}">Cancelar</button>`);
     }
-    botones.push(`<button type="button" class="danger" data-action="cancelar-pago" data-id="${id}">Cancelar</button>`);
   }
   return `
     <div class="acciones-menu">
@@ -41,6 +45,9 @@ export function renderPagoList(container, pagos, {
   estado = 'todos',
   fechaActual = new Date(),
   permitirMarcar = true,
+  puedeEditar = true,
+  puedeAnular = true,
+  eliminable = true,
   texto = '',
   pagina = 1,
   tamano = 50,
@@ -65,7 +72,7 @@ export function renderPagoList(container, pagos, {
       <tr>
         <th scope="col">Número</th>
         ${encabezadoOrdenable('pagos', 'date', 'Fecha', 'date', orden)}
-        <th scope="col">Vencimiento</th>
+        ${encabezadoOrdenable('pagos', 'fechaVencimiento', 'Vencimiento', 'date', orden)}
         <th scope="col">Tipo</th>
         <th scope="col">Cliente o proveedor</th>
         ${encabezadoOrdenable('pagos', 'amount', 'Monto', 'amount', orden, 'num')}
@@ -90,7 +97,7 @@ export function renderPagoList(container, pagos, {
       <td class="num">${formatoMoneda(pago.amount)}</td>
       <td>${escapeHtml(pago.method || '—')}</td>
       <td>${insigniaEstado(estadoPagoCalculado)}</td>
-      <td class="acciones">${acciones(pago, estadoPagoCalculado, permitirMarcar, puedeVerHistorial)}</td>`;
+      <td class="acciones">${acciones(pago, estadoPagoCalculado, permitirMarcar, puedeVerHistorial, puedeEditar, puedeAnular, eliminable)}</td>`;
     cuerpo.appendChild(fila);
   }
   container.appendChild(tabla);

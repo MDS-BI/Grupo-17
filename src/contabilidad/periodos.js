@@ -3,6 +3,8 @@ import { validarPeriodo, validarCierrePeriodo, validarEscrituraPeriodo, MENSAJE_
 import { periodoContieneFecha } from './fechas.js';
 import { registrarEvento, calcularCambios } from './auditoria.js';
 
+export const MENSAJE_PERIODO_REAPERTURA = 'Los periodos cerrados no pueden reabrirse.';
+
 function generarId() {
   return `per-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
 }
@@ -40,7 +42,7 @@ export function obtenerPeriodo(id) {
 
 function auditarPeriodo(antes, despues, sesion, accionForzada) {
   const cambios = calcularCambios(antes, despues, ['name', 'startDate', 'endDate', 'status']);
-  const accion = accionForzada || (despues.status === 'cerrado' ? 'cerrar' : despues.status === 'abierto' ? 'abrir' : 'editar');
+  const accion = accionForzada || (despues.status === 'cerrado' ? 'cerrar' : 'editar');
   registrarEvento({
     accion,
     tipoMovimiento: 'periodo',
@@ -52,9 +54,7 @@ function auditarPeriodo(antes, despues, sesion, accionForzada) {
     cambios: accion === 'editar' ? cambios : [],
     descripcion: accion === 'cerrar'
       ? `Cerró el periodo contable ${despues.name}`
-      : accion === 'abrir'
-        ? `Reabrió el periodo contable ${despues.name}`
-        : `Actualizó el periodo contable ${despues.name}`,
+      : `Actualizó el periodo contable ${despues.name}`,
     periodo: despues.id
   });
 }
@@ -106,7 +106,7 @@ export function actualizarPeriodo(id, cambios = {}, opciones = {}) {
     }
   }
   if (fusionado.status === 'abierto' && actual.status === 'cerrado') {
-    asegurarAdministrador(sesion);
+    throw new Error(MENSAJE_PERIODO_REAPERTURA);
   }
   const actualizado = {
     ...actual,
@@ -148,7 +148,7 @@ export function cambiarEstadoPeriodo(id, status, opciones = {}) {
   if (status === 'cerrado') {
     return cerrarPeriodo(id, sesionDe(opciones.sesion), opciones);
   }
-  throw new Error('Los periodos cerrados no pueden reabrirse.');
+  throw new Error(MENSAJE_PERIODO_REAPERTURA);
 }
 
 export function eliminarPeriodo(id, opciones = {}) {

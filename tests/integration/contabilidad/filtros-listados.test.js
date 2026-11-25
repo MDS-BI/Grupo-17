@@ -40,11 +40,26 @@ describe('filtros avanzados de asientos y pagos', () => {
     qs('nav-asientos').click();
 
     elegir(qs('filtro-asiento-fecha-desde'), '2026-10-31');
+    const listadoPrevio = qs('asientos-total-resultados').textContent;
     elegir(qs('filtro-asiento-fecha-hasta'), '2026-10-01');
 
     expect(qs('error-filtro-asientos').textContent).toContain('La fecha desde no puede ser mayor que la fecha hasta');
-    expect(qs('asientos-total-resultados').textContent).toContain('0 registro(s)');
-    expect(qs('asientos-filtro-empty').hidden).toBe(false);
+    expect(qs('asientos-total-resultados').textContent).toBe(listadoPrevio);
+    expect(qs('asientos-filtro-empty').hidden).toBe(true);
+  });
+
+  it('conserva el último listado válido cuando el monto del filtro es inválido', async () => {
+    await bootContabilidad();
+    qs('nav-pagos').click();
+
+    elegir(qs('filtro-pago-monto-min'), '2000');
+    expect(qs('pagos-total-resultados').textContent).toContain('1 registro(s)');
+
+    elegir(qs('filtro-pago-monto-min'), '-1');
+
+    expect(qs('error-filtro-pagos').textContent).toContain('monto mínimo');
+    expect(qs('pagos-total-resultados').textContent).toContain('1 registro(s)');
+    expect(qs('pagos-filtro-empty').hidden).toBe(true);
   });
 
   it('filtra pagos por monto expresado en pesos y permite limpiar', async () => {

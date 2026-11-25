@@ -1,4 +1,6 @@
-﻿export function escapeHtml(valor) {
+﻿import { PALETA_ESTADOS } from '../../contabilidad/interfaz-config.js';
+
+export function escapeHtml(valor) {
   return String(valor ?? '')
     .replaceAll('&', '&amp;')
     .replaceAll('<', '&lt;')
@@ -38,15 +40,12 @@ export const formatoFecha = formatearFecha;
 
 export function claseEstado(estado) {
   const valor = String(estado || '').toLowerCase();
-  if (valor === 'pagado' || valor === 'aprobado' || valor === 'cerrado' || valor === 'activa') return 'estado-ok';
-  if (valor === 'vencido' || valor === 'cancelado' || valor === 'anulado' || valor === 'inactiva') return 'estado-error';
-  if (valor === 'pendiente' || valor === 'borrador' || valor === 'abierto') return 'estado-aviso';
-  return 'estado-neutro';
+  return PALETA_ESTADOS[valor] || 'estado-neutro';
 }
 
 export function insigniaEstado(estado) {
   const texto = String(estado || '').toLowerCase();
-  return `<span class="badge ${claseEstado(texto)}">${escapeHtml(texto)}</span>`;
+  return `<span class="badge ${claseEstado(texto)}" data-estado="${escapeHtml(texto)}">${escapeHtml(texto)}</span>`;
 }
 
 export function filtrarYPaginar(registros = [], filtro = '', opciones = {}) {
@@ -146,5 +145,5 @@ export function encabezadoOrdenable(tabla, columna, etiqueta, tipo, orden, clase
   const ariaSort = activa ? (direccion === 'desc' ? 'descending' : 'ascending') : 'none';
   const tipoOrden = tipo || 'text';
   const claseTh = clase ? ` class="${escapeHtml(clase)}"` : '';
-  return `<th scope="col"${claseTh} aria-sort="${ariaSort}"><button type="button" class="orden-tabla" data-orden-tabla="${escapeHtml(tabla)}" data-orden-columna="${escapeHtml(columna)}" data-orden-tipo="${escapeHtml(tipoOrden)}">${escapeHtml(etiqueta)}</button></th>`;
+  return `<th scope="col"${claseTh} aria-sort="${ariaSort}"><button type="button" class="orden-tabla" data-ordenar data-orden-tabla="${escapeHtml(tabla)}" data-orden-columna="${escapeHtml(columna)}" data-orden-tipo="${escapeHtml(tipoOrden)}" aria-label="Ordenar por ${escapeHtml(etiqueta)}">${escapeHtml(etiqueta)}</button></th>`;
 }

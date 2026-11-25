@@ -37,7 +37,7 @@ import * as Permisos from './contabilidad/permisos.js';
 import * as ResumenPagos from './contabilidad/resumen-pagos.js';
 import * as FiltrosMovimientos from './contabilidad/filtros-movimientos.js';
 import * as Auditoria from './contabilidad/auditoria.js';
-import { ordenarRegistros } from './contabilidad/interfaz-config.js';
+import { confirmarEliminacion, mostrarMensaje, ordenarRegistros, paleta } from './contabilidad/interfaz-config.js';
 
 function qs(id){ return document.getElementById(id); }
 
@@ -79,22 +79,17 @@ let modoAcceso = false;
 let filtroEstadoPago = 'todos';
 let focoResumenPendiente = null;
 let filtrosAuditoria = { tipoMovimiento: '', accion: '', usuario: '' };
+let ultimoFiltroAsientosValido = {};
+let ultimoFiltroPagosValido = {};
 let ordenTablas = {};
 let pantallaActual = 'dashboard';
 
 function confirmar(mensaje){
-  try{
-    return typeof confirm === 'function' ? confirm(mensaje) : true;
-  }catch(error){
-    return true;
-  }
+  return confirmarEliminacion(mensaje);
 }
 
 function anunciarConfirmacion(mensaje){
-  const elemento = qs('mensaje-confirmacion');
-  if(!elemento) return;
-  elemento.textContent = mensaje || '';
-  elemento.hidden = !mensaje;
+  mostrarMensaje('informacion', mensaje || '');
 }
 
 function asegurarContabilidad(){
@@ -383,7 +378,11 @@ function refrescarResumen(){
 
 function refrescarCuentas(){
   const cuentas = ordenarParaVista('cuentas', Cuentas.listarCuentas());
-  const hayCuentas = renderCuentaList(qs('cuentas-lista'), cuentas, { filtro: qs('cuentas-filtro').value, orden: ordenTablas.cuentas });
+  const hayCuentas = renderCuentaList(qs('cuentas-lista'), cuentas, {
+    filtro: qs('cuentas-filtro').value,
+    orden: ordenTablas.cuentas,
+    eliminable: puedeSeccion('cuentas', 'editar')
+  });
   qs('cuentas-empty').hidden = hayCuentas;
   populateCuentaParentSelect(cuentas, { excludeId: qs('cuenta-id').value || null });
   const detalle = Cuentas.obtenerDetalleCuenta(qs('cuenta-detalle-id').value);
@@ -407,13 +406,15 @@ function refrescarAsientos(){
   const filtro = leerFiltroAsientos();
   const revision = FiltrosMovimientos.validarFiltro(filtro);
   mostrarErrorFiltro('error-filtro-asientos', revision);
-  const detallado = revision.valido ? FiltrosMovimientos.filtrarAsientosDetallado(todos, filtro) : { registros: [], totalCentavos: 0 };
+  const filtroEfectivo = revision.valido ? filtro : ultimoFiltroAsientosValido;
+  if (revision.valido) ultimoFiltroAsientosValido = filtro;
+  const detallado = FiltrosMovimientos.filtrarAsientosDetallado(todos, filtroEfectivo);
   const registros = ordenarParaVista('asientos', detallado.registros).map(asiento => ({
     ...asiento,
     soloLectura: registroEnPeriodoCerrado(asiento)
   }));
   const hayAsientos = renderAsientoList(qs('asientos-lista'), registros, {
-    filtro: filtro.texto,
+    filtro: filtroEfectivo.texto,
     orden: ordenTablas.asientos,
     puedeVerHistorial: puedeConsultarAuditoriaMovimiento()
   });
@@ -457,7 +458,9 @@ function refrescarPagos(){
   const filtro = leerFiltroPagos();
   const revision = FiltrosMovimientos.validarFiltro(filtro);
   mostrarErrorFiltro('error-filtro-pagos', revision);
-  const detallado = revision.valido ? FiltrosMovimientos.filtrarPagosDetallado(todosLosPagos, filtro) : { registros: [], totalCentavos: 0 };
+  const filtroEfectivo = revision.valido ? filtro : ultimoFiltroPagosValido;
+  if (revision.valido) ultimoFiltroPagosValido = filtro;
+  const detallado = FiltrosMovimientos.filtrarPagosDetallado(todosLosPagos, filtroEfectivo);
   const tipo = qs('pagos-filtro-tipo').value;
   const filtrados = ordenarParaVista('pagos', detallado.registros.filter(pago => (!tipo || pago.tipo === tipo) && (!filtroEntidad.value || pago.entity_id === filtroEntidad.value))).map(pago => ({
     ...pago,
@@ -466,6 +469,9 @@ function refrescarPagos(){
   const hayPagos = renderPagoList(qs('pagos-lista'), filtrados, {
     entidades,
     permitirMarcar: puedeSeccion('pagos', 'marcarPagado'),
+    puedeEditar: puedeSeccion('pagos', 'editar'),
+    puedeAnular: puedeSeccion('pagos', 'anular'),
+    eliminable: puedeSeccion('pagos', 'anular'),
     orden: ordenTablas.pagos,
     puedeVerHistorial: puedeConsultarAuditoriaMovimiento()
   });
@@ -557,7 +563,7 @@ function activarFiltroEstadoPago(estado, { enfocar = false } = {}){
 }
 
 function handleAccionesGlobales(ev){
-  const botonOrden = ev.target.closest('.orden-tabla[data-orden-tabla]');
+  const botonOrden = ev.target.closest('[data-ordenar][data-orden-tabla]');
   if(botonOrden){
     alternarOrden(botonOrden.dataset.ordenTabla, botonOrden.dataset.ordenColumna, botonOrden.dataset.ordenTipo);
     return;
@@ -569,7 +575,8 @@ function handleAccionesGlobales(ev){
       if(control.id === 'filtro-estado-pago') activarFiltroEstadoPago('todos');
       else{
         control.value = '';
-        control.dispatchEvent(new Event(control.tagName === 'SELECT' ? 'change' : 'input', { bubbles: true }));
+        const Evento = window?.Event || Event;
+        control.dispatchEvent(new Evento(control.tagName === 'SELECT' ? 'change' : 'input', { bubbles: true }));
       }
     }
     anunciarConfirmacion('Filtro eliminado.');
@@ -1037,7 +1044,7 @@ function handlePagoListClick(ev){
     }
     return;
   }
-  const permisosAccion = { 'editar-pago': 'editar', 'cancelar-pago': 'editar', 'eliminar-pago': 'eliminar' };
+  const permisosAccion = { 'editar-pago': 'editar', 'cancelar-pago': 'anular', 'eliminar-pago': 'eliminar' };
   if(permisosAccion[accion] && !verificarPermiso('pagos', permisosAccion[accion])) return;
   const mensajes = {
     'cancelar-pago': '¿Cancelar el pago seleccionado?',
@@ -1223,7 +1230,18 @@ function applyLabels(config){
 }
 
 function applyTheme(config){
-  document.documentElement.style.setProperty('--accent', config.theme.accentColor);
+  const acento = String(config?.theme?.accentColor || '').trim();
+  if(!acento) return;
+  const oscuro = `color-mix(in srgb, ${acento} 78%, #000)`;
+  const estilos = document.documentElement.style;
+  estilos.setProperty('--primary', acento);
+  estilos.setProperty('--primary-dark', oscuro);
+  estilos.setProperty('--accent', acento);
+  estilos.setProperty('--accent-dark', oscuro);
+  estilos.setProperty('--exito', paleta.exito);
+  estilos.setProperty('--advertencia', paleta.advertencia);
+  estilos.setProperty('--informacion', paleta.informacion);
+  estilos.setProperty('--error', paleta.error);
 }
 
 function showConfigErrors(errors){

@@ -45,7 +45,7 @@ export const DEFAULT_CONFIG = Object.freeze({
   }),
   customFields: Object.freeze([]),
   statusLifecycle: null,
-  theme: Object.freeze({ accentColor: '#0f766e', nombreEmpresa: 'Comercial Los Andes SpA', logoEmpresa: '' })
+  theme: Object.freeze({ accentColor: '#0f4c5c', nombreEmpresa: 'Comercial Los Andes SpA', logoEmpresa: '' })
 });
 
 export const FIELD_TYPES = ['text', 'number', 'date', 'select'];

@@ -1,58 +1,84 @@
-﻿import { leerValor, escribirValor, eliminarValor } from '../storage.js';
+﻿import { opcionesMenu } from './permisos.js';
 
 export const NOMBRE_EMPRESA = 'Comercial Los Andes SpA';
+
 export const IDENTIDAD_EMPRESA = Object.freeze({
   nombre: NOMBRE_EMPRESA,
   logotipo: 'svg-en-linea',
   ariaLabel: 'Logo de Comercial Los Andes SpA'
 });
-export const CLAVE_CONFIG_INTERFAZ = 'erp_contabilidad:interfaz';
 
-const DEFAULT_CONFIG = Object.freeze({
-  nombreEmpresa: NOMBRE_EMPRESA,
-  logoEmpresa: ''
+export const paleta = Object.freeze({
+  primario: '#0f4c5c',
+  exito: '#16794c',
+  error: '#b42318',
+  advertencia: '#a15c00',
+  informacion: '#1d6f8c',
+  texto: '#0b3946',
+  fondo: '#f7fafb'
 });
-
-export function obtenerConfigInterfaz() {
-  try {
-    const raw = leerValor(CLAVE_CONFIG_INTERFAZ);
-    if (!raw) return { ...DEFAULT_CONFIG };
-    const parsed = JSON.parse(raw);
-    return {
-      nombreEmpresa: String(parsed?.nombreEmpresa || DEFAULT_CONFIG.nombreEmpresa).trim() || DEFAULT_CONFIG.nombreEmpresa,
-      logoEmpresa: String(parsed?.logoEmpresa || '').trim()
-    };
-  } catch (_) {
-    return { ...DEFAULT_CONFIG };
-  }
-}
-
-export function guardarConfigInterfaz(config = {}) {
-  const actual = obtenerConfigInterfaz();
-  const siguiente = {
-    nombreEmpresa: String(config.nombreEmpresa ?? actual.nombreEmpresa).trim() || DEFAULT_CONFIG.nombreEmpresa,
-    logoEmpresa: String(config.logoEmpresa ?? actual.logoEmpresa).trim()
-  };
-  escribirValor(CLAVE_CONFIG_INTERFAZ, JSON.stringify(siguiente));
-  return siguiente;
-}
-
-export function restablecerConfigInterfaz() {
-  eliminarValor(CLAVE_CONFIG_INTERFAZ);
-  return { ...DEFAULT_CONFIG };
-}
 
 export const PALETA_ESTADOS = Object.freeze({
   pagado: 'estado-ok',
   aprobado: 'estado-ok',
   cerrado: 'estado-ok',
+  activa: 'estado-ok',
   pendiente: 'estado-aviso',
   borrador: 'estado-aviso',
   abierto: 'estado-aviso',
   vencido: 'estado-error',
   cancelado: 'estado-error',
-  anulado: 'estado-error'
+  anulado: 'estado-error',
+  inactiva: 'estado-error'
 });
+
+const TIPOS_MENSAJE = new Set(['exito', 'error', 'advertencia', 'informacion']);
+
+export function confirmarEliminacion(mensaje) {
+  const dialogo = globalThis.window?.confirm || globalThis.confirm;
+  if (typeof dialogo !== 'function') return false;
+  try {
+    return Boolean(dialogo(mensaje));
+  } catch (_) {
+    return false;
+  }
+}
+
+export function mostrarMensaje(tipo, texto) {
+  if (typeof document === 'undefined') return null;
+  const tipoNormalizado = TIPOS_MENSAJE.has(tipo) ? tipo : 'informacion';
+  const contenedor = document.querySelector('[data-mensaje="global"]')
+    || document.querySelector('[data-mensaje]');
+  if (!contenedor) return null;
+  contenedor.textContent = texto || '';
+  contenedor.dataset.tipo = tipoNormalizado;
+  contenedor.hidden = !texto;
+  return contenedor;
+}
+
+const PANTALLA_SECCION = Object.freeze({
+  panel: 'dashboard',
+  resumen: 'resumen',
+  cuentas: 'cuentas',
+  asientos: 'asientos',
+  pagos: 'pagos',
+  periodos: 'periodos',
+  reportes: 'reportes',
+  auditoria: 'auditoria',
+  alertas: 'alertas',
+  configInterfaz: 'configInterfaz'
+});
+
+export function obtenerOpcionesMenu(sesion, ancho = 1280) {
+  const movil = Number(ancho) <= 900;
+  return opcionesMenu(sesion || null).map((opcion) => ({
+    seccion: opcion.seccion,
+    pantalla: PANTALLA_SECCION[opcion.seccion] || opcion.seccion,
+    etiqueta: opcion.etiqueta,
+    acceso: opcion.acceso,
+    movil
+  }));
+}
 
 export const ICONOS_SECCION = Object.freeze({
   dashboard: '⌂',
@@ -90,7 +116,7 @@ export function compararFecha(a, b) {
   return da.localeCompare(db);
 }
 
-const ORDEN_ESTADO = { borrador: 0, pendiente: 1, abierto: 1, aprobado: 2, pagado: 2, cerrado: 2, vencido: 3, cancelado: 4, anulado: 5 };
+const ORDEN_ESTADO = { borrador: 0, pendiente: 1, abierto: 1, aprobado: 2, pagado: 2, cerrado: 2, activa: 2, vencido: 3, cancelado: 4, anulado: 5, inactiva: 5 };
 
 export function compararEstado(estado) {
   const clave = normalizarTexto(estado);

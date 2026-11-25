@@ -7,7 +7,7 @@ import { alertasDeVencimientos } from '../contabilidad/alertas-vencimientos.js';
 import { loadPagos } from '../contabilidad/almacenamiento.js';
 import { loadEntities } from '../storage.js';
 
-const PALETA_GASTOS = ['#0f766e', '#b45309', '#2563eb', '#7c3aed', '#be123c', '#0e7490', '#4d7c0f', '#a16207'];
+const PALETA_GASTOS = ['#0f4c5c', '#1b6070', '#287484', '#358896', '#429ca8', '#4fb0bb', '#5cc4cf', '#0b3946'];
 const PORCENTAJE = new Intl.NumberFormat('es-MX', { style: 'percent', maximumFractionDigits: 1 });
 
 function setText(id, text){
