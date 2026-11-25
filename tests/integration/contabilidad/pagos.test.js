@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { crearDom, bootContabilidad, qs, enviar, elegir } from '../../setup/contabilidad.js';
 import { loadPagos, loadPeriodos, savePeriodos } from '../../../src/contabilidad/almacenamiento.js';
-import { formatearMXN } from '../../../src/contabilidad/dinero.js';
+import { formatearCLP } from '../../../src/contabilidad/dinero.js';
 
 let dom;
 
@@ -32,7 +32,7 @@ describe('registro y consulta de pagos y cobros', () => {
     await abrirPagos();
     expect(qs('view-pagos').hidden).toBe(false);
     expect(qs('pagos-lista').textContent).toContain('COB-1001');
-    expect(qs('pagos-lista').textContent).toContain(formatearMXN(116000));
+    expect(qs('pagos-lista').textContent).toContain(formatearCLP(116000));
     expect(qs('pagos-empty').hidden).toBe(true);
 
     const toggle = document.querySelector('[data-acciones-menu="pag-0001"]');

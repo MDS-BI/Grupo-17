@@ -17,6 +17,11 @@
             <span id="empresa-nombre" class="brand-modulo">Comercial Los Andes SpA</span>
           </div>
         </div>
+        <div class="encabezado-usuario" data-identidad-usuario hidden>
+          <span class="usuario-nombre" id="usuario-nombre" data-usuario-nombre></span>
+          <span class="usuario-rol" id="usuario-rol" data-usuario-rol></span>
+          <button type="button" id="cerrar-sesion-encabezado" class="secondary" data-accion="cerrar-sesion" data-cerrar-sesion>Cerrar sesión</button>
+        </div>
         <button type="button" id="menu-toggle" class="menu-toggle" data-menu-movil aria-controls="sidebar-nav" aria-expanded="false" aria-label="Abrir menú de navegación" hidden>
           <svg class="menu-toggle-icono" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" data-lucide="menu" aria-hidden="true"><path d="M4 6h16"></path><path d="M4 12h16"></path><path d="M4 18h16"></path></svg><span class="menu-toggle-texto">Menú</span>
         </button>
@@ -67,11 +72,21 @@
         </nav>
       </aside>
 
+      <div id="ventana-formulario" class="ventana-formulario" data-ventana-formulario role="presentation" aria-hidden="true" hidden>
+        <section class="ventana-formulario-panel" role="dialog" aria-modal="true" aria-labelledby="ventana-formulario-titulo">
+          <header class="ventana-formulario-cabecera">
+            <h2 id="ventana-formulario-titulo">Nuevo registro</h2>
+            <button type="button" id="ventana-formulario-cerrar" class="secondary" data-cerrar-ventana-formulario aria-label="Cerrar ventana sin guardar">×</button>
+          </header>
+          <div class="ventana-formulario-contenido" data-ventana-formulario-contenido></div>
+        </section>
+      </div>
+
       <main class="content" id="app">
         <div id="mensaje-confirmacion" class="muted confirmacion-global" data-mensaje="global" role="status" aria-live="polite" hidden></div>
-        <section id="view-acceso" aria-labelledby="acceso-heading">
+        <section id="view-acceso" aria-labelledby="acceso-heading" data-acceso-pantalla>
           <h1 id="acceso-heading">Acceso al módulo</h1>
-          <form id="acceso-formulario" class="card acceso-card" data-acceso="formulario">
+          <form id="acceso-formulario" class="card acceso-card" data-acceso="formulario" data-acceso-centrado>
             <p class="muted">Ingresa tu RUT y contraseña de demostración para continuar.</p>
             <div>
               <label for="acceso-rut">RUT *</label>
@@ -83,8 +98,8 @@
               <input id="acceso-contraseña" name="acceso-contraseña" data-acceso="contraseña" type="password" autocomplete="current-password" required />
               <div class="error" id="error-acceso-contraseña" aria-live="polite"></div>
             </div>
-            <div class="error" id="error-acceso" data-acceso="error" aria-live="polite"></div>
             <div class="form-actions">
+              <div class="error" id="error-acceso" data-acceso="error" aria-live="polite"></div>
               <button type="submit" id="acceso-ingresar" class="primary" data-acceso="ingresar">Ingresar</button>
             </div>
           </form>
@@ -325,7 +340,7 @@
               </div>
               <div>
                 <label for="currency">Moneda</label>
-                <input id="currency" name="currency" placeholder="p. ej., MXN" />
+                <input id="currency" name="currency" placeholder="p. ej., CLP" />
               </div>
               <div>
                 <label for="docPaymentTerms">Condiciones de pago</label>
@@ -403,7 +418,7 @@
 
         <section id="view-cuentas" aria-labelledby="cuentas-view-heading" hidden>
           <h1 id="cuentas-view-heading">Cuentas contables</h1>
-          <section class="card" aria-labelledby="cuenta-form-heading">
+          <section class="card" aria-labelledby="cuenta-form-heading" data-formulario-nuevo="cuenta">
             <h2 id="cuenta-form-heading">Agregar / Editar cuenta contable</h2>
             <form id="cuenta-form">
               <input type="hidden" id="cuenta-id" />
@@ -454,13 +469,17 @@
               </div>
             </form>
           </section>
-          <section class="card card-wide" aria-labelledby="cuentas-lista-heading">
-            <h2 id="cuentas-lista-heading">Plan de cuentas</h2>
+          <section class="card card-wide" aria-labelledby="cuentas-lista-heading" data-lista-principal data-seccion-nuevo="cuentas">
+            <div class="lista-cabecera">
+              <h2 id="cuentas-lista-heading">Plan de cuentas</h2>
+              <button type="button" class="primary boton-nuevo" data-nuevo="cuenta" data-titulo-nuevo="Nueva cuenta contable" data-permiso-nuevo="cuentas">Nuevo</button>
+            </div>
             <div class="filtro-lista">
               <label for="cuentas-filtro">Filtrar cuentas</label>
               <input id="cuentas-filtro" type="search" placeholder="Código, nombre o tipo" aria-label="Filtrar cuentas contables" />
             </div>
             <div id="cuentas-empty" class="empty" hidden>No hay cuentas contables registradas.</div>
+            <div id="cuentas-filtro-empty" class="empty estado-vacio-listado" data-estado-vacio-filtro hidden>No hay resultados para mostrar.</div>
             <div id="cuentas-lista"></div>
           </section>
           <section class="card card-wide" aria-labelledby="cuenta-detalle-heading">
@@ -473,7 +492,7 @@
 
         <section id="view-asientos" aria-labelledby="asientos-view-heading" hidden>
           <h1 id="asientos-view-heading">Asientos contables</h1>
-          <section class="card card-wide" aria-labelledby="asiento-form-heading">
+          <section class="card card-wide" aria-labelledby="asiento-form-heading" data-formulario-nuevo="asiento">
             <h2 id="asiento-form-heading">Registrar asiento contable</h2>
             <form id="asiento-form">
               <input type="hidden" id="asiento-id" />
@@ -527,8 +546,11 @@
               </div>
             </form>
           </section>
-          <section class="card card-wide" aria-labelledby="asientos-lista-heading">
-            <h2 id="asientos-lista-heading">Asientos registrados</h2>
+          <section class="card card-wide" aria-labelledby="asientos-lista-heading" data-lista-principal data-seccion-nuevo="asientos">
+            <div class="lista-cabecera">
+              <h2 id="asientos-lista-heading">Asientos registrados</h2>
+              <button type="button" class="primary boton-nuevo" data-nuevo="asiento" data-titulo-nuevo="Nuevo asiento contable" data-permiso-nuevo="asientos">Nuevo</button>
+            </div>
             <div class="filtros-movimientos" data-filtros-asientos>
               <div class="campo-con-limpieza">
                 <label for="filtro-asiento-fecha-desde">Fecha desde</label>
@@ -631,7 +653,7 @@
             </div>
             <p id="error-filtro-pagos" class="error" data-error-filtro aria-live="polite"></p>
           </section>
-          <section class="card card-wide" aria-labelledby="pago-form-heading">
+          <section class="card card-wide" aria-labelledby="pago-form-heading" data-formulario-nuevo="pago">
             <h2 id="pago-form-heading">Registrar pago o cobro</h2>
             <form id="pago-form">
               <input type="hidden" id="pago-id" />
@@ -714,8 +736,11 @@
               </div>
             </form>
           </section>
-          <section class="card card-wide" aria-labelledby="pagos-lista-heading">
-            <h2 id="pagos-lista-heading">Pagos y cobros registrados</h2>
+          <section class="card card-wide" aria-labelledby="pagos-lista-heading" data-lista-principal data-seccion-nuevo="pagos">
+            <div class="lista-cabecera">
+              <h2 id="pagos-lista-heading">Pagos y cobros registrados</h2>
+              <button type="button" class="primary boton-nuevo" data-nuevo="pago" data-titulo-nuevo="Nuevo pago o cobro" data-permiso-nuevo="pagos">Nuevo</button>
+            </div>
             <div class="field-row">
               <div>
                 <label for="pagos-filtro-tipo">Tipo</label>
@@ -744,7 +769,7 @@
 
         <section id="view-periodos" aria-labelledby="periodos-view-heading" hidden>
           <h1 id="periodos-view-heading">Periodos contables</h1>
-          <section class="card" aria-labelledby="periodo-form-heading">
+          <section class="card" aria-labelledby="periodo-form-heading" data-formulario-nuevo="periodo">
             <h2 id="periodo-form-heading">Agregar / Editar periodo contable</h2>
             <form id="periodo-form">
               <input type="hidden" id="periodo-id" />
@@ -780,13 +805,17 @@
               </div>
             </form>
           </section>
-          <section class="card card-wide" aria-labelledby="periodos-lista-heading">
-            <h2 id="periodos-lista-heading">Periodos registrados</h2>
+          <section class="card card-wide" aria-labelledby="periodos-lista-heading" data-lista-principal data-seccion-nuevo="periodos">
+            <div class="lista-cabecera">
+              <h2 id="periodos-lista-heading">Periodos registrados</h2>
+              <button type="button" class="primary boton-nuevo" data-nuevo="periodo" data-titulo-nuevo="Nuevo periodo contable" data-permiso-nuevo="periodos">Nuevo</button>
+            </div>
             <div class="filtro-lista">
               <label for="periodos-filtro">Filtrar periodos</label>
               <input id="periodos-filtro" type="search" placeholder="Nombre o estado" aria-label="Filtrar periodos contables" />
             </div>
             <div id="periodos-empty" class="empty" hidden>No hay periodos contables registrados.</div>
+            <div id="periodos-filtro-empty" class="empty estado-vacio-listado" data-estado-vacio-filtro hidden>No hay resultados para mostrar.</div>
             <div id="periodos-lista"></div>
           </section>
         </section>
@@ -806,8 +835,8 @@
                   <th scope="col">Fecha</th>
                   <th scope="col">Concepto</th>
                   <th scope="col">Cuenta</th>
-                  <th scope="col" class="num">Débito</th>
-                  <th scope="col" class="num">Crédito</th>
+                  <th scope="col" class="num">Débito (CLP)</th>
+                  <th scope="col" class="num">Crédito (CLP)</th>
                 </tr>
               </thead>
               <tbody id="reportes-movimientos"></tbody>

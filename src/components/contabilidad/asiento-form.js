@@ -1,5 +1,5 @@
 import { listarCuentas } from '../../contabilidad/cuentas.js';
-import { normalizarImporte, desdeCentavos, formatearMXN, sumarCentavos } from '../../contabilidad/dinero.js';
+import { normalizarImporte, desdeCentavos, formatearCLP, sumarCentavos } from '../../contabilidad/dinero.js';
 import { poblarSelect, limpiarErrores, mostrarError } from './comun.js';
 
 function qs(id) {
@@ -148,11 +148,11 @@ export function actualizarTotalesAsiento() {
   const totalDebe = qs('asiento-total-debitos');
   const totalHaber = qs('asiento-total-creditos');
   const diferencia = qs('asiento-diferencia');
-  if (totalDebe) totalDebe.textContent = formatearMXN(debitos);
-  if (totalHaber) totalHaber.textContent = formatearMXN(creditos);
+  if (totalDebe) totalDebe.textContent = formatearCLP(debitos);
+  if (totalHaber) totalHaber.textContent = formatearCLP(creditos);
   if (diferencia) {
     const delta = sumarCentavos([debitos, -creditos]);
-    diferencia.textContent = formatearMXN(delta);
+    diferencia.textContent = formatearCLP(delta);
     diferencia.classList.toggle('negative', delta !== 0);
   }
 }

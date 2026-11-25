@@ -7,7 +7,7 @@ import {
   periodosDisponibles
 } from '../../../src/contabilidad/reportes.js';
 import { renderReporte } from '../../../src/components/contabilidad/reportes.js';
-import { formatearMXN } from '../../../src/contabilidad/dinero.js';
+import { formatearCLP } from '../../../src/contabilidad/dinero.js';
 
 let dom;
 
@@ -28,6 +28,15 @@ function renderVista(periodoId = 'per-2026-10', opciones = {}) {
     estados: obtenerReportesFinancieros(periodoId, { resultado }),
     ...opciones
   });
+}
+
+function centavosDeTexto(texto) {
+  return Number(String(texto).replace(/[^\d-]/g, '')) || 0;
+}
+
+function importesDelDetalle() {
+  return [...document.querySelectorAll('[data-detalle-filas] tr')]
+    .map((fila) => centavosDeTexto(fila.cells[2].textContent));
 }
 
 beforeEach(() => {
@@ -59,7 +68,7 @@ describe('pestañas de estados financieros', () => {
 
     pestanas.find((boton) => boton.dataset.reporte === 'estadoResultados').click();
     expect(document.querySelector('[data-tabla-reporte]').tHead.textContent).toContain('Ingresos');
-    expect(document.querySelector('[data-tabla-reporte] tfoot').textContent).toContain(formatearMXN(-150000));
+    expect(document.querySelector('[data-tabla-reporte] tfoot').textContent).toContain(formatearCLP(-150000));
     expect(document.querySelector('[data-reporte="estadoResultados"]').getAttribute('aria-selected')).toBe('true');
 
     document.querySelector('[data-reporte="balanceGeneral"]').click();
@@ -67,7 +76,7 @@ describe('pestañas de estados financieros', () => {
     expect(document.querySelector('[data-advertencia-reporte]').hidden).toBe(true);
   });
 
-  it('alinea los totales con el número de columnas y usa formato MXN', () => {
+  it('alinea los totales con el número de columnas y usa formato CLP', () => {
     renderVista();
 
     for (const clave of ['libroMayor', 'balanceComprobacion', 'estadoResultados', 'balanceGeneral']) {
@@ -111,7 +120,81 @@ describe('pestañas de estados financieros', () => {
     renderVista('per-2026-11');
 
     expect(document.querySelector('[data-reporte="estadoResultados"]').getAttribute('aria-selected')).toBe('true');
-    expect(document.querySelector('[data-tabla-reporte] tfoot').textContent).toContain(formatearMXN(0));
+    expect(document.querySelector('[data-tabla-reporte] tfoot').textContent).toContain(formatearCLP(0));
     expect(document.querySelector('[data-estado-vacio-reporte]').hidden).toBe(false);
+  });
+
+  it('indica CLP en todos los encabezados monetarios', () => {
+    renderVista();
+
+    const encabezadosMovimientos = [...document.querySelectorAll('#reportes-tabla thead th.num')];
+    expect(encabezadosMovimientos.length).toBeGreaterThan(0);
+    expect(encabezadosMovimientos.every((th) => th.textContent.includes('(CLP)'))).toBe(true);
+
+    for (const clave of ['libroMayor', 'balanceComprobacion', 'estadoResultados', 'balanceGeneral']) {
+      document.querySelector(`[data-reporte="${clave}"]`).click();
+      const encabezados = [...document.querySelectorAll('[data-tabla-reporte] thead th.num')];
+      expect(encabezados.length).toBeGreaterThan(0);
+      expect(encabezados.every((th) => th.textContent.includes('(CLP)'))).toBe(true);
+    }
+  });
+
+  it('permite ordenar el reporte Estado de Resultados por tipo', () => {
+    renderVista('per-2026-10', {
+      reporte: 'estadoResultados',
+      orden: { tabla: 'reporte-estadoResultados', columna: 'tipo', direccion: 'asc' }
+    });
+
+    const tabla = document.querySelector('[data-tabla-reporte]');
+    const cabeceraTipo = tabla.tHead.querySelectorAll('th')[2];
+    const tipos = [...tabla.tBodies[0].rows].map((fila) => fila.cells[2].textContent);
+
+    expect(cabeceraTipo.textContent).toContain('Tipo');
+    expect(cabeceraTipo.getAttribute('aria-sort')).toBe('ascending');
+    expect(tipos).toEqual([...tipos].sort((a, b) => a.localeCompare(b, 'es')));
+  });
+
+  it('muestra el detalle de los totales de la tabla de movimientos', () => {
+    renderVista();
+    const panel = document.querySelector('[data-detalle-totales]');
+    expect(panel.hidden).toBe(true);
+
+    for (const [id, campo] of [['reportes-total-debitos', 'debit'], ['reportes-total-creditos', 'credit']]) {
+      const total = document.getElementById(id);
+      const boton = total.querySelector('[data-detalle-total="movimientos"]');
+      expect(boton).not.toBeNull();
+
+      boton.click();
+
+      const movimientos = obtenerMovimientos('per-2026-10').movimientos.filter((movimiento) => movimiento[campo] !== 0);
+      expect(panel.hidden).toBe(false);
+      expect(panel.querySelector('[data-detalle-titulo]').textContent).toContain('CLP');
+      expect(panel.querySelectorAll('[data-detalle-filas] tr')).toHaveLength(movimientos.length);
+      expect(importesDelDetalle().reduce((suma, valor) => suma + valor, 0)).toBe(centavosDeTexto(total.textContent));
+      expect(boton.getAttribute('aria-expanded')).toBe('true');
+    }
+
+    panel.querySelector('[data-cerrar-detalle]').click();
+    expect(panel.hidden).toBe(true);
+  });
+
+  it('muestra el detalle de cada total de los cuatro reportes', () => {
+    renderVista();
+    const panel = document.querySelector('[data-detalle-totales]');
+
+    for (const clave of ['libroMayor', 'balanceComprobacion', 'estadoResultados', 'balanceGeneral']) {
+      document.querySelector(`[data-reporte="${clave}"]`).click();
+      const botones = [...document.querySelectorAll('[data-tabla-reporte] [data-detalle-total="reporte"]')];
+      expect(botones.length).toBeGreaterThan(0);
+
+      for (const boton of botones) {
+        boton.click();
+        const importes = importesDelDetalle();
+        expect(panel.hidden).toBe(false);
+        expect(importes.length).toBeGreaterThan(0);
+        expect(importes.reduce((suma, valor) => suma + valor, 0)).toBe(centavosDeTexto(boton.textContent));
+        expect(boton.getAttribute('aria-expanded')).toBe('true');
+      }
+    }
   });
 });

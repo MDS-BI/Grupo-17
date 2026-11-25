@@ -29,13 +29,13 @@ Definir la interfaz entre `Pago`, la pantalla "Pagos y cobros" y el resumen por 
 - `resumirPagos(pagos, fechaActual)`: agrupa por `EstadoPago` y devuelve `cantidad` y `totalCentavos` para los tres estados, aunque alguno esté vacío.
 - `filtrarPagos(pagos, filtro, fechaActual)`: devuelve los pagos del estado seleccionado; `todos` no filtra.
 - `marcarPagado(pagoId)`: cambia `status` a `pagado` y devuelve el pago actualizado.
-- `formatearResumen(resumen)`: usa `formatearMXN` para los totales sin alterar los centavos.
+- `formatearResumen(resumen)`: usa `formatearCLP` para los totales sin alterar los centavos.
 
 ## Puntos de Montaje
 
 | Elemento | Selector | Contenido |
 |---|---|---|
-| Resumen | `[data-resumen-pagos]` | Tres tarjetas con cantidad y total en MXN |
+| Resumen | `[data-resumen-pagos]` | Tres tarjetas con cantidad y total en CLP |
 | Filtro | `[data-filtro-estado]` | Opciones `Todos`, `Pendiente`, `Pagado`, `Vencido` |
 | Listado | `[data-lista-pagos]` | Pagos resultantes del filtro |
 | Estado vacío del resumen | `[data-estado-vacio-resumen]` | Mensaje cuando no hay pagos registrados |

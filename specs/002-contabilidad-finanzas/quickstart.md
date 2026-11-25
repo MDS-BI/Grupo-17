@@ -27,7 +27,7 @@ npm run build
 
 1. Poblar los datos de ejemplo y permanecer en el panel principal.
 2. Verificar que aparecen tres visualizaciones: barras de ingresos/gastos por periodo, línea de resultado y dona de gastos por cuenta.
-3. Comprobar que las etiquetas y tooltips muestran importes en MXN con dos decimales.
+3. Comprobar que las etiquetas y tooltips muestran importes en CLP con dos decimales.
 4. Cambiar el periodo contable y confirmar que las tres gráficas se actualizan sin recargar la página.
 5. Comprobar que la suma de ingresos y gastos del panel coincide con el resumen del reporte del mismo periodo.
 6. Eliminar los datos de ejemplo o iniciar una sesión sin datos y verificar mensajes de estado vacío en español en lugar de gráficas vacías.
@@ -68,7 +68,7 @@ npm run build
 ## Validación de la Historia de Usuario 12 (resumen de pagos)
 
 1. Iniciar sesión como Tesorero o Administrador financiero, cargar la semilla y abrir **Pagos y cobros**.
-2. Verificar el resumen con cantidad y total en MXN para pendiente, pagado y vencido.
+2. Verificar el resumen con cantidad y total en CLP para pendiente, pagado y vencido.
 3. Aplicar cada filtro (`Todos`, `Pendiente`, `Pagado`, `Vencido`) y comprobar que el listado coincide con el resumen y que los otros totales siguen visibles.
 4. Confirmar que un pago pendiente cuya fecha de vencimiento ya pasó aparece como vencido y deja de contarse como pendiente.
 5. Marcar un pago como pagado y verificar el cambio inmediato en resumen, totales y listado filtrado.
@@ -104,7 +104,7 @@ npm run build
 
 ## Validación de la Historia de Usuario 17 (alertas de vencimientos)
 
-1. Iniciar sesión como Tesorero con datos de ejemplo y comprobar que su panel muestra alertas de pagos vencidos y de pagos que vencen esta semana, con cantidad y total en MXN.
+1. Iniciar sesión como Tesorero con datos de ejemplo y comprobar que su panel muestra alertas de pagos vencidos y de pagos que vencen esta semana, con cantidad y total en CLP.
 2. Revisar el detalle de cada alerta: entidad, monto y fecha de vencimiento; si hay más de tres pagos, debe indicarse cuántos adicionales existen.
 3. Verificar que un pago vencido dentro de la semana actual solo aparece en la alerta de vencidos y que un pago con vencimiento el lunes siguiente no aparece en la alerta semanal.
 4. Pagar o anular un pago y actualizar el panel; la alerta correspondiente debe desaparecer o recalcularse.

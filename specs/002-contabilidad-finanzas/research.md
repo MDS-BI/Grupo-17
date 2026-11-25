@@ -20,8 +20,8 @@ Registro de decisiones técnicas tomadas durante la fase 0. No quedan puntos `NE
 
 ### Formato monetario y compacto de ejes
 
-- **Decisión**: tooltips, etiquetas y tablas usan `formatearMXN` de `src/contabilidad/comun.js`; las etiquetas compactas de los ejes se centralizan en la misma capa de formato para no repetir división y redondeo en el componente.
-- **Razonamiento**: El importe se almacena en centavos y debe mostrarse en MXN con dos decimales; un formato disperso produce inconsistencias visuales y viola el Principio V. La centralización pendiente queda trazada como T067.
+- **Decisión**: tooltips, etiquetas y tablas usan `formatearCLP` de `src/contabilidad/comun.js`; las etiquetas compactas de los ejes se centralizan en la misma capa de formato para no repetir división y redondeo en el componente.
+- **Razonamiento**: El importe se almacena en centavos y debe mostrarse en CLP con dos decimales; un formato disperso produce inconsistencias visuales y viola el Principio V. La centralización pendiente queda trazada como T067.
 - **Alternativas consideradas**: `toLocaleString` directo en cada gráfica — rechazado porque permitiría aritmética de punto flotante y formatos dispares. Mostrar centavos crudos — rechazado porque no es legible para el usuario financiero.
 
 ### Estados vacíos y mensajes
@@ -81,7 +81,7 @@ Registro de decisiones técnicas tomadas durante la fase 0. No quedan puntos `NE
 ### Estados y resumen de pagos (HU12)
 
 - **Decisión**: Persistir `Pago.status` como `pendiente` o `pagado` y derivar `vencido` en lectura comparando `fechaVencimiento` con la fecha actual. `ResumenPagos` y el filtro usan la misma función `calcularEstadoPago`.
-- **Razonamiento**: evita que un pago quede marcado como vencido en almacenamiento aunque el tiempo avance; cumple FR-092 a FR-101 con una única clasificación. Los totales se suman en centavos y se formatean en MXN con la utilidad compartida.
+- **Razonamiento**: evita que un pago quede marcado como vencido en almacenamiento aunque el tiempo avance; cumple FR-092 a FR-101 con una única clasificación. Los totales se suman en centavos y se formatean en CLP con la utilidad compartida.
 - **Alternativas consideradas**: almacenar `vencido` como valor persistido — rechazado por desincronización con la fecha real. Crear una sección de menú para el resumen — rechazado por FR-097. Ocultar los otros totales al filtrar — rechazado por FR-091.
 
 ### Estados financieros por periodo (HU13)
@@ -92,7 +92,7 @@ Registro de decisiones técnicas tomadas durante la fase 0. No quedan puntos `NE
 
 ### Presentación de los reportes (HU13)
 
-- **Decisión**: Cuatro pestañas dentro de la vista existente "Reportes financieros", con el mismo selector de periodo y `puedeAcceder('reportes', sesion)`; formatos MXN, estados vacíos en español y advertencias cuando no cuadren las igualdades.
+- **Decisión**: Cuatro pestañas dentro de la vista existente "Reportes financieros", con el mismo selector de periodo y `puedeAcceder('reportes', sesion)`; formatos CLP, estados vacíos en español y advertencias cuando no cuadren las igualdades.
 - **Razonamiento**: Cubre FR-105 a FR-126 sin nueva opción de menú ni captura manual de cifras.
 - **Alternativas consideradas**: rutas nuevas o edición manual de importes — rechazadas por duplicar navegación y romper integridad.
 

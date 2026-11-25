@@ -62,13 +62,13 @@ describe('exportación de reportes', () => {
     expect(csv).toContain('"Comercial Los Andes SpA"');
   });
 
-  it('serializa XLS con tabla, SpreadsheetML y cifras en MXN', () => {
+  it('serializa XLS con tabla, SpreadsheetML y cifras en CLP', () => {
     const xls = serializarReporteXls(modeloBase());
     expect(xls).toContain('<Workbook');
     expect(xls).toContain('<Table');
     expect(xls).toContain('<table');
     expect(xls).toContain('Comercial Los Andes SpA');
-    expect(xls).toContain('$50.00');
+    expect(xls).toContain('$50');
   });
 
   it('serializa HTML imprimible con window.print', () => {

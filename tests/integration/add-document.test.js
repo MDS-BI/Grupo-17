@@ -45,7 +45,7 @@ describe('User Story 10 - add a document to an entity', () => {
     qs('discount').value = '50';
     qs('taxAmount').value = '152';
     qs('totalAmount').value = '1102';
-    qs('currency').value = 'MXN';
+    qs('currency').value = 'CLP';
     qs('docPaymentTerms').value = 'neto 30';
     qs('notes').value = 'Entrega parcial';
     qs('status').value = 'pendiente';
@@ -60,6 +60,7 @@ describe('User Story 10 - add a document to an entity', () => {
     expect(all[0].discount).toBe(50);
     expect(all[0].taxAmount).toBe(152);
     expect(all[0].totalAmount).toBe(1102);
+    expect(all[0].currency).toBe('CLP');
     expect(all[0].paymentTerms).toBe('neto 30');
     expect(all[0].notes).toBe('Entrega parcial');
   });

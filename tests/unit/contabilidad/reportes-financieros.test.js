@@ -25,7 +25,7 @@ function datosPrueba() {
   const cuentas = [
     { id: 'caja', code: '1010', name: 'Caja', type: 'activo' },
     { id: 'clientes', code: '1100', name: 'Clientes', type: 'activo' },
-    { id: 'iva', code: '2100', name: 'IVA trasladado', type: 'pasivo' },
+    { id: 'iva', code: '2100', name: 'IVA Débito Fiscal', type: 'pasivo' },
     { id: 'capital', code: '3010', name: 'Capital social', type: 'patrimonio' },
     { id: 'ventas', code: '4010', name: 'Ventas', type: 'ingreso' },
     { id: 'renta', code: '5020', name: 'Renta', type: 'gasto' }

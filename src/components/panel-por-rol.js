@@ -1,5 +1,5 @@
 ﻿import { obtenerPermiso, permisosEfectivos, puedeVerAlertas } from '../contabilidad/permisos.js';
-import { formatearMXN } from '../contabilidad/dinero.js';
+import { formatearCLP } from '../contabilidad/dinero.js';
 import { resumirPagos } from '../contabilidad/resumen-pagos.js';
 
 function alertasTesorero(sesion) {
@@ -94,9 +94,9 @@ function panelAdministrador(datos) {
   return `
     ${seccion('resumen-integral', 'Resumen integral', `
       <div class="stats-grid">
-        ${tarjeta('Ingresos del periodo', formatearMXN(cifras.ingresos || 0), 'ingresos')}
-        ${tarjeta('Gastos del periodo', formatearMXN(cifras.gastos || 0), 'gastos')}
-        ${tarjeta('Resultado del periodo', formatearMXN(resultado), varianteResultado)}
+        ${tarjeta('Ingresos del periodo', formatearCLP(cifras.ingresos || 0), 'ingresos')}
+        ${tarjeta('Gastos del periodo', formatearCLP(cifras.gastos || 0), 'gastos')}
+        ${tarjeta('Resultado del periodo', formatearCLP(resultado), varianteResultado)}
         ${tarjeta('Asientos contables', String(Number(cifras.movimientos) || 0), 'neutro')}
       </div>`)}
     <div class="panel-secciones-duo">
@@ -144,9 +144,9 @@ function panelTesorero(datos) {
       <p class="muted">Pagos registrados: ${egresos.length}</p>
       <p class="muted">Clientes o proveedores vinculados: ${entidades.size}</p>`)}
     ${seccion('flujo-efectivo', 'Flujo de efectivo', `
-      <p class="muted">Pendiente: ${resumenPagos.pendiente.cantidad} · ${formatearMXN(resumenPagos.pendiente.totalCentavos)}</p>
-      <p class="muted">Pagado: ${resumenPagos.pagado.cantidad} · ${formatearMXN(resumenPagos.pagado.totalCentavos)}</p>
-      <p class="muted">Vencido: ${resumenPagos.vencido.cantidad} · ${formatearMXN(resumenPagos.vencido.totalCentavos)}</p>`)}
+      <p class="muted">Pendiente: ${resumenPagos.pendiente.cantidad} · ${formatearCLP(resumenPagos.pendiente.totalCentavos)}</p>
+      <p class="muted">Pagado: ${resumenPagos.pagado.cantidad} · ${formatearCLP(resumenPagos.pagado.totalCentavos)}</p>
+      <p class="muted">Vencido: ${resumenPagos.vencido.cantidad} · ${formatearCLP(resumenPagos.vencido.totalCentavos)}</p>`)}
     ${seccion('vencimientos-proximos', 'Vencimientos próximos', `
       <p class="muted">Las alertas de vencidos y de la semana se muestran en esta vista.</p>`)}
   `;

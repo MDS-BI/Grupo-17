@@ -99,6 +99,19 @@ export function setActiveModule(name){
   });
 }
 
+export function actualizarIdentidadEncabezado(sesion){
+  const contenedor = document.getElementById('identidad-usuario') || document.querySelector('[data-identidad-usuario]');
+  if(!contenedor) return;
+  const valida = Boolean(sesion && sesion.usuarioId);
+  contenedor.hidden = !valida;
+  const nombre = document.getElementById('usuario-nombre');
+  const rol = document.getElementById('usuario-rol');
+  if(nombre) nombre.textContent = valida ? String(sesion.usuarioNombre || sesion.nombreUsuario || sesion.usuarioId) : '';
+  if(rol) rol.textContent = valida ? String(sesion.rolNombre || sesion.nombreRol || sesion.rolId || '') : '';
+  const boton = contenedor.querySelector('[data-cerrar-sesion]');
+  if(boton) boton.hidden = !valida;
+}
+
 export function cerrarDrawerNavegacion(){
   if(typeof document === 'undefined') return;
   document.getElementById('sidebar-nav')?.classList.remove('sidebar-abierta');

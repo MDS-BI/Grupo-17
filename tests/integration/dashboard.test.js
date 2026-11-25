@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { JSDOM } from 'jsdom';
 import { normalizeConfig } from '../../src/module-config.js';
-import { formatearMXN } from '../../src/contabilidad/dinero.js';
+import { formatearCLP } from '../../src/contabilidad/dinero.js';
 
 const html = fs.readFileSync(fileURLToPath(new URL('../../index.html', import.meta.url)), 'utf8');
 
@@ -48,9 +48,9 @@ describe('User Story 3 - panel de inicio de Contabilidad y Finanzas', () => {
 
     const labels = [...document.querySelectorAll('#view-dashboard .stat-card .stat-label')].map((el) => el.textContent);
     expect(labels).toEqual(['Ingresos', 'Gastos', 'Resultado financiero', 'Asientos contables']);
-    expect(qs('stat-ingresos').textContent).toBe(formatearMXN(0));
-    expect(qs('stat-gastos').textContent).toBe(formatearMXN(0));
-    expect(qs('stat-resultado').textContent).toBe(formatearMXN(0));
+    expect(qs('stat-ingresos').textContent).toBe(formatearCLP(0));
+    expect(qs('stat-gastos').textContent).toBe(formatearCLP(0));
+    expect(qs('stat-resultado').textContent).toBe(formatearCLP(0));
     expect(qs('stat-asientos').textContent).toBe('0');
   });
 

@@ -7,9 +7,9 @@
 
 Este módulo añade contabilidad por partida doble sobre el módulo base. Reutiliza `Entity` (terceros: clientes, proveedores, bancos), `Document` (documentos de origen, p. ej., facturas) y `ModuleConfig` (etiquetas y ciclo de vida), y agrega ocho entidades persistentes: `CuentaContable`, `AsientoContable`, `LineaAsiento`, `Pago`, `PeriodoContable`, `Usuario`, `Rol` y `RegistroActividad`, además de una `Sesion` activa como máximo.
 
-`Usuario` identifica a los cuatro usuarios de prueba mediante RUT, contraseña y rol. `Rol` define el panel de inicio, la matriz de `permisos` y las acciones globales disponibles. `RegistroActividad` conserva la trazabilidad inmutable de creación, edición y anulación de asientos y pagos, con usuario, rol, fecha, hora y campos modificados. Las Historias de Usuario 7 a 21 también introducen conceptos derivados que no se persisten como colecciones independientes: `PermisoRol`, `OpcionMenu`, `PanelInicio`, `DatosEjemplo`, `EstadoInicial`, `DestinoNavegacion`, `ControlAccion`, `EstadoPago`, `ResumenPagos`, `ReporteFinanciero`, `SaldoContable`, `CierrePeriodo`, `AlertaPago`, `ResumenAlerta`, `ArchivoReporte`, `ListadoFiltrado`, `TablaOrdenable` e `IdentidadCorporativa`.
+`Usuario` identifica a los cuatro usuarios de prueba mediante RUT, contraseña y rol. `Rol` define el panel de inicio, la matriz de `permisos` y las acciones globales disponibles. `RegistroActividad` conserva la trazabilidad inmutable de creación, edición y anulación de asientos y pagos, con usuario, rol, fecha, hora y campos modificados. Las Historias de Usuario 7 a 29 también introducen conceptos derivados que no se persisten como colecciones independientes: `PermisoRol`, `OpcionMenu`, `PanelInicio`, `DatosEjemplo`, `EstadoInicial`, `DestinoNavegacion`, `ControlAccion`, `EstadoPago`, `ResumenPagos`, `ReporteFinanciero`, `SaldoContable`, `CierrePeriodo`, `AlertaPago`, `ResumenAlerta`, `ArchivoReporte`, `ListadoFiltrado`, `TablaOrdenable`, `IdentidadCorporativa`, `PantallaAcceso`, `FormularioAcceso`, `MenuLateral`, `IdentificacionUsuario`, `ImporteFormateado`, `ListadoPrincipal`, `BotonNuevo`, `VentanaFormulario`, `ControlFiltro`, `FilaTotales` y `MensajeListaVacia`.
 
-Cada movimiento económico se registra como un asiento con dos o más líneas cuyos débitos y créditos deben sumar igual (partida doble). Un `Document` puede originar un asiento; un `Pago` puede generar y referenciar su asiento en el libro mayor. Todo importe se almacena como entero en centavos y se formatea en MXN solo en la capa de presentación.
+Cada movimiento económico se registra como un asiento con dos o más líneas cuyos débitos y créditos deben sumar igual (partida doble). Un `Document` puede originar un asiento; un `Pago` puede generar y referenciar su asiento en el libro mayor. Todo importe se almacena como entero en centavos y se formatea en CLP solo en la capa de presentación.
 
 ## Entidades Base Reutilizadas
 
@@ -166,7 +166,7 @@ Cabecera de un registro contable en el diario. Agrupa las líneas, fija fecha y 
 | entity_id | string | FK → Entity (`entity_id`) | Tercero relacionado con el asiento | Opcional; al eliminar la entidad se aplica `SET NULL` |
 | totalDebit | integer | — | Suma de los débitos de sus líneas, en centavos | Obligatorio, entero no negativo; exactamente igual a `totalCredit`; se recalcula desde las líneas |
 | totalCredit | integer | — | Suma de los créditos de sus líneas, en centavos | Obligatorio, entero no negativo; exactamente igual a `totalDebit`; se recalcula desde las líneas |
-| currency | string | — | Código de moneda de los importes; en el MVP siempre `MXN` | Obligatorio en el MVP; valor fijo `MXN` |
+| currency | string | — | Código de moneda de los importes; en el MVP siempre `CLP` | Obligatorio en el MVP; valor fijo `CLP` |
 | status | string | — | Estado: `borrador`, `aprobado`, `cancelado` | Opcional; si ModuleConfig define `statusLifecycle`, se aplica ese ciclo. Solo `borrador` admite borrado físico; aprobados/cancelados se anulan lógicamente |
 | notes | string | — | Notas u observaciones libres | Opcional |
 | createdAt | string | — | Marca de tiempo de creación | Obligatorio |
@@ -205,7 +205,7 @@ Movimiento financiero de dinero contra un tercero: cobro a un cliente o pago a u
 | ~~document_id~~ | — | — | No disponible en el MVP; los pagos no conservan documento asociado | Excluido por FR-015; no debe generarse ni validarse |
 | asiento_id | string | FK, UK → AsientoContable (`id`) | Asiento generado por el pago (1:1 opcional) | Opcional, único; debe referenciar un asiento existente; SET NULL al eliminar el asiento |
 | amount | integer | — | Importe pagado en la moneda configurada, en centavos | Obligatorio, entero mayor que cero |
-| currency | string | — | Código de moneda; en el MVP siempre `MXN` | Obligatorio en el MVP; valor fijo `MXN` |
+| currency | string | — | Código de moneda; en el MVP siempre `CLP` | Obligatorio en el MVP; valor fijo `CLP` |
 | method | string | — | Medio de pago: `efectivo`, `transferencia`, `cheque`, `tarjeta` | Opcional, valor del conjunto cerrado |
 | status | string | — | Estado operativo: `pendiente`, `pagado` | Obligatorio en el MVP. `vencido` no se captura: se deriva en `EstadoPago` cuando un pendiente supera `fechaVencimiento` |
 | anulado | boolean | — | Indica anulación lógica conservando el registro | Obligatorio por defecto `false`. Un pago anulado se excluye de totales vigentes, resumen, alertas y reportes |
@@ -349,8 +349,8 @@ Ventana de tiempo (mes, trimestre o año) en la que se registran asientos. Los a
   - `totalDebit = totalCredit`
 - La tolerancia es `0`; no se aceptan diferencias por redondeo.
 - Los totales se recalculan desde las líneas en cada alta o edición y se sobrescriben; no se confía en los valores enviados por el cliente.
-- Los totales del `ResumenPagos` también se calculan sumando `Pago.amount` en centavos; la conversión a MXN ocurre solo al formatear.
-- El MVP opera en una sola moneda (`MXN`) y no realiza conversión de moneda.
+- Los totales del `ResumenPagos` también se calculan sumando `Pago.amount` en centavos; la conversión a CLP ocurre solo al formatear.
+- El MVP opera en una sola moneda (`CLP`) y no realiza conversión de moneda.
 
 ## Datos de Ejemplo y Estado Inicial
 
@@ -468,7 +468,7 @@ No se elimina ninguna de las cinco entidades contables originales; se añaden `U
 
 - `AsientoContable.sourceDocumentId`: se adopta `RESTRICT` para conservar la trazabilidad (clarificación 2026-11-02).
 - `Pago` forma parte del MVP (clarificación 2026-11-02).
-- Moneda única `MXN` sin conversión (clarificación 2026-11-02).
+- Moneda única `CLP` sin conversión (clarificación 2026-11-02).
 - Sin solapamiento de periodos, abiertos o cerrados (clarificación 2026-11-02).
 - La autenticación se simula con `Usuario`, `Rol` y `Sesion` en `sessionStorage`; no existe servicio externo (HU8).
 - El RUT se normaliza para comparar; el mensaje de error es idéntico para RUT desconocido y contraseña incorrecta (HU8).
@@ -494,7 +494,7 @@ No se elimina ninguna de las cinco entidades contables originales; se añaden `U
 - `Rol.permisos` puede incorporar nuevas secciones sin cambiar la forma de `Usuario` ni de `Sesion`.
 - Si el alcance deja de ser una demostración, `Usuario`/`Sesion` deben sustituirse por un proveedor de identidad real; el resto del modelo contable no depende de ese cambio.
 
-## Vistas Derivadas (Historias de Usuario 7 a 21)
+## Vistas Derivadas (Historias de Usuario 7 a 29)
 
 Estas vistas no introducen colecciones persistentes nuevas. Se calculan en memoria desde entidades persistidas o desde la configuración de la sesión.
 
@@ -507,7 +507,7 @@ Estas vistas no introducen colecciones persistentes nuevas. Se calculan en memor
 | `DistribucionGastos` | `calcularSaldosCuentas` filtrado por el periodo seleccionado | `cuentaId`, `codigo`, `nombre`, `gastoCentavos`, `porcentaje` | Dona; segmentos ordenados de mayor a menor gasto |
 | `EstadoVacioGraficas` | Ausencia de periodos, movimientos aprobados o gastos | `mensaje` | Texto en español en lugar de SVG vacío |
 
-- Toda serie se deriva de importes en centavos y se convierte a MXN solo en la capa de formato compartida.
+- Toda serie se deriva de importes en centavos y se convierte a CLP solo en la capa de formato compartida.
 - `SerieResultado` debe cuadrar con `ingresosCentavos - gastosCentavos` del mismo periodo y con el total del reporte.
 - `DistribucionGastos` excluye cuentas con saldo cero y solo considera asientos en estado `aprobado`.
 - Cambiar el periodo recalcula las vistas derivadas sin mutar las entidades base.
@@ -548,14 +548,14 @@ Estas vistas no introducen colecciones persistentes nuevas. Se calculan en memor
 - El resumen y el filtro viven dentro de "Pagos y cobros"; no crean menú ni botón de navegación adicional.
 - Solo Administrador financiero y Tesorero ven el resumen y el filtro, porque son los roles con acceso a pagos.
 - Las cantidades y totales del resumen deben coincidir exactamente con el listado filtrado.
-- Los importes se suman en centavos y se formatean en MXN con la utilidad compartida.
+- Los importes se suman en centavos y se formatean en CLP con la utilidad compartida.
 
 ### Estados Financieros (HU13)
 
 | Vista derivada | Origen | Campos calculados | Regla de presentación |
 |---|---|---|---|
 | `SaldoContable` | `LineaAsiento` de asientos aprobados hasta una fecha límite | `cuentaId`, `debitCentavos`, `creditCentavos`, `saldoCentavos` | Saldo inicial usa movimientos anteriores al periodo; saldo final incluye el periodo |
-| `LibroMayor` | `SaldoContable` y movimientos del periodo | `codigo`, `nombre`, `saldoInicial`, `debitos`, `creditos`, `saldoFinal` | Solo cuentas con movimientos o saldo;MXN y orden por código |
+| `LibroMayor` | `SaldoContable` y movimientos del periodo | `codigo`, `nombre`, `saldoInicial`, `debitos`, `creditos`, `saldoFinal` | Solo cuentas con movimientos o saldo;CLP y orden por código |
 | `BalanceComprobacion` | `SaldoContable` al cierre | `cuenta`, `saldoDeudor`, `saldoAcreedor`, `totalDeudor`, `totalAcreedor` | Excluye saldo cero; advierte si los totales no coinciden |
 | `EstadoResultados` | `SaldoContable` de cuentas `ingreso` y `gasto` | `ingresos`, `gastos`, `resultado` | `resultado = ingresos - gastos`; advierte si una cuenta no tiene tipo válido |
 | `BalanceGeneral` | `SaldoContable` de `activo`, `pasivo` y `patrimonio` | `activos`, `pasivos`, `patrimonio`, `resultadoAcumulado` | Incluye el resultado acumulado en patrimonio; advierte si no cuadra |
@@ -594,7 +594,7 @@ Estas vistas no introducen colecciones persistentes nuevas. Se calculan en memor
 |---|---|---|---|
 | `SemanaReferencia` | Fecha de referencia del panel | `inicioLunes`, `finDomingo` | Define el rango de la alerta semanal |
 | `AlertaPago` | `Pago` pendiente no anulado y `fechaVencimiento` | `categoria`, `cantidad`, `totalCentavos`, `detalles[]` | `vencido` o `venceEstaSemana`, sin duplicar pagos |
-| `ResumenAlerta` | `AlertaPago` | `cantidad`, `totalMXN`, `adicionales` | Hasta tres detalles y contador de pagos restantes |
+| `ResumenAlerta` | `AlertaPago` | `cantidad`, `totalCLP`, `adicionales` | Hasta tres detalles y contador de pagos restantes |
 | `PanelTesorero` | `Sesion.rolId = tesorero` y alertas | Bloques informativos | Sin `data-action`, sin enlaces y sin nueva opción de menú |
 
 - Las alertas se recalculan al iniciar sesión, al volver al panel y al actualizar pagos.
@@ -627,9 +627,27 @@ Estas vistas no introducen colecciones persistentes nuevas. Se calculan en memor
 - Los filtros y la ordenación son estado de vista; no se persisten y no sustituyen los permisos.
 - La interfaz no crea nuevas opciones de menú, no modifica reglas financieras y mantiene el texto visible junto al ícono.
 
+### Mejora de Usabilidad sin Cambios Funcionales (HU22 a HU29)
+
+| Vista derivada | Origen | Regla de presentación |
+|---|---|---|
+| `PantallaAcceso` | `src/components/acceso.js` y estilos de `index.html` | Formulario centrado y angosto; "Ingresar" inmediatamente después del último campo, sin espacio vacío superior ni desplazamiento horizontal |
+| `IdentificacionUsuario` | `Sesion.usuarioNombre`, `Sesion.rolId` y acciones de `src/contabilidad/permisos.js` | Nombre, rol y "Cerrar sesión" agrupados en el encabezado de todas las pantallas con sesión válida |
+| `MenuLateral` | `OpcionMenu` y CSS del drawer | Alineado al borde izquierdo del área de trabajo; mismas etiquetas, orden y secciones permitidas en escritorio y celular |
+| `ImporteFormateado` | Enteros en centavos y `src/contabilidad/dinero.js` | "$" antes del valor, puntos de separación de miles y sin decimales; "$5.000" para cinco mil en listados, formularios, resúmenes, reportes y mensajes |
+| `ListadoPrincipal` | Colecciones persistidas filtradas por `FiltroMovimientos` | Primer contenido de la pantalla; permanece visible bajo `VentanaFormulario` con sus filtros intactos |
+| `BotonNuevo` / `VentanaFormulario` | Permisos de creación de `Sesion.permisos` y componentes de `src/components/contabilidad/` | "Nuevo" solo para roles con permiso; abre una ventana dentro del módulo sin reemplazar el listado y se cierra sin guardar sin mutar datos |
+| `ControlFiltro` | `FiltroMovimientos` y controles de `index.html` | La "×" limpia solo su filtro y la flecha abre opciones; ambos controles separados y legibles incluso con texto extenso |
+| `FilaTotales` | `LibroMayor` y `TotalesReporte` | Totales alineados con saldo inicial, débitos, créditos y saldo final; importes e igualdad contable sin cambios |
+| `MensajeListaVacia` | `ResultadoVacio` y ausencia de registros | Mensaje informativo en español dentro del área del listado; distinto de un error y ausente cuando existen registros |
+
+- Ninguna de estas vistas introduce colecciones persistentes ni campos nuevos; se calculan o renderizan desde entidades, permisos y configuración ya definidos.
+- El formato chileno es solo de presentación: los cálculos siguen operando con enteros en centavos y conservan idénticos resultados.
+- Las mejoras se aplican a todos los roles que ya tenían acceso a las pantallas afectadas y no cambian operaciones, reglas de negocio, permisos ni opciones de menú.
+
 ## Decisiones de Persistencia Actualizadas
 
 - El mecanismo por defecto es `sessionStorage` para todas las colecciones del módulo, incluidas `Usuario`, `Rol`, `Sesion`, `RegistroActividad` y las estructuras base `Entity`/`Document` que utilice el módulo.
-- No se persisten agregaciones, gráficas, alertas, filtros, ordenación de tablas, modelos de exportación, permisos derivados ni estados de pago calculados; se recomputan desde el estado de la sesión.
+- No se persisten agregaciones, gráficas, alertas, filtros, ordenación de tablas, modelos de exportación, permisos derivados, estados de pago calculados ni vistas de usabilidad (acceso centrado, identificación del encabezado, menú alineado, importes formateados, ventana "Nuevo", controles de filtro, fila de totales ni mensajes de lista vacía); se recomputan desde el estado de la sesión.
 - `RegistroActividad` se persiste como colección append-only con `CLAVES.auditoria` y se reinicia de forma determinista con la semilla.
 - La migración desde `localStorage` y las garantías de integridad referencial quedan trazadas en `tasks.md` como T117.

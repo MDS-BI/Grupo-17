@@ -1,4 +1,4 @@
-import { formatearMXN, sumarCentavos } from './dinero.js';
+import { formatearCLP, sumarCentavos } from './dinero.js';
 import { formatearFecha } from './fechas.js';
 import { IDENTIDAD_EMPRESA } from './interfaz-config.js';
 
@@ -250,7 +250,7 @@ export function validarModeloExportacion(modelo) {
 }
 
 function presentar(valor, columna) {
-  if (columna?.tipo === 'monto') return formatearMXN(valor);
+  if (columna?.tipo === 'monto') return formatearCLP(valor);
   return texto(valor);
 }
 
@@ -278,7 +278,7 @@ export function serializarReporteCsv(modelo) {
     ['Totales']
   ];
   for (const [clave, valor] of Object.entries(modelo.totales || {})) {
-    lineas.push([clave, formatearMXN(valor)]);
+    lineas.push([clave, formatearCLP(valor)]);
   }
   if (!modelo.totales || Object.keys(modelo.totales).length === 0) lineas.push(['Sin totales', '']);
   return '\uFEFF' + lineas.map(filaCsv).join('\r\n');
@@ -296,7 +296,7 @@ function construirTablaHtml(modelo) {
     return `<tr>${celdas}</tr>`;
   }).join('');
   const totales = Object.entries(modelo.totales || {}).map(([clave, valor]) => (
-    `<span class="total"><strong>${escaparHtml(clave)}:</strong> ${escaparHtml(formatearMXN(valor))}</span>`
+    `<span class="total"><strong>${escaparHtml(clave)}:</strong> ${escaparHtml(formatearCLP(valor))}</span>`
   )).join('');
   return `<table class="tabla-exportacion"><thead><tr>${encabezados}</tr></thead><tbody>${cuerpo}</tbody></table><div class="totales">${totales}</div>`;
 }
@@ -334,7 +334,7 @@ export function serializarReporteSpreadsheetMl(modelo) {
   const encabezado = `<Row>${columnas.map((columna) => `<Cell ss:StyleID="sHead"><Data ss:Type="String">${escaparXml(columna.etiqueta)}</Data></Cell>`).join('')}</Row>`;
   const cuerpo = filas.map((fila) => filaXml(fila, columnas)).join('');
   const totales = Object.entries(modelo.totales || {}).map(([clave, valor]) => (
-    `<Row><Cell><Data ss:Type="String">${escaparXml(clave)}</Data></Cell><Cell><Data ss:Type="String">${escaparXml(formatearMXN(valor))}</Data></Cell></Row>`
+    `<Row><Cell><Data ss:Type="String">${escaparXml(clave)}</Data></Cell><Cell><Data ss:Type="String">${escaparXml(formatearCLP(valor))}</Data></Cell></Row>`
   )).join('');
   const meta = [
     modelo.empresa || NOMBRE_EMPRESA,
@@ -365,7 +365,7 @@ function lineasPdf(modelo) {
     ...filas.map((fila) => (fila.valores || []).map((valor, indice) => presentar(valor, columnas[indice])).join(' | ')),
     '',
     'Totales',
-    ...Object.entries(modelo.totales || {}).map(([clave, valor]) => `${clave}: ${formatearMXN(valor)}`),
+    ...Object.entries(modelo.totales || {}).map(([clave, valor]) => `${clave}: ${formatearCLP(valor)}`),
     ...(modelo.advertencias || []).map(texto)
   ];
   return lineas.map(ascii);

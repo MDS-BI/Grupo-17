@@ -162,7 +162,7 @@ export function crearPago(payload = {}, opciones = {}) {
     series,
     folio,
     numero,
-    currency: 'MXN',
+    currency: 'CLP',
     status: payload.status || 'pendiente'
   };
   const revision = validarPago(datos, { pagos, entidades, documentos, asientos });
@@ -180,7 +180,7 @@ export function crearPago(payload = {}, opciones = {}) {
     entity_id: texto(payload.entity_id),
     asiento_id: texto(payload.asiento_id) || null,
     amount: revision.centavos,
-    currency: 'MXN',
+    currency: 'CLP',
     method: texto(payload.method) || null,
     status: revision.status,
     ...anulacion,
@@ -218,7 +218,7 @@ export function actualizarPago(id, cambios = {}, opciones = {}) {
   const monto = cambios.amount !== undefined
     ? cambios.amount
     : (actual.amount === undefined ? '' : desdeCentavos(actual.amount));
-  const datos = { ...fusionado, series, folio, numero, amount: monto, currency: 'MXN' };
+  const datos = { ...fusionado, series, folio, numero, amount: monto, currency: 'CLP' };
   const revision = validarPago(datos, { pagos, entidades, documentos, asientos, id });
   if (!revision.valido) throw new Error(Object.values(revision.errores)[0]);
   const marca = ahora();
@@ -233,7 +233,7 @@ export function actualizarPago(id, cambios = {}, opciones = {}) {
     entity_id: texto(fusionado.entity_id),
     asiento_id: texto(fusionado.asiento_id) || null,
     amount: revision.centavos,
-    currency: 'MXN',
+    currency: 'CLP',
     method: texto(fusionado.method) || null,
     status: revision.status,
     ...banderaAnulacion({ ...fusionado, status: revision.status }, marca),

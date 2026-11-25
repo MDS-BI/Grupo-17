@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { crearDom, bootContabilidad, qs, elegir } from '../../setup/contabilidad.js';
 import { loadPagos } from '../../../src/contabilidad/almacenamiento.js';
-import { formatearMXN } from '../../../src/contabilidad/dinero.js';
+import { formatearCLP } from '../../../src/contabilidad/dinero.js';
 
 let dom;
 
@@ -23,10 +23,10 @@ describe('resumen de pagos por estado', () => {
     await abrirPagos();
     const tarjetas = qs('pago-resumen-tarjetas');
     expect(tarjetas.textContent).toContain('Pagado');
-    expect(tarjetas.textContent).toContain(formatearMXN(116000));
-    expect(tarjetas.textContent).toContain(formatearMXN(283000));
-    expect(tarjetas.textContent).toContain(formatearMXN(58000));
-    expect(tarjetas.textContent).not.toContain(formatearMXN(45000));
+    expect(tarjetas.textContent).toContain(formatearCLP(116000));
+    expect(tarjetas.textContent).toContain(formatearCLP(283000));
+    expect(tarjetas.textContent).toContain(formatearCLP(58000));
+    expect(tarjetas.textContent).not.toContain(formatearCLP(45000));
     expect(qs('pago-resumen-empty').hidden).toBe(true);
   });
 
@@ -58,7 +58,7 @@ describe('resumen de pagos por estado', () => {
     expect(boton).not.toBeNull();
     boton.click();
     expect(loadPagos().find((pago) => pago.id === 'pag-0003').status).toBe('pagado');
-    expect(qs('pago-resumen-tarjetas').textContent).toContain(formatearMXN(174000));
-    expect(qs('pago-resumen-tarjetas').textContent).toContain(formatearMXN(283000));
+    expect(qs('pago-resumen-tarjetas').textContent).toContain(formatearCLP(174000));
+    expect(qs('pago-resumen-tarjetas').textContent).toContain(formatearCLP(283000));
   });
 });

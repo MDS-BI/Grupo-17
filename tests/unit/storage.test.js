@@ -208,7 +208,7 @@ describe('document storage', () => {
   });
 
   it('adds and loads documents linked by entity_id', () => {
-    const d = addDocument({entityId:entity.entity_id, series:'FAC', folio:1001, startDate:'2026-08-01', endDate:'2026-08-05', quantity:2, subtotal:500, discount:50, taxAmount:72.8, totalAmount:522.8, currency:'MXN', status:'pendiente', paymentTerms:'neto 30', notes:'Entrega en almacén'});
+    const d = addDocument({entityId:entity.entity_id, series:'FAC', folio:1001, startDate:'2026-08-01', endDate:'2026-08-05', quantity:2, subtotal:500, discount:50, taxAmount:72.8, totalAmount:522.8, currency:'CLP', status:'pendiente', paymentTerms:'neto 30', notes:'Entrega en almacén'});
     const all = loadDocuments();
     expect(all.length).toBe(1);
     expect(all[0].id).toBe(d.id);

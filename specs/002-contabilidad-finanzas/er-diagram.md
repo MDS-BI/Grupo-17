@@ -251,7 +251,7 @@ No se elimina ninguna de las cinco entidades contables originales; se añaden `U
 
 1. **`AsientoContable.sourceDocumentId`: `RESTRICT`.** Conserva la trazabilidad del asiento a su documento de origen (clarificación 2026-11-02).
 2. **`Pago` forma parte del MVP.** La Historia 4 y FR-013 a FR-016 lo exigen (clarificación 2026-11-02).
-3. **Moneda única `MXN` sin conversión** (clarificación 2026-11-02).
+3. **Moneda única `CLP` sin conversión** (clarificación 2026-11-02).
 4. **Sin solapamiento de periodos**, abiertos o cerrados (clarificación 2026-11-02).
 5. **Autenticación simulada con `Usuario`, `Rol` y `Sesion` en `sessionStorage`** (HU8).
 6. **Permisos derivados del rol copiados en la sesión; opciones no permitidas ocultas** (HU9).

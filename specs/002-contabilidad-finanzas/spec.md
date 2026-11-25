@@ -20,6 +20,9 @@
 **Entrada adicional**: Descripción del usuario: "En la especificación 002-contabilidad-finanzas, agregar una nueva historia de usuario: como usuario, quiero filtrar asientos y pagos por fecha, cuenta, monto y estado."
 **Entrada adicional**: Descripción del usuario: "En la especificación 002-contabilidad-finanzas, agregar una nueva historia de usuario: como usuario, quiero una interfaz profesional: mismos colores en todo el módulo, íconos en cada sección, tablas ordenables, mensaje de confirmación al guardar o eliminar, y menú adaptable en celular."
 **Entrada adicional**: Descripción del usuario: "En la especificación 002-contabilidad-finanzas, actualizar la historia de inicio de sesión: el campo RUT se formatea automáticamente mientras el usuario escribe (agrega puntos y guion, acepta k mayúscula o minúscula), valida el dígito verificador y muestra un mensaje si el RUT no es válido. El botón Menú del encabezado abre y cierra el menú lateral."
+**Entrada adicional**: Descripción del usuario: "Mejora la usabilidad sin cambiar funciones: login centrado y angosto, sin espacio vacío antes de Ingresar; menú lateral alineado a la izquierda; 'Cerrar sesión' en el encabezado junto al usuario y su rol; montos en formato chileno ($5.000, sin decimales); en cada pantalla mostrar primero la lista y un botón 'Nuevo' que abra el formulario en una ventana; la '×' de los filtros sin encimarse con la flecha; alinear la fila de totales del Libro Mayor; y mensajes claros cuando una lista está vacía."
+**Entrada adicional**: Descripción del usuario: "En la especificación 002-contabilidad-finanzas, agregar una nueva historia de usuario: como Auditor, quiero ver la unidad CLP en los encabezados monetarios y consultar el detalle detrás de cada total de los reportes financieros, para rastrear cada cifra hasta sus movimientos de origen sin modificar los datos."
+**Entrada adicional**: Descripción del usuario: "La empresa es chilena: usa CLP como única moneda en todo el módulo, con formato $5.000 sin decimales; renombra las cuentas de IVA a 'IVA Débito Fiscal' e 'IVA Crédito Fiscal'; actualiza los datos de ejemplo y la especificación."
 
 ## Propósito
 
@@ -39,7 +42,7 @@ La implementación inicial se enfocará en una interfaz frontend funcional que p
 - Q: ¿El MVP debe incluir un ciclo de estados para los asientos contables (borrador → aprobado → cancelado) con bloqueo de edición una vez aprobados? → A: Incluir el ciclo completo: borrador, aprobado y cancelado, con bloqueo de edición tras aprobar.
 - Q: Cuando se elimina un Documento que tiene asientos contables asociados, ¿qué comportamiento debe aplicar el sistema? → A: RESTRICT: impedir borrar el documento mientras existan asientos asociados.
 - Q: ¿El sistema debe permitir que existan periodos contables con fechas superpuestas? → A: Prohibir cualquier solapamiento entre periodos, abiertos o cerrados.
-- Q: ¿El módulo manejará una sola moneda o registrará operaciones en varias monedas? → A: Una sola moneda (MXN) para todo el módulo, sin conversión.
+- Q: ¿El módulo manejará una sola moneda o registrará operaciones en varias monedas? → A: Una sola moneda (CLP) para todo el módulo, sin conversión.
 
 ## Escenarios de Usuario y Pruebas 
 
@@ -161,7 +164,7 @@ Como gerente o analista financiero, quiero visualizar gráficas de ingresos, gas
 2. **Dado** que el panel está visible, **cuando** el usuario selecciona un periodo contable, **entonces** las gráficas se actualizan con la información correspondiente a ese periodo.
 3. **Dado** que existen movimientos contables aprobados, **cuando** se renderizan las gráficas, **entonces** los valores provienen de los mismos cálculos de resumen y saldos utilizados por los reportes.
 4. **Dado** que no existen periodos o movimientos registrados, **cuando** se cargan las gráficas, **entonces** se muestran mensajes de estado vacío en español en lugar de gráficas sin información.
-5. **Dado** que el usuario consulta una gráfica, **cuando** revisa las etiquetas o herramientas de cada punto, **entonces** los importes se muestran en MXN con el mismo formato que el resto del módulo.
+5. **Dado** que el usuario consulta una gráfica, **cuando** revisa las etiquetas o herramientas de cada punto, **entonces** los importes se muestran en CLP con el mismo formato que el resto del módulo.
 
 ---
 
@@ -312,7 +315,7 @@ Como Tesorero o Administrador financiero, quiero ver un resumen de pagos y cobro
 
 **Escenarios de Aceptación**:
 
-1. **Dado** que un usuario con acceso a pagos abre la pantalla "Pagos y cobros", **cuando** se carga la información, **entonces** ve un resumen con la cantidad y el total en MXN de los estados pendiente, pagado y vencido.
+1. **Dado** que un usuario con acceso a pagos abre la pantalla "Pagos y cobros", **cuando** se carga la información, **entonces** ve un resumen con la cantidad y el total en CLP de los estados pendiente, pagado y vencido.
 2. **Dado** que el resumen está visible, **cuando** el usuario selecciona el filtro "Pendiente", **entonces** el listado muestra únicamente pagos y cobros pendientes y ese estado queda destacado en el resumen sin ocultar los otros totales.
 3. **Dado** que el usuario selecciona el filtro "Pagado", **cuando** se aplica el filtro, **entonces** el listado muestra únicamente pagos y cobros pagados.
 4. **Dado** que el usuario selecciona el filtro "Vencido", **cuando** se aplica el filtro, **entonces** el listado muestra únicamente pagos y cobros cuya fecha de vencimiento ya pasó y que no están pagados.
@@ -351,7 +354,7 @@ Como Contador, quiero generar Libro Mayor, Balance de Comprobación, Estado de R
 14. **Dado** que un periodo está cerrado, **cuando** se generan los reportes de ese periodo, **entonces** se muestran los saldos históricos sin modificar el estado del periodo ni los movimientos.
 15. **Dado** que se revisa el menú lateral, **cuando** se comparan sus entradas con la configuración vigente, **entonces** no se crea ninguna opción nueva para estos reportes.
 16. **Dado** que un rol sin acceso a "Reportes financieros" intenta abrir estos reportes directamente, **cuando** realiza la acción, **entonces** se muestra un mensaje de acceso no disponible y no se revela información financiera.
-17. **Dado** que un reporte está visible, **cuando** se revisan sus importes y acciones, **entonces** los importes se muestran en MXN con el mismo formato del módulo y no existen opciones para capturar cifras manualmente ni modificar movimientos.
+17. **Dado** que un reporte está visible, **cuando** se revisan sus importes y acciones, **entonces** los importes se muestran en CLP con el mismo formato del módulo y no existen opciones para capturar cifras manualmente ni modificar movimientos.
 
 ---
 
@@ -446,8 +449,8 @@ Como Tesorero, quiero ver en el panel alertas de pagos vencidos y de pagos que v
 
 **Escenarios de Aceptación**:
 
-1. **Dado** que existen pagos pendientes vencidos, **cuando** inicia sesión el Tesorero, **entonces** su panel muestra una alerta de pagos vencidos con cantidad y total en MXN.
-2. **Dado** que existen pagos pendientes que vencen entre la fecha de referencia y el domingo de la semana actual, **cuando** inicia sesión el Tesorero, **entonces** su panel muestra una alerta de pagos que vencen esta semana con cantidad y total en MXN.
+1. **Dado** que existen pagos pendientes vencidos, **cuando** inicia sesión el Tesorero, **entonces** su panel muestra una alerta de pagos vencidos con cantidad y total en CLP.
+2. **Dado** que existen pagos pendientes que vencen entre la fecha de referencia y el domingo de la semana actual, **cuando** inicia sesión el Tesorero, **entonces** su panel muestra una alerta de pagos que vencen esta semana con cantidad y total en CLP.
 3. **Dado** que una alerta está visible, **cuando** el Tesorero revisa su detalle, **entonces** puede identificar la entidad, el monto y la fecha de vencimiento de cada pago incluido.
 4. **Dado** que hay más pagos de los que caben en el detalle, **cuando** se revisa la alerta, **entonces** se indica cuántos pagos adicionales existen.
 5. **Dado** que un pago vence el domingo de la semana actual, **cuando** se consulta el panel, **entonces** se incluye en la alerta semanal.
@@ -564,6 +567,192 @@ Como usuario, quiero una interfaz profesional con colores coherentes, íconos po
 
 ---
 
+### Historia de Usuario 22 - Centrar y estrechar el acceso (Prioridad: P1)
+
+Como usuario del módulo, quiero que la pantalla de acceso esté centrada y sea angosta, con el botón "Ingresar" inmediatamente después de los campos, para concentrarme en las credenciales sin buscar el control de acceso.
+
+**Por qué esta prioridad**: El acceso es la primera interacción con el módulo; una presentación clara reduce errores y tiempo de ingreso.
+
+**Prueba Independiente**: Se abre la pantalla de acceso en una pantalla amplia y en una estrecha, y se verifica que el formulario esté centrado, angosto y que el botón "Ingresar" no tenga un espacio vacío superior que lo separe del último campo.
+
+**Escenarios de Aceptación**:
+
+1. **Dado** que se abre la pantalla de acceso, **cuando** se revisa su disposición, **entonces** el formulario aparece centrado en el área visible.
+2. **Dado** que la pantalla es amplia, **cuando** se compara el ancho del formulario con el ancho de la pantalla, **entonces** el formulario es angosto y no ocupa todo el ancho disponible.
+3. **Dado** que se completan los campos de acceso, **cuando** se revisa la posición del botón "Ingresar", **entonces** aparece inmediatamente después del último campo sin un espacio vacío superior.
+4. **Dado** que se visualiza la pantalla en un dispositivo estrecho, **cuando** se revisa el acceso, **entonces** los campos y el botón permanecen legibles y sin desplazamiento horizontal de toda la página.
+5. **Dado** que se cambia el tamaño de la ventana, **cuando** se revisa el acceso, **entonces** el formulario conserva su centrado y su carácter angosto.
+
+---
+
+### Historia de Usuario 23 - Mostrar la identidad del usuario y el cierre de sesión en el encabezado (Prioridad: P1)
+
+Como usuario autenticado, quiero ver mi nombre, mi rol y la acción "Cerrar sesión" juntos en el encabezado, para reconocer con quién estoy trabajando y finalizar el acceso sin buscar en otras zonas.
+
+**Por qué esta prioridad**: La identidad del usuario y la salida rápida son referencias permanentes durante toda la sesión y reducen la incertidumbre sobre el perfil activo.
+
+**Prueba Independiente**: Se inicia sesión con cada usuario de prueba y se comprueba que el encabezado muestre el nombre, el rol y "Cerrar sesión" agrupados, y que la acción conserve su comportamiento habitual.
+
+**Escenarios de Aceptación**:
+
+1. **Dado** que existe una sesión válida, **cuando** se abre cualquier pantalla del módulo, **entonces** el encabezado muestra el nombre del usuario autenticado y su rol.
+2. **Dado** que el encabezado está visible, **cuando** se revisa la ubicación de "Cerrar sesión", **entonces** aparece junto al nombre del usuario y su rol.
+3. **Dado** que se navega entre secciones, **cuando** se revisa el encabezado, **entonces** el nombre, el rol y "Cerrar sesión" permanecen visibles y agrupados.
+4. **Dado** que se selecciona "Cerrar sesión" desde el encabezado, **cuando** finaliza la acción, **entonces** la sesión termina y se vuelve a la pantalla de acceso, conservando el comportamiento definido en la Historia de Usuario 8.
+5. **Dado** que el nombre o el rol son extensos, **cuando** se muestra el encabezado en una pantalla estrecha, **entonces** la información sigue siendo legible y "Cerrar sesión" sigue accesible.
+
+---
+
+### Historia de Usuario 24 - Alinear el menú lateral a la izquierda (Prioridad: P1)
+
+Como usuario autenticado, quiero que el menú lateral esté alineado al borde izquierdo del área de trabajo, para tener una referencia de navegación estable y predecible.
+
+**Por qué esta prioridad**: Una navegación ubicada de forma consistente permite orientarse rápidamente y evita confusión al cambiar de pantalla.
+
+**Prueba Independiente**: Se abre el menú lateral en distintas pantallas y tamaños de pantalla, y se verifica que quede alineado al borde izquierdo con las mismas secciones permitidas para el rol.
+
+**Escenarios de Aceptación**:
+
+1. **Dado** que existe una sesión válida, **cuando** se muestra el menú lateral, **entonces** aparece alineado al borde izquierdo del área de trabajo.
+2. **Dado** que se navega entre secciones, **cuando** se revisa el menú lateral, **entonces** conserva su alineación a la izquierda.
+3. **Dado** que el menú se abre desde el encabezado, **cuando** se revisa su posición, **entonces** continúa alineado a la izquierda.
+4. **Dado** que se usa una pantalla estrecha, **cuando** se abre el menú, **entonces** el menú se despliega desde el borde izquierdo y muestra solo las secciones permitidas.
+5. **Dado** que se revisan las opciones del menú, **cuando** se comparan con la matriz de acceso vigente, **entonces** no aparecen secciones nuevas ni se pierden las permitidas.
+
+---
+
+### Historia de Usuario 25 - Mostrar montos en formato chileno (Prioridad: P1)
+
+Como usuario del módulo, quiero ver todos los montos en formato chileno, con símbolo "$", separador de miles y sin decimales, para leer las cifras con el mismo criterio que uso habitualmente.
+
+**Por qué esta prioridad**: La consistencia en la presentación de importes evita misinterpretaciones en listados, reportes y resúmenes financieros.
+
+**Prueba Independiente**: Se revisan importes en listados, formularios, resúmenes y reportes, y se comprueba que un valor como cinco mil se muestre como "$5.000" sin decimales y con el mismo criterio en todas partes.
+
+**Escenarios de Aceptación**:
+
+1. **Dado** que una pantalla muestra un monto, **cuando** se revisa su presentación, **entonces** aparece con el símbolo "$" antes del valor y puntos como separador de miles.
+2. **Dado** que un monto es cinco mil, **cuando** se muestra en pantalla, **entonces** se presenta exactamente como "$5.000".
+3. **Dado** que un monto tiene tres o menos cifras, **cuando** se muestra en pantalla, **entonces** aparece sin puntos de miles y sin decimales.
+4. **Dado** que se revisan listados, formularios, resúmenes y reportes, **cuando** se comparan sus importes, **entonces** todos usan el mismo formato chileno sin decimales.
+5. **Dado** que cambia la presentación de un importe, **cuando** se consultan los cálculos del módulo, **entonces** los valores y resultados financieros permanecen iguales.
+
+---
+
+### Historia de Usuario 26 - Mostrar primero la lista y abrir el formulario desde "Nuevo" (Prioridad: P1)
+
+Como usuario con permisos de creación, quiero ver primero la lista de registros y usar un botón "Nuevo" que abra el formulario en una ventana, para consultar el contexto existente antes de crear un registro sin perder el listado de fondo.
+
+**Por qué esta prioridad**: Priorizar la lista refuerza la consulta como primera acción y la ventana de formulario mantiene visible el contexto mientras se captura información.
+
+**Prueba Independiente**: Se abre una pantalla con registros, se verifica que la lista aparezca antes que el formulario, se selecciona "Nuevo", se interactúa con la ventana y se cierra sin guardar comprobando que el listado y sus filtros no cambiaron.
+
+**Escenarios de Aceptación**:
+
+1. **Dado** que se abre una pantalla con registros, **cuando** se revisa su contenido, **entonces** la lista aparece antes que cualquier formulario de creación.
+2. **Dado** que el usuario tiene permiso para crear, **cuando** se revisa la pantalla, **entonces** encuentra un botón visible identificado como "Nuevo".
+3. **Dado** que el usuario selecciona "Nuevo", **cuando** se abre el formulario, **entonces** este aparece en una ventana dentro del módulo sin reemplazar la lista de fondo.
+4. **Dado** que la ventana del formulario está abierta, **cuando** se revisa la lista de fondo, **entonces** los filtros y los registros previamente visibles permanecen sin cambios.
+5. **Dado** que el usuario cierra la ventana sin guardar, **cuando** se revisa la pantalla, **entonces** el listado, los filtros y los datos permanecen igual.
+6. **Dado** que el usuario confirma un registro válido, **cuando** se cierra la ventana, **entonces** la lista se actualiza conservando las reglas y validaciones vigentes.
+7. **Dado** que un rol no puede crear registros, **cuando** revisa la pantalla, **entonces** no ve el botón "Nuevo".
+
+---
+
+### Historia de Usuario 27 - Evitar la superposición en los filtros (Prioridad: P2)
+
+Como usuario que aplica filtros, quiero que la "×" para limpiar un filtro no se encime con la flecha del selector, para poder limpiar y cambiar el valor elegido sin hacer clic en el control equivocado.
+
+**Por qué esta prioridad**: Una superposición de controles provoca acciones accidentales y dificulta la revisión de listados extensos.
+
+**Prueba Independiente**: Se revisan los filtros con la "×" visible y la flecha del selector, se aplica y limpia cada filtro, y se comprueba que ambos controles puedan usarse por separado.
+
+**Escenarios de Aceptación**:
+
+1. **Dado** que un filtro tiene una "×" para limpiarlo, **cuando** se revisa su presentación, **entonces** la "×" no se encima con la flecha del selector.
+2. **Dado** que un filtro está aplicado, **cuando** se selecciona la "×", **entonces** el filtro se limpia sin activar el selector.
+3. **Dado** que se selecciona la flecha del selector, **cuando** se abre la lista de opciones, **entonces** no se activa la acción de limpiar el filtro.
+4. **Dado** que se revisan todos los filtros de la pantalla, **cuando** se comparan sus controles, **entonces** ninguna "×" invade el espacio de una flecha.
+5. **Dado** que el nombre de una opción es extenso, **cuando** se muestra el filtro, **entonces** la "×" y la flecha continúan separadas y legibles.
+
+---
+
+### Historia de Usuario 28 - Alinear la fila de totales del Libro Mayor (Prioridad: P2)
+
+Como Contador o usuario autorizado, quiero que la fila de totales del Libro Mayor esté alineada con las columnas correspondientes, para leer cada importe en su columna sin confundir saldos, débitos y créditos.
+
+**Por qué esta prioridad**: Una fila de totales desalineada dificulta la verificación contable y puede generar interpretaciones incorrectas de los saldos.
+
+**Prueba Independiente**: Se genera el Libro Mayor de un periodo con movimientos y se comprueba que los totales queden debajo de saldo inicial, débitos, créditos y saldo final, conservando los mismos importes que antes.
+
+**Escenarios de Aceptación**:
+
+1. **Dado** que se genera un Libro Mayor con movimientos, **cuando** se revisa la fila de totales, **entonces** cada total está alineado con su columna.
+2. **Dado** que la fila de totales es visible, **cuando** se comparan sus columnas con las del detalle, **entonces** saldo inicial, débitos, créditos y saldo final coinciden en posición.
+3. **Dado** que se revisan los importes de los totales, **cuando** se comparan con el cálculo vigente, **entonces** los valores permanecen iguales.
+4. **Dado** que el Libro Mayor se visualiza en una pantalla estrecha, **cuando** se revisa la fila de totales, **entonces** la alineación se conserva dentro del área de la tabla.
+5. **Dado** que se alinea la fila de totales, **cuando** se revisan las reglas del reporte, **entonces** no se modifica la igualdad contable ni el criterio de cálculo.
+
+---
+
+### Historia de Usuario 29 - Mostrar mensajes claros para listas vacías (Prioridad: P1)
+
+Como usuario, quiero un mensaje claro cuando una lista no tiene registros, para saber que no hay datos disponibles y no confundir esa situación con un error o con información oculta.
+
+**Por qué esta prioridad**: Los estados vacíos son frecuentes en demostraciones y periodos sin movimientos; un mensaje explícito evita dudas sobre el estado del módulo.
+
+**Prueba Independiente**: Se abren listados sin registros, con filtros sin resultados y con datos cargados, y se verifica que el mensaje de estado vacío aparezca solo cuando corresponda.
+
+**Escenarios de Aceptación**:
+
+1. **Dado** que un listado no tiene registros, **cuando** se abre la pantalla, **entonces** se muestra un mensaje claro en español que indica que no hay resultados.
+2. **Dado** que se aplica un filtro sin coincidencias, **cuando** se revisa el listado, **entonces** se muestra un mensaje que explica que no hay registros para ese filtro.
+3. **Dado** que existen registros, **cuando** se revisa el listado, **entonces** no se muestra el mensaje de lista vacía.
+4. **Dado** que un mensaje de lista vacía está visible, **cuando** se revisa su presentación, **entonces** permanece dentro del área del listado y es legible.
+5. **Dado** que el mensaje de lista vacía aparece, **cuando** se compara con un mensaje de error, **entonces** se distingue claramente y no sugiere que falló la carga.
+6. **Dado** que se limpia un filtro y existen registros, **cuando** se actualiza el listado, **entonces** el mensaje de lista vacía desaparece.
+
+---
+
+### Historia de Usuario 30 - Rastrear totales financieros hasta su origen (Prioridad: P1)
+
+Como Auditor, quiero ver la unidad CLP en los encabezados monetarios y consultar el detalle detrás de cada total de los reportes financieros, para rastrear cada cifra hasta sus movimientos de origen sin modificar los datos.
+
+**Por qué esta prioridad**: La constitución exige que las cifras financieras sean consistentes, estén etiquetadas y sean rastreables; un total sin desglose impide verificar su origen durante una revisión.
+
+**Prueba Independiente**: Se abren los cuatro reportes y la tabla de movimientos, se confirma que los encabezados monetarios indican CLP, se consulta el desglose de cada total y se comprueba que la suma del desglose coincide con el total mostrado.
+
+**Escenarios de Aceptación**:
+
+1. **Dado** que se visualiza una tabla financiera, **cuando** se revisan sus encabezados monetarios, **entonces** todos indican la unidad CLP.
+2. **Dado** que un total monetario tiene registros que lo componen, **cuando** se activa su control de desglose, **entonces** se muestra el origen, la referencia y el importe de cada registro.
+3. **Dado** que se consulta el desglose de un total, **cuando** se suman sus importes, **entonces** el resultado coincide con el total mostrado y conserva el formato chileno sin decimales.
+4. **Dado** que un total no tiene registros que lo compongan, **cuando** se abre su desglose, **entonces** se muestra un mensaje claro en español sin estimar importes.
+5. **Dado** que un desglose está abierto, **cuando** se cierra, **entonces** desaparece sin modificar periodos, filtros, datos ni permisos.
+6. **Dado** que el reporte Estado de Resultados incluye la columna Tipo, **cuando** se ordena por esa columna, **entonces** las filas se reordenan alfabéticamente y el indicador `aria-sort` refleja la dirección.
+7. **Dado** que se consulta un total de un reporte, **cuando** se comparan las cifras antes y después del desglose, **entonces** no cambian las reglas de cálculo ni la igualdad contable.
+
+---
+
+### Historia de Usuario 31 - Usar CLP y terminología de IVA chilena (Prioridad: P1)
+
+Como usuario del módulo, quiero que todas las cifras, unidades y datos de ejemplo usen CLP y la terminología de IVA chilena, para que la información financiera coincida con la empresa y con mi criterio habitual.
+
+**Por qué esta prioridad**: La identidad corporativa es chilena; mostrar otra moneda o nombres de impuestos ajenos genera confusión y rompe la consistencia exigida por la constitución.
+
+**Prueba Independiente**: Se revisan encabezados, registros semilla, formularios, exportaciones y reportes, y se comprueba que la moneda es CLP, que cinco mil pesos se muestran como "$5.000" sin decimales y que las cuentas de IVA usan "IVA Débito Fiscal" e "IVA Crédito Fiscal".
+
+**Escenarios de Aceptación**:
+
+1. **Dado** que se abre cualquier pantalla con importes, **cuando** se revisan encabezados o etiquetas de moneda, **entonces** todos indican CLP.
+2. **Dado** que se consulta un importe de cinco mil pesos, **cuando** se muestra en pantalla o en una exportación, **entonces** aparece como "$5.000" sin decimales.
+3. **Dado** que se consultan los datos de ejemplo, **cuando** se revisan cuentas, asientos, pagos y documentos, **entonces** todos usan CLP.
+4. **Dado** que se consulta el plan de cuentas semilla, **cuando** se buscan cuentas de IVA, **entonces** aparecen "IVA Crédito Fiscal" e "IVA Débito Fiscal" y no aparecen denominaciones anteriores.
+5. **Dado** que se crea un documento sin indicar moneda, **cuando** se guarda, **entonces** se almacena CLP.
+6. **Dado** que se cambia la moneda y las etiquetas, **cuando** se comparan los cálculos y permisos, **entonces** permanecen sin cambios.
+
+---
+
 ### Casos Límite
 
 - ¿Qué ocurre cuando un usuario intenta crear una cuenta contable sin ingresar su código, nombre o tipo?
@@ -628,6 +817,8 @@ Como usuario, quiero una interfaz profesional con colores coherentes, íconos po
 - ¿Qué ocurre cuando una cuenta tiene saldo inicial pero no movimientos en el periodo?
 - ¿Qué ocurre cuando se generan los cuatro reportes financieros para periodos distintos durante la misma consulta?
 - ¿Qué ocurre cuando un usuario sin acceso a Reportes financieros intenta abrir un reporte directamente?
+- ¿Qué ocurre cuando un total monetario es cero y se consulta su desglose?
+- ¿Qué ocurre cuando se cierra un desglose y cambia el periodo seleccionado?
 - ¿Qué ocurre cuando se cancela la confirmación de cierre de un periodo?
 - ¿Qué ocurre cuando se intenta cerrar un periodo que ya está cerrado?
 - ¿Qué ocurre cuando no existe el periodo seleccionado para cerrar?
@@ -695,6 +886,16 @@ Como usuario, quiero una interfaz profesional con colores coherentes, íconos po
 - ¿Qué ocurre cuando cambia el ancho de pantalla?
 - ¿Qué ocurre cuando un ícono no puede mostrarse?
 - ¿Qué ocurre cuando un mensaje de confirmación aparece en una pantalla estrecha?
+- ¿Qué ocurre cuando la pantalla de acceso se abre en una ventana muy estrecha?
+- ¿Qué ocurre cuando el nombre del usuario o su rol son extensos en el encabezado?
+- ¿Qué ocurre cuando un monto es cero, tiene tres cifras o supera los miles?
+- ¿Qué ocurre cuando se abre el formulario "Nuevo" con filtros aplicados en la lista?
+- ¿Qué ocurre cuando se cierra la ventana del formulario sin guardar?
+- ¿Qué ocurre cuando una opción de filtro tiene un texto extenso y la "×" y la flecha compiten por espacio?
+- ¿Qué ocurre cuando el Libro Mayor no tiene movimientos y solo muestra totales en cero?
+- ¿Qué ocurre cuando una lista está vacía porque el rol no tiene registros disponibles?
+- ¿Qué ocurre cuando cambia el ancho de la pantalla mientras una ventana de formulario está abierta?
+- ¿Qué ocurre cuando se aplican mejoras visuales en una pantalla con permisos reducidos?
 
 ## Requisitos 
 
@@ -733,12 +934,12 @@ Como usuario, quiero una interfaz profesional con colores coherentes, íconos po
 - **FR-031**: El sistema DEBE manejar los estados `borrador`, `aprobado` y `cancelado` en los asientos contables, impidiendo modificar o eliminar las líneas de un asiento aprobado y conservando los asientos cancelados para auditoría.
 - **FR-032**: El sistema DEBE impedir eliminar un documento que tenga asientos contables asociados, conservando la referencia al documento de origen.
 - **FR-033**: El sistema DEBE impedir crear un periodo contable cuyas fechas se superpongan con las de otro periodo existente, independientemente de su estado.
-- **FR-034**: El sistema DEBE operar con una sola moneda (MXN) y NO DEBE realizar conversiones de moneda durante el MVP.
+- **FR-034**: El sistema DEBE operar con una sola moneda (CLP) y NO DEBE realizar conversiones de moneda durante el MVP.
 - **FR-035**: El sistema DEBE mostrar en el panel principal una gráfica de barras con los ingresos y gastos de cada periodo contable.
 - **FR-036**: El sistema DEBE mostrar en el panel principal una gráfica de línea con la evolución del resultado financiero por periodo contable.
 - **FR-037**: El sistema DEBE mostrar en el panel principal una gráfica de distribución de los gastos por cuenta del periodo seleccionado.
 - **FR-038**: El sistema DEBE actualizar las gráficas cuando el usuario seleccione un periodo contable diferente y mostrar mensajes de estado vacío cuando no existan datos.
-- **FR-039**: Los importes presentados en las gráficas DEBEN formatearse en MXN mediante las utilidades compartidas del módulo.
+- **FR-039**: Los importes presentados en las gráficas DEBEN formatearse en CLP mediante las utilidades compartidas del módulo.
 - **FR-040**: El sistema DEBE solicitar RUT y contraseña para permitir el acceso al módulo.
 - **FR-041**: El sistema DEBE contar con cuatro usuarios de prueba ficticios, uno por cada rol: Administrador financiero, Contador, Tesorero y Auditor.
 - **FR-042**: El sistema DEBE autenticar a cada usuario de prueba únicamente cuando su RUT y su contraseña coincidan.
@@ -787,7 +988,7 @@ Como usuario, quiero una interfaz profesional con colores coherentes, íconos po
 - **FR-085**: El sistema DEBE mostrar el mensaje "Sección no disponible" y no presentar contenido cuando se intente abrir una pantalla eliminada del menú.
 - **FR-086**: La localización de registros DEBE realizarse mediante filtros propios de cada sección permitida, sin una pantalla global de búsqueda.
 - **FR-087**: El menú final DEBE cumplir simultáneamente la matriz de permisos de la Historia de Usuario 9 y las exclusiones de la Historia de Usuario 11.
-- **FR-088**: La pantalla "Pagos y cobros" DEBE mostrar un resumen con la cantidad y el total en MXN de los estados pendiente, pagado y vencido.
+- **FR-088**: La pantalla "Pagos y cobros" DEBE mostrar un resumen con la cantidad y el total en CLP de los estados pendiente, pagado y vencido.
 - **FR-089**: El sistema DEBE ofrecer un filtro por estado con las opciones "Todos", "Pendiente", "Pagado" y "Vencido".
 - **FR-090**: El filtro por estado DEBE actualizar el listado de pagos y cobros de forma inmediata.
 - **FR-091**: El resumen DEBE destacar el estado seleccionado sin ocultar las cantidades ni los totales de los demás estados.
@@ -798,7 +999,7 @@ Como usuario, quiero una interfaz profesional con colores coherentes, íconos po
 - **FR-096**: Todo cambio de estado DEBE reflejarse de inmediato en el resumen, en los totales y en el listado filtrado.
 - **FR-097**: El resumen y el filtro NO DEBEN crear una nueva opción de menú ni un botón duplicado que abra la misma pantalla.
 - **FR-098**: Los roles sin acceso a pagos NO DEBEN ver el resumen ni el filtro por estado.
-- **FR-099**: Los importes del resumen DEBEN mostrarse en MXN con el mismo formato utilizado en el resto del módulo.
+- **FR-099**: Los importes del resumen DEBEN mostrarse en CLP con el mismo formato utilizado en el resto del módulo.
 - **FR-100**: Cuando no existan pagos o cobros, el resumen DEBE mostrar cero en cada estado y un mensaje de estado vacío.
 - **FR-101**: Cuando un filtro no produzca resultados, el sistema DEBE mostrar un mensaje que indique que no hay pagos con ese estado.
 - **FR-102**: El menú lateral NO DEBE mostrarse antes de que una persona inicie sesión correctamente.
@@ -818,7 +1019,7 @@ Como usuario, quiero una interfaz profesional con colores coherentes, íconos po
 - **FR-116**: El sistema DEBE advertir claramente cuando el total de activos no sea igual a la suma de pasivos y patrimonio.
 - **FR-117**: Los reportes financieros DEBEN actualizarse cuando el usuario seleccione un periodo diferente.
 - **FR-118**: Los reportes financieros DEBEN mostrar mensajes de estado vacío en español cuando no existan movimientos o saldos para el periodo seleccionado.
-- **FR-119**: Todos los importes de los reportes financieros DEBEN mostrarse en MXN con el mismo formato utilizado en el resto del módulo.
+- **FR-119**: Todos los importes de los reportes financieros DEBEN mostrarse en CLP con el mismo formato utilizado en el resto del módulo.
 - **FR-120**: Los reportes financieros DEBEN derivarse de los registros contables existentes y NO DEBEN permitir la captura manual de cifras.
 - **FR-121**: Los reportes financieros DEBEN poder generarse para periodos abiertos y cerrados sin modificar el estado del periodo.
 - **FR-122**: Los reportes financieros DEBEN ser de solo consulta para todos los roles que puedan verlos.
@@ -892,7 +1093,7 @@ Como usuario, quiero una interfaz profesional con colores coherentes, íconos po
 - **FR-190**: El panel del Tesorero DEBE mostrar una alerta de pagos vencidos cuando existan pagos pendientes cuya fecha de vencimiento sea anterior a la fecha de referencia.
 - **FR-191**: El panel del Tesorero DEBE mostrar una alerta de pagos que vencen esta semana cuando existan pagos pendientes cuya fecha de vencimiento esté entre la fecha de referencia y el domingo de la semana actual, inclusive.
 - **FR-192**: Cada alerta DEBE mostrar la cantidad de pagos que cumplen la condición.
-- **FR-193**: Cada alerta DEBE mostrar el total en MXN de los pagos que cumplen la condición, usando el mismo criterio de cálculo que el módulo.
+- **FR-193**: Cada alerta DEBE mostrar el total en CLP de los pagos que cumplen la condición, usando el mismo criterio de cálculo que el módulo.
 - **FR-194**: Cada alerta DEBE permitir identificar la entidad, el monto y la fecha de vencimiento de los pagos incluidos.
 - **FR-195**: Cuando existan más pagos de los que se muestran en el detalle, la alerta DEBE indicar cuántos pagos adicionales existen.
 - **FR-196**: Los pagos pagados DEBEN excluirse de ambas alertas.
@@ -907,7 +1108,7 @@ Como usuario, quiero una interfaz profesional con colores coherentes, íconos po
 - **FR-205**: Las alertas NO DEBEN funcionar como acceso directo duplicado a la sección "Pagos y cobros".
 - **FR-206**: Las alertas DEBEN ser coherentes con la información mostrada en la sección "Pagos y cobros" para las mismas condiciones.
 - **FR-207**: La semana actual DEBE considerarse de lunes a domingo, usando la fecha de referencia definida para el panel.
-- **FR-208**: Los importes de las alertas DEBEN expresarse en MXN y usar el formato consistente del módulo.
+- **FR-208**: Los importes de las alertas DEBEN expresarse en CLP y usar el formato consistente del módulo.
 - **FR-209**: Las fechas de vencimiento de las alertas DEBEN mostrarse con el formato consistente del módulo.
 - **FR-210**: Los datos de ejemplo DEBEN incluir pagos que permitan demostrar las alertas de forma determinista.
 - **FR-211**: Cargar datos de ejemplo dos veces con la misma fecha de referencia DEBE producir alertas idénticas.
@@ -965,7 +1166,7 @@ Como usuario, quiero una interfaz profesional con colores coherentes, íconos po
 - **FR-263**: El filtro de monto DEBE permitir definir un rango con monto mínimo y monto máximo, ambos inclusive.
 - **FR-264**: En asientos, el filtro de monto DEBE aplicarse al monto total del asiento.
 - **FR-265**: En pagos y cobros, el filtro de monto DEBE aplicarse al monto del pago o cobro.
-- **FR-266**: Los montos del filtro DEBEN expresarse en MXN y usar el formato consistente del módulo.
+- **FR-266**: Los montos del filtro DEBEN expresarse en CLP y usar el formato consistente del módulo.
 - **FR-267**: El filtro de estado en asientos DEBE ofrecer borrador, aprobado y cancelado.
 - **FR-268**: El filtro de estado en pagos y cobros DEBE ofrecer pendiente, pagado, vencido y anulado.
 - **FR-269**: La opción inicial del filtro de estado DEBE ser "Todos", que representa ausencia de filtro por estado.
@@ -1028,6 +1229,50 @@ Como usuario, quiero una interfaz profesional con colores coherentes, íconos po
 - **FR-326**: El botón "Menú" NO DEBE crear una entrada adicional en el menú lateral ni duplicar el acceso a una pantalla existente.
 - **FR-327**: Después de cerrar sesión, el botón "Menú" NO DEBE abrir el menú lateral sin una nueva autenticación válida.
 - **FR-328**: Abrir o cerrar el menú lateral desde el encabezado NO DEBE modificar reglas de negocio, permisos, filtros, datos financieros ni el estado de autenticación.
+- **FR-329**: La pantalla de acceso DEBE presentar el formulario de inicio de sesión centrado en el área visible.
+- **FR-330**: El formulario de acceso DEBE ser angosto y NO DEBE ocupar todo el ancho de la pantalla en dispositivos amplios.
+- **FR-331**: El botón "Ingresar" DEBE aparecer inmediatamente después del último campo obligatorio, sin un espacio vacío superior que lo separe de dicho campo.
+- **FR-332**: La pantalla de acceso NO DEBE mostrar información financiera antes de una autenticación válida, además de la ocultación del menú lateral definida en FR-102.
+- **FR-333**: El menú lateral DEBE estar alineado al borde izquierdo del área de trabajo cuando esté visible.
+- **FR-334**: El menú lateral DEBE conservar las etiquetas, el orden y los permisos vigentes de las secciones.
+- **FR-335**: El encabezado DEBE mostrar el nombre del usuario autenticado y su rol cuando exista una sesión válida.
+- **FR-336**: La acción "Cerrar sesión" DEBE mostrarse en el encabezado junto al nombre del usuario y su rol.
+- **FR-337**: La acción "Cerrar sesión" del encabezado DEBE conservar el comportamiento definido en FR-050 y FR-051.
+- **FR-338**: Los importes monetarios DEBEN mostrarse con el símbolo "$" antes del valor y punto como separador de miles.
+- **FR-339**: Los importes monetarios DEBEN mostrarse sin decimales.
+- **FR-340**: El formato monetario DEBE aplicarse de forma consistente a listados, formularios, resúmenes, reportes y mensajes que contengan montos.
+- **FR-341**: Un importe de cinco mil DEBE presentarse como "$5.000" cuando se muestre al usuario.
+- **FR-342**: El cambio de presentación de los importes NO DEBE modificar los valores numéricos, los cálculos ni las reglas contables vigentes.
+- **FR-343**: Cada pantalla con registros DEBE mostrar primero el listado disponible para el usuario.
+- **FR-344**: Cada pantalla con registros DEBE ofrecer un botón visible identificado como "Nuevo" cuando el usuario tenga permiso para crear.
+- **FR-345**: Al seleccionar "Nuevo", el sistema DEBE abrir el formulario correspondiente en una ventana dentro del módulo, sin reemplazar el listado de fondo.
+- **FR-346**: La ventana del formulario DEBE conservar el listado y los filtros previamente aplicados sin cambios mientras esté abierta.
+- **FR-347**: La ventana del formulario DEBE poder cerrarse sin guardar, dejando los datos y el listado sin modificaciones.
+- **FR-348**: La creación de registros desde la ventana DEBE conservar las validaciones, reglas de negocio y permisos vigentes.
+- **FR-349**: El botón "Nuevo" NO DEBE mostrarse en pantallas donde el rol autenticado no pueda crear registros.
+- **FR-350**: El control "×" para limpiar un filtro NO DEBE superponerse con la flecha del selector.
+- **FR-351**: La "×" de un filtro DEBE limpiar únicamente ese filtro sin activar el selector de opciones.
+- **FR-352**: La flecha del selector DEBE abrir las opciones del filtro sin activar la acción de limpiar.
+- **FR-353**: Los controles de filtro DEBEN permanecer legibles y separados incluso cuando el texto de la opción seleccionada sea extenso.
+- **FR-354**: La fila de totales del Libro Mayor DEBE alinearse con las columnas de saldo inicial, débitos, créditos y saldo final.
+- **FR-355**: La fila de totales del Libro Mayor DEBE conservar los importes y el criterio de cálculo vigente.
+- **FR-356**: Cuando un listado no tenga registros, el sistema DEBE mostrar un mensaje claro en español que indique que no hay resultados.
+- **FR-357**: Cuando un filtro no produzca coincidencias, el sistema DEBE mostrar un mensaje que indique que no hay registros para ese filtro, además del estado vacío general definido en FR-274.
+- **FR-358**: El mensaje de lista vacía NO DEBE presentarse como un mensaje de error ni indicar que falló la carga.
+- **FR-359**: El mensaje de lista vacía DEBE permanecer dentro del área del listado y ser legible.
+- **FR-360**: Cuando existan registros, el sistema NO DEBE mostrar el mensaje de lista vacía.
+- **FR-361**: Las mejoras de usabilidad NO DEBEN agregar, eliminar ni modificar operaciones, permisos, datos ni reglas de negocio.
+- **FR-362**: Las mejoras de usabilidad NO DEBEN crear nuevas opciones de menú ni accesos duplicados a pantallas existentes.
+- **FR-363**: Las mejoras DEBEN aplicarse a todos los roles que ya tenían acceso a las pantallas afectadas.
+- **FR-364**: Los encabezados de columnas monetarias en tablas y reportes financieros DEBEN indicar la unidad CLP.
+- **FR-365**: Cada total monetario de los reportes financieros DEBE ofrecer un desglose con los registros o movimientos que lo componen.
+- **FR-366**: El desglose DEBE mostrar el origen, la referencia y el importe CLP de cada registro y DEBE poder cerrarse sin modificar datos, filtros ni periodos.
+- **FR-367**: Las tablas de reportes DEBEN permitir ordenar por tipo cuando esté presente la columna "Tipo".
+- **FR-368**: El desglose y la indicación de unidad NO DEBEN modificar importes, reglas de cálculo, permisos ni la igualdad contable.
+- **FR-369**: Todo el módulo DEBE usar CLP como única moneda en datos, encabezados, etiquetas y exportaciones, sin conversión.
+- **FR-370**: Los importes DEBEN mostrarse en formato chileno con "$", puntos de miles y sin decimales, incluidas las etiquetas compactas.
+- **FR-371**: La semilla y el plan de cuentas DEBEN usar "IVA Débito Fiscal" e "IVA Crédito Fiscal" como nombres de las cuentas de IVA.
+- **FR-372**: Los documentos creados sin moneda explícita DEBEN almacenarse con CLP.
 
 ### Requisitos de Extensibilidad 
 
@@ -1059,7 +1304,7 @@ El módulo de Contabilidad y Finanzas DEBE:
 - **DestinoNavegacion**: Pantalla del módulo que debe tener un único acceso visible y estar disponible solo para los roles autorizados.
 - **ControlAccion**: Botón del panel que ejecuta una acción inmediata, como cargar datos, restablecer datos o cerrar sesión, sin abrir una pantalla de navegación.
 - **EstadoPago**: Clasificación de un pago o cobro como pendiente, pagado, vencido o anulado, según su confirmación, su fecha de vencimiento y su anulación conservando el registro.
-- **ResumenPagos**: Agrupación de pagos y cobros por estado que presenta la cantidad de registros y el total en MXN de cada grupo.
+- **ResumenPagos**: Agrupación de pagos y cobros por estado que presenta la cantidad de registros y el total en CLP de cada grupo.
 - **ReporteFinanciero**: Consulta por periodo que presenta el Libro Mayor, el Balance de Comprobación, el Estado de Resultados o el Balance General a partir de asientos aprobados.
 - **SaldoContable**: Resultado de agregar los movimientos aprobados de una cuenta hasta una fecha determinada, utilizado para los reportes financieros.
 - **CierrePeriodo**: Acción administrativa confirmada que cambia un periodo de abierto a cerrado y bloquea el registro y la modificación de asientos y pagos en ese periodo.
@@ -1069,11 +1314,11 @@ El módulo de Contabilidad y Finanzas DEBE:
 - **RegistroConsolidado**: Consulta de solo lectura que reúne eventos de asientos y pagos con filtros locales para el Auditor.
 - **UsuarioResponsable**: Usuario ficticio de demostración identificado por nombre, rol y RUT, responsable de una acción registrada en auditoría.
 - **AlertaPago**: Aviso del panel del Tesorero que resume pagos con una condición de vencimiento específica.
-- **ResumenAlerta**: Cantidad de pagos y total en MXN asociados a una alerta.
+- **ResumenAlerta**: Cantidad de pagos y total en CLP asociados a una alerta.
 - **PanelTesorero**: Vista inicial del Tesorero donde se muestran las alertas de vencimientos de pagos.
 - **SemanaReferencia**: Intervalo de lunes a domingo usado para determinar qué pagos vencen esta semana.
 - **EntidadPago**: Cliente, proveedor u otra entidad asociada al pago, utilizada para identificar cada movimiento dentro de la alerta.
-- **EncabezadoModulo**: Área superior común del módulo que presenta la identidad de la empresa ficticia.
+- **EncabezadoModulo**: Área superior común del módulo que presenta la identidad de la empresa ficticia, el nombre y rol del usuario autenticado y la acción "Cerrar sesión".
 - **EmpresaFicticia**: Organización demostrativa llamada "Comercial Los Andes SpA", propietaria de los datos financieros de ejemplo.
 - **LogotipoEmpresa**: Elemento visual ficticio que identifica a "Comercial Los Andes SpA" dentro del encabezado.
 - **IdentidadCorporativa**: Combinación del nombre de la empresa y su logotipo presentada de forma consistente en todas las pantallas.
@@ -1082,7 +1327,7 @@ El módulo de Contabilidad y Finanzas DEBE:
 - **TotalesReporte**: Conjunto de importes y saldos aplicables al tipo de reporte que deben conservarse en la exportación.
 - **FiltroFecha**: Rango inclusive de fechas aplicado a la fecha contable de un asiento o a la fecha del movimiento de un pago.
 - **FiltroCuenta**: Criterio que selecciona una cuenta contable y determina qué asientos o pagos coinciden.
-- **FiltroMonto**: Rango inclusive de montos en MXN aplicado al total de un asiento o al monto de un pago.
+- **FiltroMonto**: Rango inclusive de montos en CLP aplicado al total de un asiento o al monto de un pago.
 - **FiltroEstado**: Criterio que selecciona uno o todos los estados válidos del tipo de registro.
 - **ListadoFiltrado**: Resultado de aplicar uno o varios filtros sobre el listado de asientos o pagos.
 - **ResultadoVacio**: Estado que informa que ningún registro cumple la combinación de filtros aplicada.
@@ -1097,6 +1342,17 @@ El módulo de Contabilidad y Finanzas DEBE:
 - **MensajeRutInvalido**: Aviso específico que informa que el RUT no es válido por su dígito verificador y bloquea el acceso.
 - **BotonMenu**: Control del encabezado que abre y cierra el menú lateral sin cambiar de pantalla ni modificar la sesión.
 - **EstadoMenuLateral**: Condición del menú lateral como abierto o cerrado, reflejada en el botón "Menú".
+- **PantallaAcceso**: Vista inicial que concentra el formulario de credenciales y el botón "Ingresar" sin espacio vacío superior innecesario.
+- **FormularioAcceso**: Conjunto de campos de autenticación conservados sin cambios funcionales respecto al comportamiento vigente.
+- **MenuLateral**: Navegación principal alineada al borde izquierdo del área de trabajo, con las secciones permitidas por el rol.
+- **IdentificacionUsuario**: Nombre y rol del usuario con sesión válida, mostrados juntos en el encabezado.
+- **ImporteFormateado**: Presentación de un valor monetario con símbolo "$", separador de miles y sin decimales, equivalente al valor numérico usado en cálculos.
+- **ListadoPrincipal**: Primer contenido visible de una pantalla con registros, conservando filtros y datos mientras se abre un formulario.
+- **BotonNuevo**: Control visible que abre el formulario de creación en una ventana dentro del módulo.
+- **VentanaFormulario**: Área temporal donde se captura o edita información sin reemplazar el listado de fondo.
+- **ControlFiltro**: Elemento de filtro que incluye la opción de limpiar y el selector de valores sin superposición entre ambos controles.
+- **FilaTotales**: Fila del Libro Mayor que presenta los totales alineados con saldo inicial, débitos, créditos y saldo final.
+- **MensajeListaVacia**: Aviso claro y legible que informa que no hay registros o que un filtro no produjo resultados.
 
 ## Criterios de Éxito 
 
@@ -1180,7 +1436,7 @@ El módulo de Contabilidad y Finanzas DEBE:
 - **SC-076**: El 100% de los pagos pendientes vencidos se refleja en la alerta de vencidos con cantidad y total correctos.
 - **SC-077**: El 100% de los pagos pendientes que vencen en la semana actual se refleja en la alerta semanal con cantidad y total correctos.
 - **SC-078**: El 100% de los pagos pagados o anulados se excluye de ambas alertas.
-- **SC-079**: El 100% de las alertas muestra importes en MXN y fechas con el formato consistente del módulo.
+- **SC-079**: El 100% de las alertas muestra importes en CLP y fechas con el formato consistente del módulo.
 - **SC-080**: El 100% de los cambios de estado o fecha de vencimiento se refleja en las alertas después de actualizar el panel.
 - **SC-081**: El 100% de los roles distintos del Tesorero no ve las alertas en su panel.
 - **SC-082**: El 100% de las pruebas con datos de ejemplo produce alertas idénticas para la misma fecha de referencia.
@@ -1245,6 +1501,27 @@ El módulo de Contabilidad y Finanzas DEBE:
 - **SC-141**: El 100% de los roles ve exactamente las mismas secciones al abrir el menú desde el botón del encabezado que las definidas en su matriz de acceso.
 - **SC-142**: El 100% de los cierres del menú conserva la pantalla activa, la sesión y los datos del módulo sin cambios.
 - **SC-143**: Al menos el 95% de los usuarios identifica cómo abrir y cerrar el menú lateral sin ayuda en menos de 5 segundos.
+- **SC-144**: El 100% de las revisiones de la pantalla de acceso confirma que el formulario está centrado y es angosto en pantallas amplias.
+- **SC-145**: El 100% de los usuarios de prueba localiza el botón "Ingresar" sin desplazamiento adicional en menos de 5 segundos.
+- **SC-146**: El 100% de las pantallas posteriores al acceso muestra el menú lateral alineado al borde izquierdo.
+- **SC-147**: El 100% de las sesiones válidas muestra en el encabezado el nombre del usuario, su rol y "Cerrar sesión" de forma agrupada.
+- **SC-148**: El 100% de los importes visibles usa el formato chileno con "$", puntos de miles y sin decimales.
+- **SC-149**: El 100% de los cálculos financieros conserva idénticos resultados después del cambio de formato de los importes.
+- **SC-150**: El 100% de las pantallas con registros muestra el listado antes que cualquier formulario de creación.
+- **SC-151**: El 100% de los formularios abiertos desde "Nuevo" aparece en una ventana sin reemplazar el listado de fondo.
+- **SC-152**: El 100% de los cierres de ventana sin guardar conserva el listado, los filtros y los datos sin cambios.
+- **SC-153**: Se detectan 0 superposiciones entre la "×" de los filtros y la flecha del selector en las revisiones de pantalla.
+- **SC-154**: El 100% de las filas de totales del Libro Mayor está alineada con sus columnas correspondientes.
+- **SC-155**: El 100% de los listados vacíos muestra un mensaje claro en español dentro del área del listado.
+- **SC-156**: Al menos el 95% de los usuarios encuestados encuentra una acción principal sin ayuda en menos de 10 segundos después de los cambios.
+- **SC-157**: Se detectan 0 cambios funcionales en reglas, permisos, datos y operaciones respecto al comportamiento vigente.
+- **SC-158**: El 100% de los roles conserva el mismo conjunto de pantallas y acciones permitidas que antes de la mejora.
+- **SC-159**: El 100% de los encabezados monetarios de tablas y reportes financieros indica la unidad CLP.
+- **SC-160**: El 100% de los totales monetarios abre un desglose cuya suma coincide con el importe total mostrado.
+- **SC-161**: Se detectan 0 cambios en importes, reglas contables, permisos o igualdad financiera al usar el desglose o el orden por tipo.
+- **SC-162**: El 100% de las referencias visibles y persistidas a la moneda usa CLP.
+- **SC-163**: El 100% de las cuentas de IVA en datos de ejemplo usa "IVA Débito Fiscal" o "IVA Crédito Fiscal".
+- **SC-164**: Se detectan 0 cambios en cálculos, permisos e igualdad contable tras el cambio de moneda y terminología.
 
 ## Suposiciones
 
@@ -1264,7 +1541,7 @@ El módulo de Contabilidad y Finanzas DEBE:
 - La implementación inicial corresponde a una solución frontend, por lo que se utilizarán datos de ejemplo para representar las operaciones.
 - No se contempla una conexión real a una base de datos ni la integración con sistemas bancarios externos durante esta etapa del proyecto.
 - La información utilizada en el prototipo tiene fines demostrativos y no corresponde a registros financieros reales.
-- Todas las operaciones del módulo se registran en una sola moneda (MXN); no se contemplan conversiones de moneda.
+- Todas las operaciones del módulo se registran en una sola moneda (CLP); no se contemplan conversiones de moneda.
 - La autenticación se simula dentro de la experiencia de demostración del módulo; no se contempla un servicio de identidad externo.
 - Los cuatro usuarios de prueba son ficticios, deterministas y se restauran al estado inicial al comenzar una demostración.
 - El RUT se acepta con formato chileno de 7 u 8 dígitos y dígito verificador numérico o K; se admite K en mayúscula o minúscula, se formatea automáticamente mientras se escribe y se valida su dígito verificador antes de intentar el acceso.
@@ -1285,7 +1562,7 @@ El módulo de Contabilidad y Finanzas DEBE:
 - Los botones de carga y restablecimiento se muestran en el panel del Administrador financiero, único rol con permiso para modificar el estado general del módulo según la Historia de Usuario 9; los demás roles no los ven.
 - "Cargar datos de ejemplo" reemplaza cualquier conjunto previo por la semilla, mientras que "Restablecer datos" limpia los registros financieros y devuelve el módulo al estado inicial sin eliminar usuarios de prueba.
 - Los periodos de la semilla son consecutivos, no se superponen y al menos uno permanece abierto para permitir registrar nuevos asientos.
-- La semilla utiliza MXN y respeta todas las reglas contables definidas, incluida la partida doble y el estado válido de los periodos.
+- La semilla utiliza CLP y respeta todas las reglas contables definidas, incluida la partida doble y el estado válido de los periodos.
 - Ambas acciones requieren confirmación porque afectan a todo el contenido de demostración de la sesión.
 - Los datos de la semilla son ficticios y no representan operaciones financieras reales.
 - Entidades, Documentos y Búsqueda se eliminan de la navegación visible; las estructuras Entity y Document siguen existiendo para mantener las relaciones financieras.
@@ -1299,7 +1576,7 @@ El módulo de Contabilidad y Finanzas DEBE:
 - Todo pago o cobro registra una fecha de vencimiento; un registro pendiente cuya fecha ya pasó se considera vencido automáticamente.
 - El estado pagado se obtiene de la confirmación del movimiento y no elimina el registro del listado ni del resumen.
 - "Todos" es la selección inicial del filtro y representa la ausencia de filtro, no un estado adicional.
-- Los importes del resumen se expresan en MXN y utilizan las utilidades de formato compartidas del módulo.
+- Los importes del resumen se expresan en CLP y utilizan las utilidades de formato compartidas del módulo.
 - El menú lateral es la navegación principal del módulo después del inicio de sesión; por eso solo se muestra cuando existe una sesión válida.
 - Las secciones visibles del menú lateral se derivan de la matriz de acceso por rol y excluyen Entidades, Documentos y Búsqueda para todos los roles.
 - Los reportes financieros se incorporan dentro de la sección existente "Reportes financieros", sin crear una nueva opción de menú ni una pantalla duplicada.
@@ -1371,7 +1648,7 @@ El módulo de Contabilidad y Finanzas DEBE:
 - El filtro de cuenta en asientos busca coincidencias en las líneas del asiento.
 - El filtro de cuenta en pagos y cobros busca coincidencias a través del asiento relacionado.
 - Los pagos sin asiento relacionado no coinciden cuando se filtra por una cuenta específica.
-- El filtro de monto se expresa como un rango en MXN con límites inclusivos.
+- El filtro de monto se expresa como un rango en CLP con límites inclusivos.
 - Los estados disponibles son borrador, aprobado y cancelado para asientos, y pendiente, pagado, vencido y anulado para pagos y cobros.
 - "Todos" es la selección inicial del filtro de estado y significa ausencia de filtro.
 - Los filtros son locales a cada listado y no constituyen una pantalla global de búsqueda.
@@ -1390,6 +1667,17 @@ El módulo de Contabilidad y Finanzas DEBE:
 - Las reglas vigentes sobre qué registros pueden eliminarse se mantienen sin cambios.
 - El menú en celular conserva las mismas secciones y permisos del menú amplio.
 - Las mejoras de interfaz no crean nuevas opciones de menú.
+- El alcance de las Historias de Usuario 22 a 29 se limita a la presentación y disposición visual; no se agregan, eliminan ni modifican funciones, datos, permisos ni reglas de negocio.
+- "Ventana" significa una ventana dentro del módulo que se abre y cierra sobre el listado, sin reemplazar la pantalla ni abrir una pestaña separada del navegador.
+- El formulario de acceso conserva los campos, las validaciones y las credenciales definidos en la Historia de Usuario 8 de la especificación base.
+- El menú lateral conserva las secciones, etiquetas y permisos definidos en la matriz de acceso vigente.
+- El encabezado muestra el nombre y el rol del usuario autenticado tal como aparecen en los usuarios de prueba de la especificación base.
+- El formato chileno aplica a los importes en CLP usados por el módulo: símbolo "$" antes del valor, puntos de separación de miles y ausencia de decimales.
+- No se introducen montos negativos nuevos ni cambios en el criterio de redondeo; se respeta la lógica financiera existente.
+- En pantallas estrechas, el menú lateral continúa adaptándose según las reglas vigentes y permanece alineado al borde izquierdo cuando está abierto.
+- Los mensajes de lista vacía son informativos y no sustituyen mensajes de error ni estados de carga.
+- La fila de totales del Libro Mayor conserva los importes y la igualdad contable definida; solo cambia su alineación visual.
+- Las mejoras de usabilidad no crean nuevas opciones de menú ni accesos duplicados a pantallas existentes.
 
 ---
 

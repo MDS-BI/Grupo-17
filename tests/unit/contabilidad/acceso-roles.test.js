@@ -3,7 +3,7 @@ import { instalarAlmacen } from '../../setup/contabilidad.js';
 import { inicializarAcceso, loadRoles, loadUsuarios } from '../../../src/contabilidad/almacenamiento.js';
 import { CATALOGO_ROLES, permisosDelRol, panelDelRol } from '../../../src/contabilidad/roles.js';
 import { iniciarSesion, cerrarSesion, obtenerPanelInicio } from '../../../src/contabilidad/sesion.js';
-import { normalizarRUT, validarFormatoRUT } from '../../../src/contabilidad/validaciones-acceso.js';
+import { MENSAJE_RUT_INVALIDO, calcularDigitoVerificador, formatearRUT, normalizarRUT, validarDigitoVerificador, validarFormatoRUT } from '../../../src/contabilidad/validaciones-acceso.js';
 import { matrizPorRol, opcionesMenu, puedeAcceder, puedeEjecutar } from '../../../src/contabilidad/permisos.js';
 
 describe('acceso por roles', () => {
@@ -18,6 +18,24 @@ describe('acceso por roles', () => {
     expect(normalizarRUT('11.111.111-1')).toBe('111111111');
     expect(validarFormatoRUT('11.111.111-1')).toBe(true);
     expect(validarFormatoRUT('abc')).toBe(false);
+  });
+
+  it('formatea el RUT mientras se escribe y acepta k como dígito verificador', () => {
+    expect(formatearRUT('1')).toBe('1');
+    expect(formatearRUT('111111111')).toBe('11.111.111-1');
+    expect(formatearRUT('11.111.111-1')).toBe('11.111.111-1');
+    expect(formatearRUT('1111119k')).toBe('1.111.119-K');
+    expect(calcularDigitoVerificador('1111119')).toBe('k');
+    expect(validarDigitoVerificador('1.111.119-k')).toBe(true);
+    expect(validarDigitoVerificador('1.111.119-K')).toBe(true);
+    expect(normalizarRUT('1.111.119-k')).toBe(normalizarRUT('1.111.119-K'));
+  });
+
+  it('rechaza un dígito verificador inválido con mensaje específico', () => {
+    const resultado = iniciarSesion('11.111.111-2', 'Admin2026!');
+    expect(resultado.ok).toBe(false);
+    expect(resultado.error).toBe(MENSAJE_RUT_INVALIDO);
+    expect(resultado.errores.rut).toBe(MENSAJE_RUT_INVALIDO);
   });
 
   it('registra cuatro roles y cuatro usuarios de demostración', () => {

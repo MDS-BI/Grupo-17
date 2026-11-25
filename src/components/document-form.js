@@ -66,7 +66,7 @@ export function clearDocumentForm(){
   qs('discount').value = '';
   qs('taxAmount').value = '';
   qs('totalAmount').value = '';
-  qs('currency').value = '';
+  qs('currency').value = 'CLP';
   qs('docPaymentTerms').value = '';
   qs('notes').value = '';
   clearDocumentErrors();
@@ -101,7 +101,7 @@ export function startDocumentEdit(doc){
   qs('discount').value = doc.discount === undefined ? '' : doc.discount;
   qs('taxAmount').value = doc.taxAmount === undefined ? '' : doc.taxAmount;
   qs('totalAmount').value = doc.totalAmount === undefined ? '' : doc.totalAmount;
-  qs('currency').value = doc.currency || '';
+  qs('currency').value = doc.currency || 'CLP';
   qs('docPaymentTerms').value = doc.paymentTerms || '';
   qs('notes').value = doc.notes || '';
   renderStatusControl(doc.status);

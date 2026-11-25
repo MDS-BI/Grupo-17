@@ -1,4 +1,4 @@
-import { formatearMXN, sumarCentavos } from './dinero.js';
+import { formatearCLP, sumarCentavos } from './dinero.js';
 import { fechaHoyISO } from './fechas.js';
 
 export const ESTADOS_VISIBLES = Object.freeze(['pendiente', 'pagado', 'vencido']);
@@ -70,7 +70,7 @@ export function formatearResumen(resumen) {
     salida[estado] = {
       cantidad: grupo.cantidad,
       totalCentavos: grupo.totalCentavos,
-      total: formatearMXN(grupo.totalCentavos)
+      total: formatearCLP(grupo.totalCentavos)
     };
   }
   return salida;

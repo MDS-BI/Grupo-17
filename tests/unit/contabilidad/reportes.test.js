@@ -51,7 +51,7 @@ describe('reportes financieros por periodo', () => {
       asientos.push({
         id, series: 'PR', folio: 2000 + i, date: '2026-10-20', period_id: 'per-2026-10',
         concept: `Asiento masivo ${i}`, status: 'aprobado', entity_id: null,
-        totalDebit: 100, totalCredit: 100, currency: 'MXN'
+        totalDebit: 100, totalCredit: 100, currency: 'CLP'
       });
       lineas.push(
         { id: `${id}-1`, asiento_id: id, cuenta_id: 'cta-1010', debit: 100, credit: 0 },

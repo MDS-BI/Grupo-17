@@ -1,4 +1,4 @@
-import { normalizarImporte, formatearMXN, sumarCentavos } from './dinero.js';
+import { normalizarImporte, formatearCLP, sumarCentavos } from './dinero.js';
 import { esFechaValida, periodoContieneFecha } from './fechas.js';
 
 export const ESTADOS_ASIENTO = Object.freeze(['borrador', 'aprobado', 'cancelado']);
@@ -131,7 +131,7 @@ export function validarAsiento(payload = {}, {
   }
 
   if (lineaErrores.length === 0 && lineas.length >= 2 && totalDebit !== totalCredit) {
-    errores.balance = `El asiento debe estar cuadrado: débitos ${formatearMXN(totalDebit)} y créditos ${formatearMXN(totalCredit)}`;
+    errores.balance = `El asiento debe estar cuadrado: débitos ${formatearCLP(totalDebit)} y créditos ${formatearCLP(totalCredit)}`;
   }
 
   return {

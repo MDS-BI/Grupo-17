@@ -1,4 +1,5 @@
 ﻿import { PALETA_ESTADOS } from '../../contabilidad/interfaz-config.js';
+import { formatearCLP } from '../../contabilidad/dinero.js';
 
 export function escapeHtml(valor) {
   return String(valor ?? '')
@@ -18,9 +19,10 @@ function normalizar(valor) {
 }
 
 export function formatearMonto(centavos) {
-  const valor = (Number(centavos) || 0) / 100;
-  return valor.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' });
+  return formatearCLP(centavos);
 }
+
+export const MENSAJE_LISTA_VACIA = 'No hay resultados para mostrar.';
 
 export const formatoMoneda = formatearMonto;
 
@@ -33,7 +35,7 @@ export function formatearFecha(valor) {
   }
   const fecha = new Date(texto);
   if (Number.isNaN(fecha.getTime())) return texto;
-  return fecha.toLocaleDateString('es-MX');
+  return fecha.toLocaleDateString('es-CL');
 }
 
 export const formatoFecha = formatearFecha;
@@ -146,4 +148,64 @@ export function encabezadoOrdenable(tabla, columna, etiqueta, tipo, orden, clase
   const tipoOrden = tipo || 'text';
   const claseTh = clase ? ` class="${escapeHtml(clase)}"` : '';
   return `<th scope="col"${claseTh} aria-sort="${ariaSort}"><button type="button" class="orden-tabla" data-ordenar data-orden-tabla="${escapeHtml(tabla)}" data-orden-columna="${escapeHtml(columna)}" data-orden-tipo="${escapeHtml(tipoOrden)}" aria-label="Ordenar por ${escapeHtml(etiqueta)}">${escapeHtml(etiqueta)}</button></th>`;
+}
+
+export function abrirVentanaFormulario(seccion, titulo = 'Nuevo registro') {
+  const ventana = document.getElementById('ventana-formulario');
+  const contenido = ventana?.querySelector('[data-ventana-formulario-contenido]');
+  if (!ventana || !contenido || !seccion) return false;
+  if (ventana.__formularioSeccion && ventana.__formularioSeccion !== seccion) cerrarVentanaFormulario();
+  const tituloNodo = document.getElementById('ventana-formulario-titulo');
+  if (tituloNodo) tituloNodo.textContent = titulo;
+  ventana.__formularioOrigen = {
+    padre: seccion.parentNode,
+    siguiente: seccion.nextSibling
+  };
+  ventana.__formularioSeccion = seccion;
+  seccion.hidden = false;
+  seccion.setAttribute('data-formulario-en-ventana', '');
+  contenido.appendChild(seccion);
+  ventana.hidden = false;
+  ventana.setAttribute('aria-hidden', 'false');
+  seccion.querySelector('input:not([type="hidden"]), select, textarea')?.focus?.();
+  return true;
+}
+
+export function cerrarVentanaFormulario() {
+  const ventana = document.getElementById('ventana-formulario');
+  const seccion = ventana?.__formularioSeccion;
+  if (!ventana || !seccion) return false;
+  const origen = ventana.__formularioOrigen || { padre: null, siguiente: null };
+  if (origen.padre) origen.padre.insertBefore(seccion, origen.siguiente);
+  seccion.removeAttribute('data-formulario-en-ventana');
+  ventana.__formularioSeccion = null;
+  ventana.__formularioOrigen = null;
+  ventana.hidden = true;
+  ventana.setAttribute('aria-hidden', 'true');
+  const contenido = ventana.querySelector('[data-ventana-formulario-contenido]');
+  if (contenido) contenido.replaceChildren();
+  seccion.dispatchEvent(new CustomEvent('ventana-formulario-cerrada', { bubbles: true }));
+  return true;
+}
+
+export function configurarVentanasNuevo() {
+  if (typeof document === 'undefined') return;
+  const ventana = document.getElementById('ventana-formulario');
+  if (!ventana || ventana.__botonesConfigurados) return;
+  ventana.__botonesConfigurados = true;
+  document.querySelectorAll('[data-nuevo]').forEach((boton) => {
+    boton.addEventListener('click', () => {
+      if (boton.hidden) return;
+      const clave = boton.dataset.nuevo;
+      const seccion = document.querySelector(`[data-formulario-nuevo="${clave}"]`);
+      abrirVentanaFormulario(seccion, boton.dataset.tituloNuevo || 'Nuevo registro');
+    });
+  });
+  document.getElementById('ventana-formulario-cerrar')?.addEventListener('click', cerrarVentanaFormulario);
+  ventana.addEventListener('click', (evento) => {
+    if (evento.target === ventana) cerrarVentanaFormulario();
+  });
+  document.addEventListener('keydown', (evento) => {
+    if (evento.key === 'Escape' && !ventana.hidden) cerrarVentanaFormulario();
+  });
 }

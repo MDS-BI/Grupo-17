@@ -47,7 +47,7 @@ The `002-contabilidad-finanzas` feature extends the base app with:
 - **Periodos contables** — non-overlapping periods that can be opened or closed; periods with entries are closed instead of deleted.
 - **Reportes financieros** — period-filtered movements with debit/credit totals and empty states.
 
-All amounts are stored as integer cents and formatted as MXN. The first time an accounting view opens, deterministic example data is seeded (chart of accounts, four periods, journal entries, payments, and two demo entities/documents). Use **Restaurar datos de ejemplo** on the summary screen to reset the accounting data to that seed at any time.
+All amounts are stored as integer cents and formatted as CLP. The first time an accounting view opens, deterministic example data is seeded (chart of accounts, four periods, journal entries, payments, and two demo entities/documents). Use **Restaurar datos de ejemplo** on the summary screen to reset the accounting data to that seed at any time.
 
 Accounting data is stored under the `erp_contabilidad:` prefix (`cuentas`, `asientos`, `lineas`, `pagos`, `periodos`); base entities and documents remain under `erp_base_module:`.
 

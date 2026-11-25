@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { crearDom, bootContabilidad, qs, elegir } from '../../setup/contabilidad.js';
-import { formatearMXN } from '../../../src/contabilidad/dinero.js';
+import { formatearCLP } from '../../../src/contabilidad/dinero.js';
 import { loadAsientos, saveAsientos, loadLineas, saveLineas } from '../../../src/contabilidad/almacenamiento.js';
 
 let dom;
@@ -28,9 +28,9 @@ describe('panel de resumen financiero', () => {
     expect(qs('view-resumen').hidden).toBe(false);
     expect(qs('resumen-periodo').options).toHaveLength(5);
     expect(qs('resumen-periodo').value).toBe('per-2026-11');
-    expect(qs('resumen-ingresos').textContent).toBe(formatearMXN(0));
-    expect(qs('resumen-gastos').textContent).toBe(formatearMXN(60000));
-    expect(qs('resumen-resultado').textContent).toBe(formatearMXN(-60000));
+    expect(qs('resumen-ingresos').textContent).toBe(formatearCLP(0));
+    expect(qs('resumen-gastos').textContent).toBe(formatearCLP(60000));
+    expect(qs('resumen-resultado').textContent).toBe(formatearCLP(-60000));
     expect(qs('resumen-resultado').classList.contains('negative')).toBe(true);
     expect(qs('resumen-empty').hidden).toBe(true);
   });
@@ -42,9 +42,9 @@ describe('panel de resumen financiero', () => {
 
     elegir(qs('resumen-periodo'), 'per-2026-11');
 
-    expect(qs('resumen-ingresos').textContent).toBe(formatearMXN(0));
-    expect(qs('resumen-gastos').textContent).toBe(formatearMXN(0));
-    expect(qs('resumen-resultado').textContent).toBe(formatearMXN(0));
+    expect(qs('resumen-ingresos').textContent).toBe(formatearCLP(0));
+    expect(qs('resumen-gastos').textContent).toBe(formatearCLP(0));
+    expect(qs('resumen-resultado').textContent).toBe(formatearCLP(0));
     expect(qs('resumen-empty').hidden).toBe(false);
     expect(qs('resumen-empty').textContent).toContain('No hay información financiera');
   });

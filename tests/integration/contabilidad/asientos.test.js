@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { crearDom, bootContabilidad, qs, enviar } from '../../setup/contabilidad.js';
 import { inicializarContabilidad, loadAsientos, loadLineas, loadPeriodos, savePeriodos } from '../../../src/contabilidad/almacenamiento.js';
-import { formatearMXN } from '../../../src/contabilidad/dinero.js';
+import { formatearCLP } from '../../../src/contabilidad/dinero.js';
 
 let dom;
 
@@ -35,7 +35,7 @@ describe('registro de asientos contables', () => {
     await abrirAsientos();
     expect(qs('view-asientos').hidden).toBe(false);
     expect(qs('asientos-lista').textContent).toContain('Venta de mercancía a crédito');
-    expect(qs('asientos-lista').textContent).toContain(formatearMXN(116000));
+    expect(qs('asientos-lista').textContent).toContain(formatearCLP(116000));
     expect(qs('asientos-empty').hidden).toBe(true);
   });
 

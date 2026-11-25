@@ -1,6 +1,6 @@
 ﻿import { listarPeriodos } from '../contabilidad/periodos.js';
 import { calcularResumen, calcularSaldosCuentas, asientosAprobadosDelPeriodo } from '../contabilidad/reportes.js';
-import { formatearMXN, formatearMXNCompacto, sumarCentavos } from '../contabilidad/dinero.js';
+import { formatearCLP, formatearCLPCompacto, sumarCentavos } from '../contabilidad/dinero.js';
 import { formatearFecha } from '../contabilidad/fechas.js';
 import { escapeHtml } from './contabilidad/comun.js';
 import { alertasDeVencimientos } from '../contabilidad/alertas-vencimientos.js';
@@ -8,7 +8,7 @@ import { loadPagos } from '../contabilidad/almacenamiento.js';
 import { loadEntities } from '../storage.js';
 
 const PALETA_GASTOS = ['#0f4c5c', '#1b6070', '#287484', '#358896', '#429ca8', '#4fb0bb', '#5cc4cf', '#0b3946'];
-const PORCENTAJE = new Intl.NumberFormat('es-MX', { style: 'percent', maximumFractionDigits: 1 });
+const PORCENTAJE = new Intl.NumberFormat('es-CL', { style: 'percent', maximumFractionDigits: 1 });
 
 function setText(id, text){
   const elemento = document.getElementById(id);
@@ -51,7 +51,7 @@ function renderPeriodos(periodos, periodoId){
   else if(periodoId) selector.value = periodoId;
 }
 
-const numeroCompacto = formatearMXNCompacto;
+const numeroCompacto = formatearCLPCompacto;
 
 
 function calcularEscala(minimo, maximo, pasos = 4){
@@ -122,10 +122,10 @@ function renderGraficoBarras(contenedor, series){
       ? `<text class="chart-axis-label" x="${centro.toFixed(1)}" y="${alto - 16}" text-anchor="middle">${escapeHtml(periodo.name)}</text>`
       : '';
     return `<rect class="chart-bar chart-bar-ingresos" x="${xIngresos.toFixed(1)}" y="${Math.min(yIngresos, ceroY).toFixed(1)}" width="${barra.toFixed(1)}" height="${Math.abs(yIngresos - ceroY).toFixed(1)}" rx="2">
-        <title>${escapeHtml(`${periodo.name} — Ingresos: ${formatearMXN(resumen.ingresos)}`)}</title>
+        <title>${escapeHtml(`${periodo.name} — Ingresos: ${formatearCLP(resumen.ingresos)}`)}</title>
       </rect>
       <rect class="chart-bar chart-bar-gastos" x="${xGastos.toFixed(1)}" y="${Math.min(yGastos, ceroY).toFixed(1)}" width="${barra.toFixed(1)}" height="${Math.abs(yGastos - ceroY).toFixed(1)}" rx="2">
-        <title>${escapeHtml(`${periodo.name} — Gastos: ${formatearMXN(resumen.gastos)}`)}</title>
+        <title>${escapeHtml(`${periodo.name} — Gastos: ${formatearCLP(resumen.gastos)}`)}</title>
       </rect>
       ${etiqueta}`;
   }).join('');
@@ -177,7 +177,7 @@ function renderGraficoResultado(contenedor, series){
       ? `<text class="chart-axis-label" x="${punto.x.toFixed(1)}" y="${alto - 16}" text-anchor="middle">${escapeHtml(periodo.name)}</text>`
       : '';
     return `<circle class="chart-dot${negativo ? ' chart-dot-negative' : ''}" cx="${punto.x.toFixed(1)}" cy="${punto.y.toFixed(1)}" r="4">
-        <title>${escapeHtml(`${periodo.name} — Resultado: ${formatearMXN(resumen.resultado)}`)}</title>
+        <title>${escapeHtml(`${periodo.name} — Resultado: ${formatearCLP(resumen.resultado)}`)}</title>
       </circle>
       ${etiqueta}`;
   }).join('');
@@ -210,7 +210,7 @@ function renderGraficoGastos(contenedor, leyenda, cuentas, periodo){
     acumulado += longitud;
     const color = PALETA_GASTOS[indice % PALETA_GASTOS.length];
     return `<circle class="chart-donut-segment" cx="${centro}" cy="${centro}" r="${radio}" stroke="${color}" stroke-width="${grosor}" stroke-dasharray="${longitud.toFixed(2)} ${(circunferencia - longitud).toFixed(2)}" stroke-dashoffset="${desplazamiento.toFixed(2)}" transform="rotate(-90 ${centro} ${centro})">
-      <title>${escapeHtml(`${cuenta.code} — ${cuenta.name}: ${formatearMXN(cuenta.total)} (${PORCENTAJE.format(fraccion)})`)}</title>
+      <title>${escapeHtml(`${cuenta.code} — ${cuenta.name}: ${formatearCLP(cuenta.total)} (${PORCENTAJE.format(fraccion)})`)}</title>
     </circle>`;
   }).join('');
 
@@ -229,7 +229,7 @@ function renderGraficoGastos(contenedor, leyenda, cuentas, periodo){
       return `<li>
         <i class="chart-swatch" style="background:${color}" aria-hidden="true"></i>
         <span class="chart-legend-text" title="${escapeHtml(etiqueta)}">${escapeHtml(etiqueta)}</span>
-        <span class="chart-legend-value">${formatearMXN(cuenta.total)} · ${PORCENTAJE.format(fraccion)}</span>
+        <span class="chart-legend-value">${formatearCLP(cuenta.total)} · ${PORCENTAJE.format(fraccion)}</span>
       </li>`;
     }).join('');
   }
@@ -240,7 +240,7 @@ function renderBloqueAlerta(contenedor, alerta, titulo, clase){
   const detalles = (alerta.detalles || []).map((detalle) => `
     <li class="alerta-detalle-item">
       <span class="alerta-detalle-entidad">${escapeHtml(detalle.entidad)}</span>
-      <span class="alerta-detalle-monto">${formatearMXN(detalle.montoCentavos)}</span>
+      <span class="alerta-detalle-monto">${formatearCLP(detalle.montoCentavos)}</span>
       <span class="alerta-detalle-fecha">Vence: ${formatearFecha(detalle.fechaVencimiento)}</span>
     </li>`).join('');
   contenedor.className = `alerta-bloque ${clase}${alerta.cantidad === 0 ? ' alerta-vacia' : ''}`;
@@ -249,7 +249,7 @@ function renderBloqueAlerta(contenedor, alerta, titulo, clase){
       <h3 class="alerta-titulo">${escapeHtml(titulo)}</h3>
       <span class="alerta-badge">${alerta.cantidad}</span>
     </div>
-    <p class="alerta-total">Total: <strong>${formatearMXN(alerta.totalCentavos)}</strong></p>
+    <p class="alerta-total">Total: <strong>${formatearCLP(alerta.totalCentavos)}</strong></p>
     ${alerta.cantidad > 0 ? `<ul class="alerta-detalles">${detalles}</ul>` : '<p class="muted alerta-sin-items">Sin pagos en esta categoría.</p>'}
     ${alerta.adicionales > 0 ? `<p class="muted alerta-adicionales">+${alerta.adicionales} pago(s) adicional(es) con esta condición.</p>` : ''}`;
 }
@@ -276,9 +276,9 @@ export function renderDashboard(opciones = {}){
     ? calcularResumen(periodoId)
     : { ingresos: 0, gastos: 0, resultado: 0, movimientos: 0, hayMovimientos: false };
 
-  setText('stat-ingresos', formatearMXN(resumen.ingresos));
-  setText('stat-gastos', formatearMXN(resumen.gastos));
-  setText('stat-resultado', formatearMXN(resumen.resultado));
+  setText('stat-ingresos', formatearCLP(resumen.ingresos));
+  setText('stat-gastos', formatearCLP(resumen.gastos));
+  setText('stat-resultado', formatearCLP(resumen.resultado));
   setText('stat-asientos', String(resumen.movimientos));
 
   const resultado = document.getElementById('stat-resultado');

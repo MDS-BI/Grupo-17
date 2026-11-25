@@ -60,7 +60,7 @@ describe('resumen de pagos por estado', () => {
     expect(filtrarPagos(pagos, 'vencido', HOY).map((item) => item.id)).toEqual(['b']);
     expect(filtrarPagos(pagos, 'todos', HOY)).toHaveLength(3);
     const resumen = formatearResumen(resumirPagos(pagos, HOY));
-    expect(resumen.pagado.total).toContain('100.00');
-    expect(resumen.vencido.total).toContain('100.00');
+    expect(resumen.pagado.total).toContain('$100');
+    expect(resumen.vencido.total).toContain('$100');
   });
 });

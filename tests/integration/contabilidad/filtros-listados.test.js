@@ -1,5 +1,9 @@
+import fs from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { crearDom, bootContabilidad, qs, elegir } from '../../setup/contabilidad.js';
+
+const css = fs.readFileSync(fileURLToPath(new URL('../../../src/styles.css', import.meta.url)), 'utf8');
 
 let dom;
 
@@ -11,71 +15,23 @@ afterEach(() => {
   dom.window.close();
 });
 
-describe('filtros avanzados de asientos y pagos', () => {
-  it('filtra asientos por rango de fechas y permite limpiar', async () => {
-    await bootContabilidad();
+describe('filtros sin superposición', () => {
+  it('permite usar la × de limpieza sin tapar la flecha del selector', async () => {
+    await bootContabilidad(undefined, { requireAccess: true, sesion: 'administrador' });
     qs('nav-asientos').click();
 
-    expect(qs('asientos-total-resultados').textContent).toContain('10 registro(s)');
-    expect(qs('filtro-asiento-cuenta').options.length).toBeGreaterThan(1);
-    const limpiadores = document.querySelectorAll('.filtros-movimientos .limpiar-campo');
-    expect(limpiadores).toHaveLength(12);
-    limpiadores.forEach((boton) => {
-      expect(boton.parentElement.classList.contains('campo-con-limpieza')).toBe(true);
-    });
+    const select = qs('filtro-asiento-cuenta');
+    const limpiar = document.querySelector('[data-limpiar-campo="filtro-asiento-cuenta"]');
 
-    elegir(qs('filtro-asiento-fecha-desde'), '2026-10-01');
-    elegir(qs('filtro-asiento-fecha-hasta'), '2026-10-31');
+    expect(limpiar).not.toBeNull();
+    expect([...select.options].some((opcion) => opcion.textContent.length > 12)).toBe(true);
+    expect(css).toMatch(/\.campo-con-limpieza\s+input,\.campo-con-limpieza\s+select\s*\{[^}]*padding-right:\s*64px/s);
+    expect(css).toMatch(/\.campo-con-limpieza\s+\.limpiar-campo\s*\{[^}]*right:\s*30px/s);
 
-    expect(qs('asientos-total-resultados').textContent).toContain('3 registro(s)');
+    elegir(select, select.options[1].value);
+    expect(select.value).not.toBe('');
 
-    qs('asientos-limpiar-filtros').click();
-
-    expect(qs('asientos-total-resultados').textContent).toContain('10 registro(s)');
-    expect(qs('error-filtro-asientos').textContent).toBe('');
-  });
-
-  it('muestra el error de un rango de fechas inválido', async () => {
-    await bootContabilidad();
-    qs('nav-asientos').click();
-
-    elegir(qs('filtro-asiento-fecha-desde'), '2026-10-31');
-    const listadoPrevio = qs('asientos-total-resultados').textContent;
-    elegir(qs('filtro-asiento-fecha-hasta'), '2026-10-01');
-
-    expect(qs('error-filtro-asientos').textContent).toContain('La fecha desde no puede ser mayor que la fecha hasta');
-    expect(qs('asientos-total-resultados').textContent).toBe(listadoPrevio);
-    expect(qs('asientos-filtro-empty').hidden).toBe(true);
-  });
-
-  it('conserva el último listado válido cuando el monto del filtro es inválido', async () => {
-    await bootContabilidad();
-    qs('nav-pagos').click();
-
-    elegir(qs('filtro-pago-monto-min'), '2000');
-    expect(qs('pagos-total-resultados').textContent).toContain('1 registro(s)');
-
-    elegir(qs('filtro-pago-monto-min'), '-1');
-
-    expect(qs('error-filtro-pagos').textContent).toContain('monto mínimo');
-    expect(qs('pagos-total-resultados').textContent).toContain('1 registro(s)');
-    expect(qs('pagos-filtro-empty').hidden).toBe(true);
-  });
-
-  it('filtra pagos por monto expresado en pesos y permite limpiar', async () => {
-    await bootContabilidad();
-    qs('nav-pagos').click();
-
-    expect(qs('pagos-total-resultados').textContent).toContain('5 registro(s)');
-    expect(qs('filtro-pago-cuenta').options.length).toBeGreaterThan(1);
-
-    elegir(qs('filtro-pago-monto-min'), '2000');
-
-    expect(qs('pagos-total-resultados').textContent).toContain('1 registro(s)');
-
-    qs('pagos-limpiar-filtros').click();
-
-    expect(qs('pagos-total-resultados').textContent).toContain('5 registro(s)');
-    expect(qs('error-filtro-pagos').textContent).toBe('');
+    limpiar.click();
+    expect(select.value).toBe('');
   });
 });

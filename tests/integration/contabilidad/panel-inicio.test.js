@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { crearDom, bootContabilidad, qs, elegir, enviar } from '../../setup/contabilidad.js';
-import { formatearMXN } from '../../../src/contabilidad/dinero.js';
+import { formatearCLP } from '../../../src/contabilidad/dinero.js';
 import { loadAsientos } from '../../../src/contabilidad/almacenamiento.js';
 
 let dom;
@@ -98,9 +98,9 @@ describe('panel de inicio de Contabilidad y Finanzas', () => {
       '2026-11 (abierto)'
     ]);
     expect(qs('dashboard-periodo').value).toBe('per-2026-11');
-    expect(qs('stat-ingresos').textContent).toBe(formatearMXN(0));
-    expect(qs('stat-gastos').textContent).toBe(formatearMXN(60000));
-    expect(qs('stat-resultado').textContent).toBe(formatearMXN(-60000));
+    expect(qs('stat-ingresos').textContent).toBe(formatearCLP(0));
+    expect(qs('stat-gastos').textContent).toBe(formatearCLP(60000));
+    expect(qs('stat-resultado').textContent).toBe(formatearCLP(-60000));
     expect(qs('stat-resultado').classList.contains('negative')).toBe(true);
     expect(qs('stat-asientos').textContent).toBe('1');
     expect(qs('dashboard-empty').hidden).toBe(true);
@@ -113,9 +113,9 @@ describe('panel de inicio de Contabilidad y Finanzas', () => {
 
     elegir(qs('dashboard-periodo'), 'per-2026-10');
 
-    expect(qs('stat-ingresos').textContent).toBe(formatearMXN(100000));
-    expect(qs('stat-gastos').textContent).toBe(formatearMXN(250000));
-    expect(qs('stat-resultado').textContent).toBe(formatearMXN(-150000));
+    expect(qs('stat-ingresos').textContent).toBe(formatearCLP(100000));
+    expect(qs('stat-gastos').textContent).toBe(formatearCLP(250000));
+    expect(qs('stat-resultado').textContent).toBe(formatearCLP(-150000));
     expect(qs('stat-asientos').textContent).toBe('2');
     expect(qs('dashboard-empty').hidden).toBe(true);
   });
@@ -139,9 +139,9 @@ describe('panel de inicio de Contabilidad y Finanzas', () => {
     qs('nav-dashboard').click();
 
     expect(qs('dashboard-periodo').value).toBe('per-2026-11');
-    expect(qs('stat-ingresos').textContent).toBe(formatearMXN(10000));
-    expect(qs('stat-gastos').textContent).toBe(formatearMXN(60000));
-    expect(qs('stat-resultado').textContent).toBe(formatearMXN(-50000));
+    expect(qs('stat-ingresos').textContent).toBe(formatearCLP(10000));
+    expect(qs('stat-gastos').textContent).toBe(formatearCLP(60000));
+    expect(qs('stat-resultado').textContent).toBe(formatearCLP(-50000));
     expect(qs('stat-asientos').textContent).toBe('2');
   });
 });

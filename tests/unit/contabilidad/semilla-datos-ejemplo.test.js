@@ -33,6 +33,17 @@ describe('semilla de datos de ejemplo', () => {
     expect(datos.auditoria.length).toBeGreaterThanOrEqual(8);
   });
 
+  it('usa CLP y terminología de IVA chilena en los datos de ejemplo', () => {
+    const datos = generarSemilla({ ...generarSemillaBase(), fechaReferencia: '2026-11-23' });
+    const base = generarSemillaBase();
+    const nombresCuentas = datos.cuentas.map((cuenta) => cuenta.name);
+    const monedas = [...datos.asientos, ...datos.pagos, ...base.documentos].map((registro) => registro.currency);
+
+    expect(nombresCuentas).toContain('IVA Crédito Fiscal');
+    expect(nombresCuentas).toContain('IVA Débito Fiscal');
+    expect([...new Set(monedas)]).toEqual(['CLP']);
+  });
+
   it('genera pagos relativos a la fecha de referencia con estados derivados', () => {
     const hoy = '2026-11-23';
     const datos = generarSemilla({ ...generarSemillaBase(), fechaReferencia: hoy });

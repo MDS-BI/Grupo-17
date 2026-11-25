@@ -1,5 +1,5 @@
 import * as Comun from './comun.js';
-import { formatearMXN, sumarCentavos } from '../../contabilidad/dinero.js';
+import { formatearCLP, sumarCentavos } from '../../contabilidad/dinero.js';
 import { obtenerReportesFinancieros } from '../../contabilidad/reportes.js';
 import { construirModeloExportacion } from '../../contabilidad/exportacion-reportes.js';
 import { renderizarBotonesExportacion } from './exportacion.js';
@@ -13,32 +13,35 @@ const REPORTES = Object.freeze([
   { clave: 'balanceGeneral', etiqueta: 'Balance General' }
 ]);
 
+const UNIDAD_MONETARIA = 'CLP';
+const SIN_DETALLE = 'No hay movimientos que compongan este total.';
+
 const COLUMNAS = Object.freeze({
   libroMayor: [
     { etiqueta: 'Código', tipo: 'texto' },
     { etiqueta: 'Cuenta', tipo: 'texto' },
-    { etiqueta: 'Saldo inicial', tipo: 'monto' },
-    { etiqueta: 'Débitos', tipo: 'monto' },
-    { etiqueta: 'Créditos', tipo: 'monto' },
-    { etiqueta: 'Saldo final', tipo: 'monto' }
+    { etiqueta: `Saldo inicial (${UNIDAD_MONETARIA})`, tipo: 'monto' },
+    { etiqueta: `Débitos (${UNIDAD_MONETARIA})`, tipo: 'monto' },
+    { etiqueta: `Créditos (${UNIDAD_MONETARIA})`, tipo: 'monto' },
+    { etiqueta: `Saldo final (${UNIDAD_MONETARIA})`, tipo: 'monto' }
   ],
   balanceComprobacion: [
     { etiqueta: 'Código', tipo: 'texto' },
     { etiqueta: 'Cuenta', tipo: 'texto' },
-    { etiqueta: 'Saldo deudor', tipo: 'monto' },
-    { etiqueta: 'Saldo acreedor', tipo: 'monto' }
+    { etiqueta: `Saldo deudor (${UNIDAD_MONETARIA})`, tipo: 'monto' },
+    { etiqueta: `Saldo acreedor (${UNIDAD_MONETARIA})`, tipo: 'monto' }
   ],
   estadoResultados: [
     { etiqueta: 'Código', tipo: 'texto' },
     { etiqueta: 'Cuenta', tipo: 'texto' },
     { etiqueta: 'Tipo', tipo: 'texto' },
-    { etiqueta: 'Ingresos', tipo: 'monto' },
-    { etiqueta: 'Gastos', tipo: 'monto' },
-    { etiqueta: 'Resultado', tipo: 'monto' }
+    { etiqueta: `Ingresos (${UNIDAD_MONETARIA})`, tipo: 'monto' },
+    { etiqueta: `Gastos (${UNIDAD_MONETARIA})`, tipo: 'monto' },
+    { etiqueta: `Resultado (${UNIDAD_MONETARIA})`, tipo: 'monto' }
   ],
   balanceGeneral: [
     { etiqueta: 'Concepto', tipo: 'texto' },
-    { etiqueta: 'Importe', tipo: 'monto' }
+    { etiqueta: `Importe (${UNIDAD_MONETARIA})`, tipo: 'monto' }
   ]
 });
 
@@ -53,7 +56,7 @@ function escapeHtml(valor) {
 }
 
 function formatoMoneda(centavos) {
-  return formatearMXN(centavos);
+  return formatearCLP(centavos);
 }
 
 function formatoFecha(valor) {
@@ -120,6 +123,53 @@ function asegurarContenedor() {
   return contenedor;
 }
 
+function asegurarPanelDetalle() {
+  const vista = document.getElementById('view-reportes');
+  if (!vista) return null;
+  let panel = vista.querySelector('[data-detalle-totales]');
+  if (!panel) {
+    panel = document.createElement('section');
+    panel.className = 'card card-wide detalle-totales';
+    panel.id = 'detalle-totales';
+    panel.setAttribute('data-detalle-totales', '');
+    panel.setAttribute('aria-live', 'polite');
+    panel.hidden = true;
+    panel.innerHTML = `
+      <div class="detalle-totales-cabecera">
+        <h3 data-detalle-titulo></h3>
+        <button type="button" class="secondary" data-cerrar-detalle>Cerrar detalle</button>
+      </div>
+      <p data-detalle-resumen></p>
+      <div class="tabla-detalle-contenedor">
+        <table class="tabla-financiera tabla-detalle-totales">
+          <thead>
+            <tr>
+              <th scope="col">Origen</th>
+              <th scope="col">Referencia</th>
+              <th scope="col" class="num">Importe (${UNIDAD_MONETARIA})</th>
+            </tr>
+          </thead>
+          <tbody data-detalle-filas></tbody>
+        </table>
+      </div>`;
+    vista.appendChild(panel);
+  }
+  if (!panel.__detalleConectado) {
+    panel.__detalleConectado = true;
+    panel.querySelector('[data-cerrar-detalle]')?.addEventListener('click', () => ocultarDetalleTotales(panel));
+  }
+  return panel;
+}
+
+function ocultarDetalleTotales(panel) {
+  if (!panel) return;
+  panel.hidden = true;
+  const documento = panel.ownerDocument || document;
+  for (const boton of documento.querySelectorAll('[data-detalle-total][aria-expanded="true"]')) {
+    boton.setAttribute('aria-expanded', 'false');
+  }
+}
+
 function renderizarPestanas(contenedor, activa) {
   const barra = contenedor.querySelector('[data-reportes-tabs]');
   if (!barra) return;
@@ -182,7 +232,10 @@ function filasPara(clave, estado) {
 
 function totalesPara(clave, estado) {
   if (clave === 'libroMayor') {
-    return ['Totales del periodo', '', null, centr(estado.totales?.debitos), centr(estado.totales?.creditos), null];
+    const cuentas = Array.isArray(estado.cuentas) ? estado.cuentas : [];
+    const saldoInicial = sumarCentavos(cuentas.map((cuenta) => centr(cuenta.saldoInicial)));
+    const saldoFinal = sumarCentavos(cuentas.map((cuenta) => centr(cuenta.saldoFinal)));
+    return ['Totales del periodo', '', saldoInicial, centr(estado.totales?.debitos), centr(estado.totales?.creditos), saldoFinal];
   }
   if (clave === 'balanceComprobacion') {
     return ['Totales del periodo', '', estado.totalDeudor, estado.totalAcreedor];
@@ -193,12 +246,125 @@ function totalesPara(clave, estado) {
   return ['Totales del periodo', centr(estado.activos)];
 }
 
+function unirDetalle(...partes) {
+  return partes.map((parte) => texto(parte).trim()).filter(Boolean).join(' · ');
+}
+
+function filaDetalle(etiqueta, referencia, valor) {
+  return { etiqueta: texto(etiqueta), referencia: texto(referencia), valor: centr(valor) };
+}
+
+function cerrarDetalle(titulo, filas, tipoRegistro) {
+  const visibles = filas.filter((fila) => fila.valor !== 0);
+  return {
+    titulo: `${titulo} (${UNIDAD_MONETARIA})`,
+    resumen: `${visibles.length} ${tipoRegistro} que componen el total en ${UNIDAD_MONETARIA}.`,
+    filas: visibles.length ? visibles : [filaDetalle('Sin registros', SIN_DETALLE, 0)]
+  };
+}
+
+function detalleMovimientos(movimientos, campo, etiqueta) {
+  const filas = (Array.isArray(movimientos) ? movimientos : [])
+    .filter((movimiento) => centr(movimiento?.[campo]) !== 0)
+    .map((movimiento) => filaDetalle(
+      unirDetalle(movimiento.accountCode, movimiento.accountName || 'Cuenta desconocida'),
+      unirDetalle(formatoFecha(movimiento.date), `${texto(movimiento.series)}-${texto(movimiento.folio)}`, movimiento.concept || movimiento.lineConcept),
+      movimiento[campo]
+    ));
+  return cerrarDetalle(`Desglose de ${etiqueta}`, filas, 'movimientos');
+}
+
+function detalleReporte(clave, indiceColumna, estado, movimientos, columnas) {
+  const etiquetaCompleta = texto(columnas[indiceColumna]?.etiqueta);
+  const etiqueta = etiquetaCompleta.replace(/\s*\(CLP\)\s*$/i, '') || 'Total';
+
+  if (clave === 'libroMayor' && indiceColumna === 3) {
+    return detalleMovimientos(movimientos, 'debit', 'Débitos');
+  }
+  if (clave === 'libroMayor' && indiceColumna === 4) {
+    return detalleMovimientos(movimientos, 'credit', 'Créditos');
+  }
+
+  let filas = [];
+  if (clave === 'libroMayor') {
+    const campo = indiceColumna === 2 ? 'saldoInicial' : 'saldoFinal';
+    const referencia = campo === 'saldoInicial'
+      ? 'Saldo inicial de la cuenta'
+      : 'Saldo final = saldo inicial + débitos - créditos';
+    filas = (Array.isArray(estado?.cuentas) ? estado.cuentas : [])
+      .filter((cuenta) => centr(cuenta[campo]) !== 0)
+      .map((cuenta) => filaDetalle(unirDetalle(cuenta.codigo, cuenta.nombre), referencia, cuenta[campo]));
+  } else if (clave === 'balanceComprobacion') {
+    const campo = indiceColumna === 2 ? 'saldoDeudor' : 'saldoAcreedor';
+    const referencia = campo === 'saldoDeudor' ? 'Saldo deudor de la cuenta' : 'Saldo acreedor de la cuenta';
+    filas = (Array.isArray(estado?.saldos) ? estado.saldos : [])
+      .filter((saldo) => centr(saldo[campo]) !== 0)
+      .map((saldo) => filaDetalle(unirDetalle(saldo.codigo, saldo.nombre), referencia, saldo[campo]));
+  } else if (clave === 'estadoResultados') {
+    filas = filasPara('estadoResultados', estado || {})
+      .filter((fila) => centr(fila[indiceColumna]) !== 0)
+      .map((fila) => filaDetalle(unirDetalle(fila[0], fila[1]), texto(fila[2]), fila[indiceColumna]));
+  } else {
+    filas = filasPara('balanceGeneral', estado || {})
+      .filter((fila) => texto(fila[0]) === 'Activos' && centr(fila[1]) !== 0)
+      .map((fila) => filaDetalle(texto(fila[0]), 'Total de activos del periodo', fila[1]));
+  }
+
+  return cerrarDetalle(`Desglose de ${etiqueta}`, filas, 'registros');
+}
+
+function mostrarDetalleTotales(panel, boton, detalle) {
+  if (!panel || !detalle) return;
+  mensajeEn(panel.querySelector('[data-detalle-titulo]'), detalle.titulo);
+  mensajeEn(panel.querySelector('[data-detalle-resumen]'), detalle.resumen);
+  const cuerpo = panel.querySelector('[data-detalle-filas]');
+  if (cuerpo) {
+    cuerpo.innerHTML = '';
+    for (const fila of detalle.filas) {
+      const filaNodo = document.createElement('tr');
+      for (const [indice, valor] of [fila.etiqueta, fila.referencia, formatoMoneda(fila.valor)].entries()) {
+        const celda = document.createElement('td');
+        if (indice === 2) celda.className = 'num';
+        celda.textContent = valor;
+        filaNodo.appendChild(celda);
+      }
+      cuerpo.appendChild(filaNodo);
+    }
+  }
+  panel.hidden = false;
+  const documento = panel.ownerDocument || document;
+  for (const control of documento.querySelectorAll('[data-detalle-total]')) {
+    control.setAttribute('aria-expanded', String(control === boton));
+  }
+}
+
+function conectarTotales(tabla, panel) {
+  if (!tabla || !panel || tabla.__detallesConectados) return;
+  tabla.__detallesConectados = true;
+  tabla.addEventListener('click', (evento) => {
+    const boton = evento.target.closest?.('[data-detalle-total]');
+    if (!boton || !tabla.contains(boton)) return;
+    const contexto = tabla.__detalleContexto || {};
+    const detalle = boton.dataset.detalleTotal === 'movimientos'
+      ? detalleMovimientos(contexto.movimientos, boton.dataset.campo, boton.dataset.etiqueta)
+      : detalleReporte(
+        contexto.clave,
+        Number(boton.dataset.columna),
+        contexto.estado,
+        contexto.movimientos,
+        COLUMNAS[contexto.clave] || []
+      );
+    mostrarDetalleTotales(panel, boton, detalle);
+  });
+}
+
 function claveOrdenReporte(clave, columna, indice = 0) {
   const etiqueta = texto(columna.etiqueta).toLowerCase();
   if (etiqueta.includes('fecha')) return 'date';
   if (etiqueta.includes('débito') || etiqueta.includes('debitos')) return 'debit';
   if (etiqueta.includes('crédito') || etiqueta.includes('creditos')) return 'credit';
   if (etiqueta.includes('estado')) return 'status';
+  if (etiqueta === 'tipo') return 'tipo';
   if (columna.tipo === 'monto') return `monto-${indice}`;
   return null;
 }
@@ -226,7 +392,9 @@ function renderizarTabla(contenedor, clave, estado, orden) {
   thead.innerHTML = `<tr>${columnas.map((columna, indiceColumna) => {
     const colOrden = claveOrdenReporte(clave, columna, indiceColumna);
     if (colOrden && typeof Comun.encabezadoOrdenable === 'function') {
-      const tipo = colOrden === 'date' ? 'date' : (colOrden === 'status' ? 'status' : 'amount');
+      const tipo = colOrden === 'date'
+        ? 'date'
+        : (colOrden === 'status' ? 'status' : (colOrden === 'tipo' ? 'text' : 'amount'));
       return Comun.encabezadoOrdenable(`reporte-${clave}`, colOrden, columna.etiqueta, tipo, orden, columna.tipo === 'monto' ? 'num' : '');
     }
     return `<th scope="col" class="${columna.tipo === 'monto' ? 'num' : ''}">${escapeHtml(columna.etiqueta)}</th>`;
@@ -250,10 +418,11 @@ function renderizarTabla(contenedor, clave, estado, orden) {
       return `<th scope="row">${escapeHtml(valor)}</th>`;
     }
     if (valor === null || valor === '' || valor === undefined) return '<td></td>';
-    return `<td class="num">${escapeHtml(formatoMoneda(valor))}</td>`;
+    const etiqueta = texto(columnas[indice]?.etiqueta).replace(/\s*\(CLP\)\s*$/i, '') || 'Total';
+    return `<td class="num"><button type="button" class="boton-total" data-detalle-total="reporte" data-reporte="${escapeHtml(clave)}" data-columna="${indice}" aria-expanded="false" aria-controls="detalle-totales" aria-label="Ver desglose de ${escapeHtml(etiqueta)}">${escapeHtml(formatoMoneda(valor))}</button></td>`;
   }).join('');
   const relleno = Math.max(0, columnas.length - totalesAlineados.length);
-  pie.innerHTML = `<tr>${celdas}${'<td></td>'.repeat(relleno)}</tr>`;
+  pie.innerHTML = `<tr class="fila-totales">${celdas}${'<td></td>'.repeat(relleno)}</tr>`;
   return filas;
 }
 
@@ -319,8 +488,12 @@ export function renderReporte({
       cuerpo.appendChild(fila);
     }
   }
-  if (totalDebe) totalDebe.textContent = formatoMoneda(datosMovimientos.totalDebit);
-  if (totalHaber) totalHaber.textContent = formatoMoneda(datosMovimientos.totalCredit);
+  if (totalDebe) {
+    totalDebe.innerHTML = `<button type="button" class="boton-total" data-detalle-total="movimientos" data-campo="debit" data-etiqueta="Débito (${UNIDAD_MONETARIA})" aria-expanded="false" aria-controls="detalle-totales" aria-label="Ver desglose de Débito">${escapeHtml(formatoMoneda(datosMovimientos.totalDebit))}</button>`;
+  }
+  if (totalHaber) {
+    totalHaber.innerHTML = `<button type="button" class="boton-total" data-detalle-total="movimientos" data-campo="credit" data-etiqueta="Crédito (${UNIDAD_MONETARIA})" aria-expanded="false" aria-controls="detalle-totales" aria-label="Ver desglose de Crédito">${escapeHtml(formatoMoneda(datosMovimientos.totalCredit))}</button>`;
+  }
   mostrarMensaje('reportes-empty', datosMovimientos.vacio ? 'No existen movimientos registrados para el periodo seleccionado.' : '');
 
   const contenedor = asegurarContenedor();
@@ -358,6 +531,18 @@ export function renderReporte({
   const estado = estadosPorClave[activa] || { cuentas: [], saldos: [], detalle: [], totales: {}, vacio: true };
   const ordenReporte = ordenes[activa] || (orden?.tabla === `reporte-${activa}` ? orden : undefined);
   const filas = renderizarTabla(contenedor, activa, estado, ordenReporte);
+  const panelDetalle = asegurarPanelDetalle();
+  ocultarDetalleTotales(panelDetalle);
+  const tablaMovimientos = document.getElementById('reportes-tabla');
+  if (tablaMovimientos) {
+    tablaMovimientos.__detalleContexto = { movimientos: datosMovimientos.movimientos };
+    conectarTotales(tablaMovimientos, panelDetalle);
+  }
+  const tablaReporte = contenedor.querySelector('[data-tabla-reporte]');
+  if (tablaReporte) {
+    tablaReporte.__detalleContexto = { clave: activa, estado, movimientos: datosMovimientos.movimientos };
+    conectarTotales(tablaReporte, panelDetalle);
+  }
   const advertencias = estado.advertencias || estado.errores || [];
   mensajeEn(contenedor.querySelector('[data-advertencia-reporte]'), advertencias.join(' '));
   mensajeEn(

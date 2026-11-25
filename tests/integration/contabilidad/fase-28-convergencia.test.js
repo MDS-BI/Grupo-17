@@ -22,7 +22,7 @@ function escribir(id, valor) {
 
 function montosDeAsientos() {
   return [...qs('asientos-lista').querySelectorAll('tbody tr')]
-    .map((fila) => Number(fila.children[5].textContent.replace(/[^\d.-]/g, '')));
+    .map((fila) => Number(fila.children[5].textContent.replace(/[^\d-]/g, '')));
 }
 
 function botonOrden(contenedorId, columna) {
@@ -106,7 +106,7 @@ describe('fase 28 de convergencia', () => {
     expect(modelo.filas[0].celdas.find((celda) => celda.clave === 'resultado').valor).toBe(6000);
     const csv = serializarReporteCsv(modelo);
     expect(csv).toContain('"Resultado"');
-    expect(csv).toContain('$60.00');
+    expect(csv).toContain('$60');
   });
 
   it('invita a reintentar cuando falla la descarga', () => {
@@ -140,12 +140,12 @@ describe('fase 28 de convergencia', () => {
     escribir('linea-debit-0', '100');
     escribir('linea-credit-1', '90');
 
-    expect(qs('asiento-total-debitos').textContent).toBe('$100.00');
-    expect(qs('asiento-total-creditos').textContent).toBe('$90.00');
-    expect(qs('asiento-diferencia').textContent).toBe('$10.00');
+    expect(qs('asiento-total-debitos').textContent).toBe('$100');
+    expect(qs('asiento-total-creditos').textContent).toBe('$90');
+    expect(qs('asiento-diferencia').textContent).toBe('$10');
 
     escribir('linea-credit-1', '100');
-    expect(qs('asiento-diferencia').textContent).toBe('$0.00');
+    expect(qs('asiento-diferencia').textContent).toBe('$0');
 
     qs('nav-dashboard').click();
     elegir(qs('dashboard-periodo'), 'per-2026-11');

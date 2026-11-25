@@ -27,7 +27,7 @@ EstadoResultados = { periodo, ingresos, gastos, resultado, detalle: [] }
 BalanceGeneral = { periodo, activos, pasivos, patrimonio, resultadoAcumulado, valido: boolean }
 ```
 
-Todos los importes son enteros en centavos; solo la capa de presentación los convierte a MXN.
+Todos los importes son enteros en centavos; solo la capa de presentación los convierte a CLP.
 
 ## API
 
@@ -43,14 +43,19 @@ Todos los importes son enteros en centavos; solo la capa de presentación los co
 | Elemento | Selector | Contenido |
 |---|---|---|
 | Pestañas de reporte | `[data-reportes-tabs]` | Libro Mayor, Balance de Comprobación, Estado de Resultados, Balance General |
-| Tabla de reporte | `[data-tabla-reporte]` | Filas calculadas con importes en MXN |
-| Totales | `[data-totales-reporte]` | Total deudor/acreedor, resultado o totales de balance según reporte |
+| Tabla de reporte | `[data-tabla-reporte]` | Filas calculadas con importes en CLP |
+| Encabezados monetarios | `.tabla-financiera th.num` | Columnas monetarias etiquetadas con la unidad `(CLP)` |
+| Totales | `[data-totales-reporte]`, `[data-tabla-reporte] tfoot [data-detalle-total]` | Total deudor/acreedor, resultado o totales de balance según reporte; cada total abre su desglose |
+| Desglose de total | `[data-detalle-totales]`, `[data-detalle-filas]`, `[data-cerrar-detalle]` | Origen, referencia e importe CLP de los registros que componen el total |
 | Advertencia | `[data-advertencia-reporte]` | Descuadre, cuenta sin tipo válido o inconsistencia |
 | Estado vacío | `[data-estado-vacio-reporte]` | Mensaje en español cuando no hay movimientos ni saldos |
 
 ## Comportamiento
 
 - Cambiar el periodo recalcula los cuatro reportes sin recargar ni mutar entidades.
+- Los encabezados monetarios indican `(CLP)` y la columna `Tipo` admite orden alfabético con `aria-sort`.
+- Activar un total abre un desglose con origen, referencia e importe; la suma del desglose coincide con el total sin alterar importes ni reglas contables.
+- Cerrar el desglose oculta el panel sin modificar periodo, filtros ni datos.
 - Los asientos `borrador` y `cancelado` se excluyen; los periodos cerrados se consultan sin modificarlos.
 - Una cuenta sin tipo válido identifica la cuenta en la advertencia.
 - No existen controles para capturar cifras manualmente ni modificar movimientos desde el reporte.

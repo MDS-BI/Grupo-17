@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { normalizarImporte, aCentavos, formatearMXN, formatearMXNCompacto, sumarCentavos } from '../../../src/contabilidad/dinero.js';
+import { normalizarImporte, aCentavos, formatearCLP, formatearCLPCompacto, sumarCentavos } from '../../../src/contabilidad/dinero.js';
 
 describe('normalizarImporte', () => {
   it('normaliza importes válidos a centavos', () => {
@@ -57,12 +57,12 @@ describe('aCentavos', () => {
   });
 });
 
-describe('formatearMXNCompacto', () => {
+describe('formatearCLPCompacto', () => {
   it('usa miles, millones y signo pesos desde centavos', () => {
-    expect(formatearMXNCompacto(50000)).toBe('$500');
-    expect(formatearMXNCompacto(150000)).toBe('$1.5k');
-    expect(formatearMXNCompacto(250000000)).toBe('$2.5M');
-    expect(formatearMXNCompacto(-150000)).toBe('$-1.5k');
+    expect(formatearCLPCompacto(50000)).toBe('$500');
+    expect(formatearCLPCompacto(150000)).toBe('$2k');
+    expect(formatearCLPCompacto(250000000)).toBe('$3M');
+    expect(formatearCLPCompacto(-150000)).toBe('$-2k');
   });
 });
 
@@ -96,20 +96,20 @@ describe('sumarCentavos', () => {
   });
 });
 
-describe('formatearMXN', () => {
-  it('formatea centavos como MXN con dos decimales', () => {
-    expect(formatearMXN(0)).toBe('$0.00');
-    expect(formatearMXN(1)).toBe('$0.01');
-    expect(formatearMXN(123456)).toBe('$1,234.56');
-    expect(formatearMXN(-150)).toBe('-$1.50');
+describe('formatearCLP', () => {
+  it('formatea centavos en pesos chilenos sin decimales', () => {
+    expect(formatearCLP(0)).toBe('$0');
+    expect(formatearCLP(1)).toBe('$0');
+    expect(formatearCLP(123456)).toBe('$1.235');
+    expect(formatearCLP(-150)).toBe('-$2');
   });
 
   it('formatea importes grandes', () => {
-    expect(formatearMXN(900719925475)).toBe('$9,007,199,254.75');
+    expect(formatearCLP(900719925475)).toBe('$9.007.199.255');
   });
 
   it('trata entradas inválidas como cero', () => {
-    expect(formatearMXN(null)).toBe('$0.00');
-    expect(formatearMXN('abc')).toBe('$0.00');
+    expect(formatearCLP(null)).toBe('$0');
+    expect(formatearCLP('abc')).toBe('$0');
   });
 });

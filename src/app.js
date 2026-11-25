@@ -4,10 +4,10 @@ import { clearEntityForm, startEntityEdit, collectEntityPayload, showEntityError
 import { createEntityItem } from './components/entity-list.js';
 import { clearDocumentForm, startDocumentEdit, collectDocumentPayload, showDocumentErrors } from './components/document-form.js';
 import { folioLabel } from './components/document-list.js';
-import { renderLogo, applyShellLabels, setActiveModule, inicializarShellAccesible, cerrarDrawerNavegacion } from './components/shell.js';
+import { renderLogo, applyShellLabels, setActiveModule, inicializarShellAccesible, cerrarDrawerNavegacion, actualizarIdentidadEncabezado } from './components/shell.js';
 import { renderDashboard, renderAlertasTesorero } from './components/dashboard.js';
 import { setupSearchBar, renderSearchResults } from './components/search-bar.js';
-import { formatearMXN, sumarCentavos } from './contabilidad/dinero.js';
+import { formatearCLP, sumarCentavos } from './contabilidad/dinero.js';
 import * as Almacen from './contabilidad/almacenamiento.js';
 import * as Cuentas from './contabilidad/cuentas.js';
 import * as Periodos from './contabilidad/periodos.js';
@@ -18,6 +18,7 @@ import { validarCuenta } from './contabilidad/validaciones-cuentas.js';
 import { validarPeriodo } from './contabilidad/validaciones-periodos.js';
 import { validarAsiento } from './contabilidad/validaciones-asientos.js';
 import { validarPago } from './contabilidad/validaciones-pagos.js';
+import { formatearRUT } from './contabilidad/validaciones-acceso.js';
 import { renderResumen } from './components/contabilidad/resumen.js';
 import { populateCuentaParentSelect, clearCuentaForm, startCuentaEdit, collectCuentaPayload, showCuentaErrors } from './components/contabilidad/cuenta-form.js';
 import { renderCuentaList, renderCuentaDetalle } from './components/contabilidad/cuenta-list.js';
@@ -38,6 +39,7 @@ import * as ResumenPagos from './contabilidad/resumen-pagos.js';
 import * as FiltrosMovimientos from './contabilidad/filtros-movimientos.js';
 import * as Auditoria from './contabilidad/auditoria.js';
 import { confirmarEliminacion, mostrarMensaje, ordenarRegistros, paleta } from './contabilidad/interfaz-config.js';
+import { configurarVentanasNuevo, cerrarVentanaFormulario, MENSAJE_LISTA_VACIA } from './components/contabilidad/comun.js';
 
 function qs(id){ return document.getElementById(id); }
 
@@ -126,6 +128,18 @@ function puedeSeccion(seccion, accion){
   return Boolean(permiso[equivalencias[accion]]);
 }
 
+function sincronizarBotonesNuevo(){
+  document.querySelectorAll('[data-nuevo]').forEach(boton => {
+    boton.hidden = !puedeSeccion(boton.dataset.permisoNuevo, 'crear');
+  });
+}
+
+function aplicarMensajesListaVacia(){
+  document.querySelectorAll('[data-estado-vacio-filtro]').forEach(nodo => {
+    nodo.textContent = MENSAJE_LISTA_VACIA;
+  });
+}
+
 function verificarPermiso(seccion, accion){
   if(puedeSeccion(seccion, accion)) return true;
   mostrarBloqueo('No tienes permiso para realizar esta acción.');
@@ -145,6 +159,7 @@ function exigirAuditoriaMovimiento(){
 }
 
 function ocultarVistas(){
+  cerrarVentanaFormulario();
   Object.values(VIEWS).forEach(id => { const vista = qs(id); if(vista) vista.hidden = true; });
 }
 
@@ -163,6 +178,8 @@ function establecerVisibilidadMenu(visible){
 
 function mostrarAcceso(mensaje = ''){
   ocultarVistas();
+  actualizarIdentidadEncabezado(null);
+  sincronizarBotonesNuevo();
   establecerVisibilidadMenu(false);
   document.querySelectorAll('.nav-module').forEach(boton => { boton.hidden = true; });
   const vista = qs(VIEWS.acceso);
@@ -199,6 +216,8 @@ function aplicarSesion(){
     mostrarAcceso();
     return false;
   }
+  actualizarIdentidadEncabezado(sesion);
+  sincronizarBotonesNuevo();
   const dato = datosPanel();
   renderizarPanelInicio(sesion, dato);
   actualizarAlertasPanel();
@@ -295,7 +314,7 @@ function leerFiltroAsientos(){
     montoMax: qs('filtro-asiento-monto-max')?.value || '',
     estado: qs('filtro-asiento-estado')?.value || 'todos',
     texto: qs('asientos-filtro')?.value || '',
-    unidad: 'mxn'
+    unidad: 'clp'
   };
 }
 
@@ -308,7 +327,7 @@ function leerFiltroPagos(){
     montoMax: qs('filtro-pago-monto-max')?.value || '',
     estado: filtroEstadoPago,
     texto: qs('pagos-filtro-texto')?.value || '',
-    unidad: 'mxn'
+    unidad: 'clp'
   };
 }
 
@@ -321,7 +340,7 @@ function mostrarErrorFiltro(id, revision){
 function mostrarTotalResultados(id, cantidad, totalCentavos){
   const elemento = qs(id);
   if(!elemento) return;
-  elemento.textContent = `${cantidad} registro(s) · ${formatearMXN(totalCentavos || 0)}`;
+  elemento.textContent = `${cantidad} registro(s) · ${formatearCLP(totalCentavos || 0)}`;
 }
 
 function ordenarParaVista(tabla, registros){
@@ -383,7 +402,9 @@ function refrescarCuentas(){
     orden: ordenTablas.cuentas,
     eliminable: puedeSeccion('cuentas', 'editar')
   });
-  qs('cuentas-empty').hidden = hayCuentas;
+  qs('cuentas-empty').hidden = cuentas.length > 0;
+  const vacioFiltro = qs('cuentas-filtro-empty');
+  if(vacioFiltro) vacioFiltro.hidden = cuentas.length === 0 || hayCuentas;
   populateCuentaParentSelect(cuentas, { excludeId: qs('cuenta-id').value || null });
   const detalle = Cuentas.obtenerDetalleCuenta(qs('cuenta-detalle-id').value);
   const hayDetalle = renderCuentaDetalle(qs('cuenta-detalle'), detalle);
@@ -486,7 +507,9 @@ function refrescarPagos(){
 function refrescarPeriodos(){
   const periodos = ordenarParaVista('periodos', Periodos.listarPeriodos());
   const hayPeriodos = renderPeriodoList(qs('periodos-lista'), periodos, { filtro: qs('periodos-filtro').value, orden: ordenTablas.periodos });
-  qs('periodos-empty').hidden = hayPeriodos;
+  qs('periodos-empty').hidden = periodos.length > 0;
+  const vacioFiltro = qs('periodos-filtro-empty');
+  if(vacioFiltro) vacioFiltro.hidden = periodos.length === 0 || hayPeriodos;
 }
 
 function refrescarReportes(){
@@ -563,6 +586,12 @@ function activarFiltroEstadoPago(estado, { enfocar = false } = {}){
 }
 
 function handleAccionesGlobales(ev){
+  const botonCerrar = ev.target.closest?.('[data-cerrar-sesion]');
+  if(botonCerrar){
+    Sesion.cerrarSesion();
+    mostrarAcceso();
+    return;
+  }
   const botonOrden = ev.target.closest('[data-ordenar][data-orden-tabla]');
   if(botonOrden){
     alternarOrden(botonOrden.dataset.ordenTabla, botonOrden.dataset.ordenColumna, botonOrden.dataset.ordenTipo);
@@ -612,6 +641,8 @@ function showModule(name, opts = {}){
         return false;
       }
     }
+    actualizarIdentidadEncabezado(sesion);
+    sincronizarBotonesNuevo();
     establecerVisibilidadMenu(true);
     renderizarMenu(sesion.permisos, { ...sesion, pantallaActiva: name });
   }
@@ -1135,6 +1166,24 @@ function handlePeriodoListClick(ev){
   }
 }
 
+function handleRutInput(ev){
+  const campo = ev.target;
+  const valorOriginal = campo?.value ?? '';
+  const cursor = campo.selectionStart ?? valorOriginal.length;
+  const signosAntes = valorOriginal.slice(0, cursor).replace(/[^\dK]/gi, '').length;
+  const valorFormateado = formatearRUT(valorOriginal);
+  if (valorFormateado !== valorOriginal) campo.value = valorFormateado;
+  let posicion = 0;
+  let contados = 0;
+  while (posicion < valorFormateado.length && contados < signosAntes) {
+    if (/[\dK]/i.test(valorFormateado[posicion])) contados += 1;
+    posicion += 1;
+  }
+  if (typeof campo.setSelectionRange === 'function') campo.setSelectionRange(posicion, posicion);
+  const errorRut = qs('error-acceso-rut');
+  if (errorRut) errorRut.textContent = '';
+}
+
 function handleAccesoSubmit(ev){
   ev.preventDefault();
   const { rut, contraseña } = obtenerCredenciales(qs(VIEWS.acceso));
@@ -1326,10 +1375,12 @@ function wireEvents(){
   });
   on('resumen-periodo', 'change', refrescarResumen);
   on('reportes-periodo', 'change', refrescarReportes);
+  on('acceso-rut', 'input', handleRutInput);
   on('acceso-formulario', 'submit', handleAccesoSubmit);
   on('view-panel-inicio', 'click', handlePanelClick);
   document.addEventListener('click', handleAccionesGlobales);
   document.addEventListener('keydown', handleAccionesGlobalesTeclado);
+  configurarVentanasNuevo();
 
   const conectarFiltro = (id, manejador) => {
     on(id, 'change', manejador);
@@ -1361,6 +1412,7 @@ export function initApp(resolved, opciones = {}){
   applyTheme(resolved.config);
   renderLogo(qs('logo-mark'));
   applyLabels(resolved.config);
+  aplicarMensajesListaVacia();
   renderizarIconosMenu();
   inicializarShellAccesible();
   wireEvents();

@@ -5,6 +5,7 @@ import { crearDom, bootContabilidad, qs } from '../../setup/contabilidad.js';
 import { iconoSeccion } from '../../../src/contabilidad/interfaz-config.js';
 import { nombreIconoLucide } from '../../../src/components/iconos-lucide.js';
 import { cerrarDrawerNavegacion, renderizarIconosEncabezados } from '../../../src/components/shell.js';
+import { obtenerSesionActiva } from '../../../src/contabilidad/sesion.js';
 
 const ENCABEZADOS = {
   'dashboard-heading': 'dashboard',
@@ -105,5 +106,27 @@ describe('shell accesible de contabilidad', () => {
     cerrarDrawerNavegacion();
     expect(qs('sidebar-nav').classList.contains('sidebar-abierta')).toBe(false);
     expect(qs('menu-toggle').getAttribute('aria-expanded')).toBe('false');
+  });
+
+  it('muestra nombre, rol y cierre de sesión agrupados en el encabezado en todas las pantallas', async () => {
+    await bootContabilidad(undefined, { requireAccess: true, sesion: 'administrador' });
+    const sesion = obtenerSesionActiva();
+    const identidad = document.querySelector('[data-identidad-usuario]');
+
+    expect(identidad).not.toBeNull();
+    expect(identidad.hidden).toBe(false);
+    expect(qs('usuario-nombre').textContent).toBe(sesion.usuarioNombre);
+    expect(qs('usuario-rol').textContent).toBe(sesion.rolNombre);
+    expect(identidad.closest('header')).toBe(qs('brand-name').closest('header'));
+    expect(identidad.querySelector('[data-cerrar-sesion]').textContent).toContain('Cerrar sesión');
+
+    document.querySelectorAll('.nav-module:not([hidden])').forEach((boton) => {
+      boton.click();
+      expect(identidad.hidden).toBe(false);
+    });
+
+    qs('cerrar-sesion-encabezado').click();
+    expect(identidad.hidden).toBe(true);
+    expect(qs('view-acceso').hidden).toBe(false);
   });
 });

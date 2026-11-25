@@ -4,7 +4,7 @@ description: "Task list for feature implementation"
 
 # Tareas: Módulo de Contabilidad y Finanzas
 
-**Entrada**: Documentos de diseño desde `/specs/002-contabilidad-finanzas/`
+**Entrada**: Documentos de diseño desde `/specs/002-contabilidad-finanzas/` (Historias de Usuario 1 a 29; las HU22–HU29 son mejoras de usabilidad sin cambios funcionales)
 **Prerrequisitos**: plan.md, spec.md, research.md, data-model.md, contracts/, quickstart.md, `.specify/memory/constitution.md`
 **Pruebas**: Incluidas porque la constitución exige Vitest para lógica financiera y pruebas de integración con jsdom para flujos de usuario.
 **Organización**: Tareas agrupadas por historia de usuario. Las historias P1 aparecen antes que las P2, conservando el orden relativo de `spec.md`.
@@ -40,7 +40,7 @@ description: "Task list for feature implementation"
 
 **CRÍTICO**: Ninguna historia de usuario puede comenzar hasta completar esta fase.
 
-- [X] T007 [P] Implementar conversión a centavos, suma centralizada `sumarCentavos` y formato MXN en `src/contabilidad/dinero.js`
+- [X] T007 [P] Implementar conversión a centavos, suma centralizada `sumarCentavos` y formato CLP en `src/contabilidad/dinero.js`
 - [X] T008 [P] Implementar validación, comparación y formateo de fechas en `src/contabilidad/fechas.js`
 - [X] T009 [P] Implementar ayudantes compartidos de errores, mensajes, formato de tablas y paginación en `src/components/contabilidad/comun.js`
 - [X] T010 Implementar la capa central de almacenamiento en `sessionStorage`, claves de contabilidad/acceso/auditoría, migración desde `localStorage` y reinicio en `src/contabilidad/almacenamiento.js`
@@ -281,7 +281,7 @@ description: "Task list for feature implementation"
 
 ## Fase 12: Historia de Usuario 12 - Resumir pagos por estado (Prioridad: P1)
 
-**Objetivo**: Mostrar cantidad y total MXN por pendiente, pagado y vencido, con filtro dentro de Pagos y cobros (FR-088–FR-101).
+**Objetivo**: Mostrar cantidad y total CLP por pendiente, pagado y vencido, con filtro dentro de Pagos y cobros (FR-088–FR-101).
 
 **Prueba independiente**: Con semilla cargada, los totales coinciden con el listado filtrado; un pago vencido deja de contarse como pendiente y el cambio a pagado es inmediato.
 
@@ -324,7 +324,7 @@ description: "Task list for feature implementation"
 - [X] T112 [US13] Agregar helper de cuentas no clasificables y advertencias en `src/contabilidad/reportes.js`
 - [X] T113 [US13] Crear las cuatro pestañas de reportes financieros en `src/components/contabilidad/reportes.js`
 - [X] T114 [US13] Conectar selector de periodo y regeneración de reportes en `src/app.js`
-- [X] T115 [US13] Aplicar formato MXN, estados vacíos y advertencias accesibles en `src/components/contabilidad/reportes.js`
+- [X] T115 [US13] Aplicar formato CLP, estados vacíos y advertencias accesibles en `src/components/contabilidad/reportes.js`
 - [X] T116 [US13] Bloquear captura manual de cifras y acciones de modificación en `src/components/contabilidad/reportes.js`
 - [X] T117 [US13] Agregar estilos de pestañas, totales y advertencias en `src/styles.css`
 
@@ -420,7 +420,7 @@ description: "Task list for feature implementation"
 
 **Objetivo**: Mostrar alertas de vencidos y de vencimientos de la semana actual solo en el panel del Tesorero (FR-190–FR-213).
 
-**Prueba independiente**: El Tesorero inicia sesión con semilla cargada y verifica ambas alertas con cantidades, totales MXN, detalle acotado y coherencia con Pagos y cobros.
+**Prueba independiente**: El Tesorero inicia sesión con semilla cargada y verifica ambas alertas con cantidades, totales CLP, detalle acotado y coherencia con Pagos y cobros.
 
 ### Pruebas para US17
 
@@ -433,7 +433,7 @@ description: "Task list for feature implementation"
 - [X] T157 [US17] Definir precedencia de categorías y límite de detalle en `src/contabilidad/alertas-vencimientos.js`
 - [X] T158 [US17] Incluir pagos relativos a la fecha de referencia en la semilla de `src/contabilidad/semilla.js`
 - [X] T159 [US17] Renderizar alertas de vencidos y semana actual en `src/components/dashboard.js`
-- [X] T160 [US17] Mostrar cantidad, total MXN, entidad, monto, vencimiento y pagos adicionales en `src/components/dashboard.js`
+- [X] T160 [US17] Mostrar cantidad, total CLP, entidad, monto, vencimiento y pagos adicionales en `src/components/dashboard.js`
 - [X] T161 [US17] Agregar estado sin alertas sin cifras engañosas en `src/components/dashboard.js`
 - [X] T162 [US17] Actualizar alertas tras registrar, editar, pagar, anular o cambiar vencimiento en `src/app.js`
 - [X] T163 [US17] Mostrar alertas únicamente al Tesorero en `src/contabilidad/permisos.js`
@@ -550,7 +550,7 @@ description: "Task list for feature implementation"
 - [X] T210 [US6] Conectar selector de periodo y vista en `src/app.js`
 - [X] T211 [US6] Agregar mensaje de periodo sin movimientos en `src/components/contabilidad/comun.js`
 - [X] T212 [US6] Agregar estilos de tabla y totales de reporte en `src/styles.css`
-- [X] T213 [US6] Verificar que los totales usen `sumarCentavos` y formato MXN en `src/contabilidad/reportes.js`
+- [X] T213 [US6] Verificar que los totales usen `sumarCentavos` y formato CLP en `src/contabilidad/reportes.js`
 
 **Punto de control**: US6 es funcional y verificable de forma independiente.
 
@@ -560,7 +560,7 @@ description: "Task list for feature implementation"
 
 **Objetivo**: Mostrar barras, línea y dona derivadas de los mismos cálculos de reportes (FR-035–FR-039).
 
-**Prueba independiente**: Al cambiar el periodo, las tres gráficas se actualizan en MXN; sin datos aparecen mensajes en español.
+**Prueba independiente**: Al cambiar el periodo, las tres gráficas se actualizan en CLP; sin datos aparecen mensajes en español.
 
 ### Pruebas para US7
 
@@ -571,7 +571,7 @@ description: "Task list for feature implementation"
 
 - [X] T216 [P] [US7] Derivar series desde reportes y saldos en `src/contabilidad/reportes.js`
 - [X] T217 [US7] Implementar gráficas SVG de barras, línea y dona en `src/components/dashboard.js`
-- [X] T218 [US7] Aplicar formato MXN compartido a etiquetas y tooltips en `src/components/dashboard.js`
+- [X] T218 [US7] Aplicar formato CLP compartido a etiquetas y tooltips en `src/components/dashboard.js`
 - [X] T219 [US7] Conectar evento de periodo cambiado en `src/app.js`
 - [X] T220 [US7] Agregar estados vacíos accesibles en `src/components/dashboard.js`
 - [X] T221 [US7] Agregar estilos de gráficas y ejes en `src/styles.css`
@@ -775,8 +775,8 @@ Task: "Implementar balanceGeneral con activos, pasivos, patrimonio y resultado a
 - [X] T276 Eliminar los handlers muertos `action-nuevo-asiento`, `action-cuentas`, `action-registrar-pago` y `action-ver-reportes` en `src/app.js:1194-1197` o convertirlos en acciones no navegacionales documentadas, con prueba de control único por pantalla per `spec.md:765-766,1286`, `tasks.md:747` (duplicidad LOW)
 - [X] T277 Anunciar el filtro aplicado en `#mensaje-confirmacion` y restaurar el foco a la tarjeta activa tras el rerender de `renderizarResumenPagos` en `src/app.js:493-541` y `src/components/contabilidad/pago-resumen.js`, con pruebas DOM de teclado y ARIA per `spec.md:774,1096`, `tasks.md:755` (implementación parcial MEDIUM)
 - [X] T278 Propagar `ordenTablas['reporte-${clave}']` desde `refrescarReportes` en `src/app.js:460-478` y conservar el orden al cambiar de pestaña en `src/components/contabilidad/reportes.js:337-350`, con pruebas de orden por monto en los cuatro reportes per `spec.md:973-975,1333-1335`, `tasks.md:750` (implementación parcial MEDIUM)
-- [X] T279 Alinear `totalesPara()` en `src/components/contabilidad/reportes.js:181-192` con el número de columnas de `COLUMNAS` mediante `colspan` o celdas vacías, y formatear importes con `formatearMXN`, con prueba de estructura de tabla per `spec.md:795-797,973-975` (implementación parcial MEDIUM)
-- [X] T280 Centralizar el formato MXN compacto de `numeroCompacto` en `src/components/dashboard.js:54-59` usando utilidades compartidas de `src/contabilidad/dinero.js`, aplicándolo a ejes y total de dona per `spec.md:722` (implementación parcial MEDIUM)
+- [X] T279 Alinear `totalesPara()` en `src/components/contabilidad/reportes.js:181-192` con el número de columnas de `COLUMNAS` mediante `colspan` o celdas vacías, y formatear importes con `formatearCLP`, con prueba de estructura de tabla per `spec.md:795-797,973-975` (implementación parcial MEDIUM)
+- [X] T280 Centralizar el formato CLP compacto de `numeroCompacto` en `src/components/dashboard.js:54-59` usando utilidades compartidas de `src/contabilidad/dinero.js`, aplicándolo a ejes y total de dona per `spec.md:722` (implementación parcial MEDIUM)
 - [X] T281 Mapear los errores de periodo cerrado de `src/contabilidad/pagos.js` a un mensaje global accesible o al campo de fecha/periodo en `src/app.js:938-940,969-970,991-992` y `src/components/contabilidad/pago-form.js`, en lugar de `#error-pago-amount` per `spec.md:823,830,842` (implementación parcial MEDIUM)
 
 ---
@@ -800,3 +800,159 @@ Task: "Implementar balanceGeneral con activos, pasivos, patrimonio y resultado a
 - [X] T296 Incluir una invitación explícita a reintentar en el mensaje de fallo de descarga de `src/components/contabilidad/exportacion.js` y añadir una prueba que simule el error per `spec.md:936` (incumplimiento MEDIUM)
 - [X] T297 Añadir aserciones exactas sobre `#asiento-total-debitos`, `#asiento-total-creditos`, `#asiento-diferencia` y `.chart-donut-total` con la semilla determinista per `tasks.md:764`, `.specify/memory/constitution.md:58-62` (verificación incompleta LOW)
 - [X] T298 Implementar en `src/contabilidad/interfaz-config.js` la API contractual `confirmarEliminacion`, `mostrarMensaje`, `obtenerOpcionesMenu` y `paleta`, además de los selectores `[data-ordenar]`, `[data-confirmar-eliminacion]` y `[data-menu-movil]`, con pruebas de contrato per `contracts/interfaz-profesional.md:18-33`, `tasks.md:613` (incumplimiento MEDIUM)
+
+---
+
+## Fase 29: Historia de Usuario 22 - Centrar y estrechar el acceso (Prioridad: P1)
+
+**Propósito**: Centrar y estrechar el formulario de acceso con el botón "Ingresar" inmediatamente después de los campos, sin cambiar credenciales ni validaciones.
+
+### Pruebas para US22
+
+- [X] T299 [P] [US22] Agregar pruebas de integración del acceso centrado, angosto y sin espacio vacío superior antes de "Ingresar" en pantallas amplias y estrechas en `tests/integration/contabilidad/acceso-usabilidad.test.js` per `spec.md` HU22, FR-329–FR-332, SC-144–SC-145
+
+### Implementación para US22
+
+- [X] T300 [US22] Ajustar el contenedor y los estilos del formulario en `index.html`, `src/components/acceso.js` y `src/styles.css`, conservando los campos y las validaciones de HU8 per `spec.md` HU22, FR-329–FR-332
+
+---
+
+## Fase 30: Historia de Usuario 23 - Mostrar la identidad del usuario y el cierre de sesión en el encabezado (Prioridad: P1)
+
+**Propósito**: Agrupar nombre, rol y "Cerrar sesión" en el encabezado, conservando el comportamiento de cierre definido en HU8.
+
+### Pruebas para US23
+
+- [X] T301 [P] [US23] Agregar pruebas del encabezado con nombre, rol y "Cerrar sesión" visibles y agrupados en todas las pantallas con sesión válida en `tests/integration/contabilidad/shell-accesible.test.js` per `spec.md` HU23, FR-335–FR-337, SC-147
+
+### Implementación para US23
+
+- [X] T302 [US23] Mostrar `Sesion.usuarioNombre` y el rol junto al botón existente de "Cerrar sesión" en `src/components/shell.js` y `src/styles.css`, sin crear una nueva acción de cierre per `spec.md` HU23, FR-335–FR-337
+
+---
+
+## Fase 31: Historia de Usuario 24 - Alinear el menú lateral a la izquierda (Prioridad: P1)
+
+**Propósito**: Alinear el menú lateral al borde izquierdo del área de trabajo sin modificar secciones ni permisos.
+
+### Pruebas para US24
+
+- [X] T303 [P] [US24] Agregar pruebas de alineación izquierda del menú en escritorio y celular y de igualdad de secciones con la matriz vigente en `tests/integration/contabilidad/menu-usabilidad.test.js` per `spec.md` HU24, FR-333–FR-334, SC-146
+
+### Implementación para US24
+
+- [X] T304 [US24] Ajustar la posición del drawer y del menú en `src/styles.css` y `src/components/shell.js`, conservando las etiquetas, el orden y `OpcionMenu` per `spec.md` HU24, FR-333–FR-334
+
+---
+
+## Fase 32: Historia de Usuario 25 - Mostrar montos en formato chileno (Prioridad: P1)
+
+**Propósito**: Aplicar el formato "$5.000" con puntos de miles y sin decimales en toda la presentación, sin alterar cálculos.
+
+### Pruebas para US25
+
+- [X] T305 [P] [US25] Agregar pruebas unitarias de formato chileno para montos de tres cifras, cero y miles, y de conservación de cálculos en `tests/unit/contabilidad/dinero-usabilidad.test.js` per `spec.md` HU25, FR-338–FR-342, SC-148–SC-149
+
+### Implementación para US25
+
+- [X] T306 [US25] Reutilizar `formatearCLP` de `src/contabilidad/dinero.js` y los ayudantes de `src/components/contabilidad/comun.js` en listados, formularios, resúmenes, reportes y mensajes existentes, sin modificar importes en centavos per `spec.md` HU25, FR-338–FR-342
+
+---
+
+## Fase 33: Historia de Usuario 26 - Mostrar primero la lista y abrir el formulario desde "Nuevo" (Prioridad: P1)
+
+**Propósito**: Mostrar primero el listado y abrir el formulario de creación en una ventana que conserve el contexto y los filtros.
+
+### Pruebas para US26
+
+- [X] T307 [P] [US26] Agregar pruebas de integración de listado previo, botón "Nuevo", ventana sobre el listado, cierre sin guardar y ocultación por rol en `tests/integration/contabilidad/formulario-ventana.test.js` per `spec.md` HU26, FR-343–FR-349, SC-150–SC-152
+
+### Implementación para US26
+
+- [X] T308 [US26] Agregar el botón "Nuevo" y una ventana reutilizable en `src/components/contabilidad/comun.js`, `index.html` y las vistas con creación permitida, conservando validaciones, reglas y permisos vigentes per `spec.md` HU26, FR-343–FR-349
+
+---
+
+## Fase 34: Historia de Usuario 27 - Evitar la superposición en los filtros (Prioridad: P2)
+
+**Propósito**: Separar la "×" de limpieza de la flecha del selector en todos los filtros.
+
+### Pruebas para US27
+
+- [X] T309 [P] [US27] Agregar pruebas de uso independiente de la "×" y la flecha, incluido texto extenso de opciones, en `tests/integration/contabilidad/filtros-listados.test.js` per `spec.md` HU27, FR-350–FR-353, SC-153
+
+### Implementación para US27
+
+- [X] T310 [US27] Separar ambos controles en `index.html` y `src/styles.css` sin cambiar `FiltroMovimientos` ni las reglas de filtrado per `spec.md` HU27, FR-350–FR-353
+
+---
+
+## Fase 35: Historia de Usuario 28 - Alinear la fila de totales del Libro Mayor (Prioridad: P2)
+
+**Propósito**: Alinear los totales con saldo inicial, débitos, créditos y saldo final conservando los importes.
+
+### Pruebas para US28
+
+- [X] T311 [P] [US28] Agregar pruebas de alineación de la fila de totales, paridad de importes y comportamiento en pantalla estrecha en `tests/integration/contabilidad/reportes.test.js` per `spec.md` HU28, FR-354–FR-355, SC-154
+
+### Implementación para US28
+
+- [X] T312 [US28] Ajustar `totalesPara()` en `src/components/contabilidad/reportes.js` y los estilos de tabla en `src/styles.css`, sin modificar el cálculo ni la igualdad contable per `spec.md` HU28, FR-354–FR-355
+
+---
+
+## Fase 36: Historia de Usuario 29 - Mostrar mensajes claros para listas vacías (Prioridad: P1)
+
+**Propósito**: Mostrar un mensaje informativo y legible solo cuando un listado o un filtro no tenga resultados.
+
+### Pruebas para US29
+
+- [X] T313 [P] [US29] Agregar pruebas de mensaje de lista vacía, distinción de errores y desaparición al limpiar filtros en `tests/integration/contabilidad/estados-vacios.test.js` per `spec.md` HU29, FR-356–FR-360, SC-155
+
+### Implementación para US29
+
+- [X] T314 [US29] Unificar el mensaje informativo en `src/components/contabilidad/comun.js` y las vistas de listado existentes, conservando los mensajes de error y de estado vacío ya definidos per `spec.md` HU29, FR-356–FR-360
+
+---
+
+## Fase 37: Verificación Transversal de Usabilidad
+
+**Propósito**: Confirmar que las HU22–HU29 no introducen cambios funcionales ni alteran permisos.
+
+- [X] T315 Verificar con `npm test` y `npm run build` que se detectan 0 cambios funcionales en reglas, operaciones, datos y permisos, y que los cuatro roles conservan el mismo conjunto de pantallas y acciones (FR-361–FR-363, SC-156–SC-158), actualizando `spec.md`, `plan.md` y `data-model.md` si aparece alguna discrepancia
+
+---
+
+## Fase 38: Historia de Usuario 30 - Rastrear totales financieros hasta su origen (Prioridad: P1)
+
+**Propósito**: Mostrar CLP en los encabezados monetarios, permitir ordenar por tipo y exponer el desglose de cada total sin alterar importes ni reglas contables.
+
+### Pruebas para US30
+
+- [X] T316 [P] [US30] Agregar pruebas de integración para encabezados CLP, orden por Tipo, desglose de totales de movimientos y de los cuatro reportes en `tests/integration/contabilidad/reportes-financieros.test.js` per `spec.md` HU30, FR-364–FR-368, SC-159–SC-161
+
+### Implementación para US30
+
+- [X] T317 [US30] Agregar la unidad CLP a los encabezados monetarios, habilitar el orden por Tipo y crear un panel reutilizable de desglose conectado a los totales en `index.html`, `src/components/contabilidad/reportes.js` y `src/styles.css` per `spec.md` HU30, FR-364–FR-368
+
+### Verificación para US30
+
+- [X] T318 Verificar con `npm test` y `npm run build` que el desglose conserva importes, permisos e igualdad contable, cerrando la deuda registrada en `plan.md:179` per `spec.md` SC-159–SC-161
+
+---
+
+## Fase 39: Historia de Usuario 31 - Usar CLP y terminología de IVA chilena (Prioridad: P1)
+
+**Propósito**: Alinear moneda, unidades, formato y nombres de IVA con la empresa chilena sin alterar cálculos ni permisos.
+
+### Pruebas para US31
+
+- [X] T319 [P] [US31] Actualizar pruebas de formato, encabezados, semilla y documentos para exigir CLP, "$5.000" sin decimales e "IVA Débito Fiscal"/"IVA Crédito Fiscal" per `spec.md` HU31, FR-369–FR-372, SC-162–SC-164
+
+### Implementación para US31
+
+- [X] T320 [US31] Renombrar utilidades y valores de moneda a CLP, actualizar locales y src a `es-CL`, renombrar cuentas de IVA en `src/contabilidad/semilla.js` y fijar CLP como moneda de documentos en `src/storage.js` y `src/components/document-form.js` per `spec.md` HU31, FR-369–FR-372
+
+### Verificación para US31
+
+- [X] T321 Verificar con `npm test` y `npm run build` que no quedan referencias a la moneda anterior ni a las etiquetas anteriores de IVA y que cálculos, datos y permisos permanecen iguales per `spec.md` SC-162–SC-164

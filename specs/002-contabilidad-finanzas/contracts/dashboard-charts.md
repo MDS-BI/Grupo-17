@@ -38,7 +38,7 @@ Las funciones de gráfica son puras respecto a los datos de entrada: no mutan el
 [{ cuentaId, codigo, nombre, gastoCentavos, porcentaje }]
 ```
 
-Los importes llegan en centavos; la conversión a MXN con dos decimales ocurre al construir etiquetas y tooltips mediante `formatearMXN`.
+Los importes llegan en centavos; la conversión a CLP con dos decimales ocurre al construir etiquetas y tooltips mediante `formatearCLP`.
 
 ## Atributos de Datos y Accesibilidad
 

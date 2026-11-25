@@ -131,7 +131,7 @@ export function crearAsiento(payload = {}, opciones = {}) {
     ...payload,
     series,
     folio,
-    currency: 'MXN',
+    currency: 'CLP',
     status: payload.status || 'borrador',
     lines: lineas
   };
@@ -150,7 +150,7 @@ export function crearAsiento(payload = {}, opciones = {}) {
     entity_id: payload.entity_id || null,
     totalDebit: revision.totalDebit,
     totalCredit: revision.totalCredit,
-    currency: 'MXN',
+    currency: 'CLP',
     status: payload.status || 'borrador',
     notes: String(payload.notes || '').trim(),
     createdAt: marca,
@@ -189,7 +189,7 @@ export function actualizarAsiento(id, cambios = {}, opciones = {}) {
     series: serieDe(fusionado.series),
     folio: fusionado.folio,
     status: actual.status,
-    currency: 'MXN',
+    currency: 'CLP',
     lines: lineas
   };
   const revision = validarAsiento(datos, {

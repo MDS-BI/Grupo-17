@@ -1,9 +1,4 @@
-const FORMATO_MXN = new Intl.NumberFormat('es-MX', {
-  style: 'currency',
-  currency: 'MXN',
-  minimumFractionDigits: 2,
-  maximumFractionDigits: 2
-});
+const FORMATO_CLP = new Intl.NumberFormat('es-CL', { maximumFractionDigits: 0 });
 
 export function normalizarImporte(valor) {
   if (valor === null || valor === undefined) {
@@ -35,16 +30,18 @@ export function desdeCentavos(centavos) {
   return (Number(centavos) || 0) / 100;
 }
 
-export function formatearMXN(centavos) {
-  return FORMATO_MXN.format(desdeCentavos(centavos));
+export function formatearCLP(centavos) {
+  const valor = desdeCentavos(centavos);
+  const signo = valor < 0 ? '-' : '';
+  return `${signo}$${FORMATO_CLP.format(Math.abs(valor))}`;
 }
 
-export function formatearMXNCompacto(centavos) {
+export function formatearCLPCompacto(centavos) {
   const valor = desdeCentavos(centavos);
   const absoluto = Math.abs(valor);
-  if (absoluto >= 1000000) return `$${(valor / 1000000).toLocaleString('es-MX', { maximumFractionDigits: 1 })}M`;
-  if (absoluto >= 1000) return `$${(valor / 1000).toLocaleString('es-MX', { maximumFractionDigits: 1 })}k`;
-  return `$${valor.toLocaleString('es-MX', { maximumFractionDigits: 0 })}`;
+  if (absoluto >= 1000000) return `$${(valor / 1000000).toLocaleString('es-CL', { maximumFractionDigits: 0 })}M`;
+  if (absoluto >= 1000) return `$${(valor / 1000).toLocaleString('es-CL', { maximumFractionDigits: 0 })}k`;
+  return `$${valor.toLocaleString('es-CL', { maximumFractionDigits: 0 })}`;
 }
 
 export function sumarCentavos(importes) {

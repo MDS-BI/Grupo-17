@@ -19,7 +19,7 @@ FiltroMovimientos = {
 ListadoFiltrado = { registros: [], totalCentavos, sinResultados: boolean }
 ```
 
-Los montos se capturan en MXN pero se comparan como enteros en centavos.
+Los montos se capturan en CLP pero se comparan como enteros en centavos.
 
 ## API
 
