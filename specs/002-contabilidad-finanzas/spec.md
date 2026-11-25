@@ -19,6 +19,7 @@
 **Entrada adicional**: Descripción del usuario: "En la especificación 002-contabilidad-finanzas, agregar una nueva historia de usuario: como Contador, quiero que cada reporte financiero tenga dos botones, \"Exportar PDF\" y \"Exportar Excel\", que descarguen el reporte del periodo seleccionado con el nombre de la empresa, la fecha y los totales."
 **Entrada adicional**: Descripción del usuario: "En la especificación 002-contabilidad-finanzas, agregar una nueva historia de usuario: como usuario, quiero filtrar asientos y pagos por fecha, cuenta, monto y estado."
 **Entrada adicional**: Descripción del usuario: "En la especificación 002-contabilidad-finanzas, agregar una nueva historia de usuario: como usuario, quiero una interfaz profesional: mismos colores en todo el módulo, íconos en cada sección, tablas ordenables, mensaje de confirmación al guardar o eliminar, y menú adaptable en celular."
+**Entrada adicional**: Descripción del usuario: "En la especificación 002-contabilidad-finanzas, actualizar la historia de inicio de sesión: el campo RUT se formatea automáticamente mientras el usuario escribe (agrega puntos y guion, acepta k mayúscula o minúscula), valida el dígito verificador y muestra un mensaje si el RUT no es válido. El botón Menú del encabezado abre y cierra el menú lateral."
 
 ## Propósito
 
@@ -166,11 +167,11 @@ Como gerente o analista financiero, quiero visualizar gráficas de ingresos, gas
 
 ### Historia de Usuario 8 - Iniciar sesión con RUT y contraseña (Prioridad: P1)
 
-Como administrador financiero, contador, tesorero o auditor, quiero acceder al módulo identificándome con mi RUT y mi contraseña, para ingresar a un panel de inicio acorde a mi responsabilidad y evitar que otras personas utilicen mi acceso.
+Como administrador financiero, contador, tesorero o auditor, quiero acceder al módulo identificándome con mi RUT y mi contraseña, para ingresar a un panel de inicio acorde a mi responsabilidad y evitar que otras personas utilicen mi acceso. El RUT debe formatearse automáticamente mientras escribo, validar su dígito verificador y avisarme si no es válido; además, el botón "Menú" del encabezado debe permitirme abrir y cerrar el menú lateral.
 
-**Por qué esta prioridad**: El acceso identificado permite que cada usuario del área financiera vea el punto de partida relevante para su rol y establece la base para cualquier operación posterior dentro del módulo.
+**Por qué esta prioridad**: El acceso identificado permite que cada usuario del área financiera vea el punto de partida relevante para su rol y establece la base para cualquier operación posterior dentro del módulo. El formateo y la validación del RUT reducen errores de captura, y el control del menú desde el encabezado mantiene la navegación accesible sin cambiar de pantalla.
 
-**Prueba Independiente**: Un usuario de prueba de cada rol puede iniciar sesión con su RUT y contraseña, verificar que el panel mostrado corresponde a su rol, cerrar sesión y comprobar que se solicitan nuevamente las credenciales.
+**Prueba Independiente**: Un usuario de prueba de cada rol puede escribir su RUT con o sin puntos ni guion y con el dígito verificador en mayúscula o minúscula cuando corresponda, comprobar que se formatea y valida, iniciar sesión con su contraseña, verificar el panel según su rol, abrir y cerrar el menú lateral desde el encabezado, cerrar sesión y comprobar que se solicitan nuevamente las credenciales.
 
 **Escenarios de Aceptación**:
 
@@ -183,15 +184,26 @@ Como administrador financiero, contador, tesorero o auditor, quiero acceder al m
 7. **Dado** que un usuario ingresa una contraseña incorrecta para un RUT válido, **cuando** confirma el acceso, **entonces** el sistema muestra el mismo mensaje de error y no abre ningún panel.
 8. **Dado** que un usuario omite el RUT o la contraseña, **cuando** confirma el acceso, **entonces** el sistema indica qué dato falta y no abre ningún panel.
 9. **Dado** que un usuario ha iniciado sesión, **cuando** selecciona "Cerrar sesión", **entonces** el sistema finaliza el acceso, vuelve a la pantalla de inicio de sesión y no permite continuar en el panel anterior sin volver a autenticarse.
+10. **Dado** que un usuario escribe su RUT en la pantalla de acceso, **cuando** ingresa solo los dígitos, **entonces** el campo muestra el RUT con puntos de agrupación y guion antes del dígito verificador sin borrar ni duplicar caracteres.
+11. **Dado** que el usuario continúa escribiendo el RUT, **cuando** llega al dígito verificador, **entonces** el guion se mantiene en la posición correcta y el valor final queda con el formato chileno esperado.
+12. **Dado** que el RUT de prueba termina en K, **cuando** el usuario escribe `k` en minúscula o `K` en mayúscula, **entonces** el sistema acepta ambas formas como equivalentes, las presenta de forma consistente y permite continuar con la autenticación.
+13. **Dado** que un usuario pega un RUT sin formato, **cuando** el valor se coloca en el campo, **entonces** el sistema aplica el mismo formateo automático que al escribirlo manualmente.
+14. **Dado** que un usuario corrige o borra caracteres del RUT, **cuando** edita el campo, **entonces** el formato se recalcula sin impedir la corrección ni dejar signos sobrantes.
+15. **Dado** que el usuario completa un RUT con un dígito verificador que no coincide con la validación chilena, **cuando** confirma el acceso, **entonces** el sistema muestra el mensaje "El RUT ingresado no es válido" y no abre ningún panel.
+16. **Dado** que el usuario completa un RUT válido que no corresponde a ningún usuario de prueba, **cuando** confirma el acceso con cualquier contraseña, **entonces** el sistema muestra el mensaje "RUT o contraseña incorrectos" y no abre ningún panel.
+17. **Dado** que el usuario ingresa un RUT de prueba con formato sin puntos ni guion, **cuando** confirma el acceso con su contraseña correcta, **entonces** el sistema lo autentica igual que con el RUT puntuado.
+18. **Dado** que un usuario autenticado ve el encabezado, **cuando** selecciona el botón "Menú" con el menú lateral cerrado, **entonces** el menú lateral se abre y muestra únicamente las secciones permitidas para su rol.
+19. **Dado** que el menú lateral está abierto, **cuando** el usuario selecciona nuevamente el botón "Menú", **entonces** el menú se cierra sin cambiar de pantalla, sin cerrar sesión y sin modificar datos.
+20. **Dado** que un usuario cerró sesión, **cuando** revisa el encabezado de la pantalla de acceso, **entonces** no puede abrir el menú lateral sin autenticarse de nuevo.
 
 **Usuarios de prueba ficticios**:
 
 | Rol | RUT | Contraseña | Panel de inicio esperado |
 |-----|-----|------------|--------------------------|
-| Administrador financiero | 11.111.111-1 | Admin2026! | Resumen integral, periodos y asuntos prioritarios |
-| Contador | 22.222.222-2 | Contador2026! | Cuentas, asientos y reportes contables |
-| Tesorero | 33.333.333-3 | Tesorero2026! | Pagos, cobros y flujo de efectivo |
-| Auditor | 44.444.444-4 | Auditor2026! | Trazabilidad, reportes e historial |
+| Administrador financiero | 11.111.111-4 | Admin2026! | Resumen integral, periodos y asuntos prioritarios |
+| Contador | 22.222.222-8 | Contador2026! | Cuentas, asientos y reportes contables |
+| Tesorero | 33.333.333-1 | Tesorero2026! | Pagos, cobros y flujo de efectivo |
+| Auditor | 88.888.888-K | Auditor2026! | Trazabilidad, reportes e historial |
 
 ---
 
@@ -576,6 +588,13 @@ Como usuario, quiero una interfaz profesional con colores coherentes, íconos po
 - ¿Qué ocurre cuando el periodo seleccionado no tiene gastos registrados?
 - ¿Qué ocurre cuando el número de periodos supera el espacio disponible para las etiquetas del eje de una gráfica?
 - ¿Qué ocurre cuando el RUT se ingresa con puntos y guion o sin ellos?
+- ¿Qué ocurre cuando el campo inserta puntos y guion automáticamente mientras el usuario escribe?
+- ¿Qué ocurre cuando el usuario borra o corrige un carácter en medio del RUT?
+- ¿Qué ocurre cuando el dígito verificador se escribe como k minúscula o K mayúscula?
+- ¿Qué ocurre cuando el dígito verificador no coincide con la validación del RUT?
+- ¿Qué ocurre cuando se ingresa un RUT válido pero no registrado y una contraseña cualquiera?
+- ¿Qué ocurre cuando se abre y cierra el menú lateral desde el botón "Menú" en una pantalla estrecha?
+- ¿Qué ocurre cuando se cierra sesión mientras el menú lateral está abierto?
 - ¿Qué ocurre cuando la contraseña incluye mayúsculas, minúsculas o caracteres especiales?
 - ¿Qué ocurre cuando se intenta acceder con un RUT válido y la contraseña de otro usuario?
 - ¿Qué ocurre cuando se cierra sesión desde un panel y se intenta volver a él sin autenticarse?
@@ -732,7 +751,7 @@ Como usuario, quiero una interfaz profesional con colores coherentes, íconos po
 - **FR-049**: El sistema DEBE indicar qué dato obligatorio falta cuando el usuario omite el RUT o la contraseña.
 - **FR-050**: El sistema DEBE ofrecer una acción de cierre de sesión desde cada panel de inicio.
 - **FR-051**: Después del cierre de sesión, el sistema NO DEBE permitir el acceso a un panel sin una nueva autenticación válida.
-- **FR-052**: El sistema DEBE aceptar el RUT de prueba con el formato puntuado mostrado en la tabla de usuarios y también sin puntos ni guion.
+- **FR-052**: El sistema DEBE aceptar el RUT de prueba con el formato puntuado mostrado en la tabla de usuarios y también sin puntos ni guion, aplicando el formateo automático y la validación del dígito verificador definidos en los requisitos FR-314 a FR-316.
 - **FR-053**: El sistema DEBE mostrar en el menú únicamente las secciones que el rol autenticado puede usar.
 - **FR-054**: El sistema DEBE ocultar las secciones no permitidas en lugar de mostrarlas deshabilitadas.
 - **FR-055**: El Administrador financiero DEBE poder acceder a todas las secciones del módulo, incluida la apertura y el cierre de periodos contables.
@@ -994,6 +1013,21 @@ Como usuario, quiero una interfaz profesional con colores coherentes, íconos po
 - **FR-311**: Cuando un ícono no pueda mostrarse, el texto de la sección DEBE permanecer visible y comprensible.
 - **FR-312**: Cuando una tabla no tenga registros, DEBE mostrarse un estado vacío claro con la paleta definida.
 - **FR-313**: Cuando un mensaje de confirmación se muestre en pantalla estrecha, DEBE permanecer legible y comprensible.
+- **FR-314**: El campo RUT DEBE formatear automáticamente el valor mientras se escribe, insertando puntos de agrupación y un guion antes del dígito verificador sin borrar, duplicar ni reordenar dígitos.
+- **FR-315**: El campo RUT DEBE aceptar un dígito verificador numérico o la letra k en mayúscula o minúscula, y DEBE reconocer ambas formas como equivalentes para la validación y la autenticación.
+- **FR-316**: El sistema DEBE validar el dígito verificador del RUT con la regla chilena estándar antes de intentar autenticar al usuario.
+- **FR-317**: Cuando el RUT tenga un dígito verificador inválido, el sistema DEBE mostrar el mensaje "El RUT ingresado no es válido" y NO DEBE iniciar sesión ni mostrar el mensaje genérico de credenciales incorrectas.
+- **FR-318**: Cuando el RUT sea válido pero no corresponda a un usuario de prueba, o cuando la contraseña sea incorrecta, el sistema DEBE mostrar el mensaje "RUT o contraseña incorrectos" definido en FR-048 sin revelar cuál dato falló.
+- **FR-319**: El formateo automático DEBE conservar la equivalencia entre un RUT escrito con puntos y guion y el mismo RUT escrito sin ellos, de modo que ambos autentiquen de igual forma con la misma contraseña.
+- **FR-320**: El formateo automático NO DEBE impedir corregir, borrar ni reemplazar caracteres del RUT mientras se edita el campo.
+- **FR-321**: Cuando el valor pegado en el campo RUT no tenga puntos ni guion, el sistema DEBE aplicar el mismo formateo automático que aplica a la escritura manual.
+- **FR-322**: El encabezado DEBE mostrar un botón identificado como "Menú" cuando exista una sesión válida.
+- **FR-323**: Al seleccionar el botón "Menú" con el menú lateral cerrado, el sistema DEBE abrirlo y mostrar únicamente las secciones permitidas para el rol autenticado.
+- **FR-324**: Al seleccionar el botón "Menú" con el menú lateral abierto, el sistema DEBE cerrarlo sin cambiar de pantalla, sin cerrar sesión y sin modificar datos.
+- **FR-325**: El botón "Menú" DEBE reflejar visualmente si el menú lateral está abierto o cerrado.
+- **FR-326**: El botón "Menú" NO DEBE crear una entrada adicional en el menú lateral ni duplicar el acceso a una pantalla existente.
+- **FR-327**: Después de cerrar sesión, el botón "Menú" NO DEBE abrir el menú lateral sin una nueva autenticación válida.
+- **FR-328**: Abrir o cerrar el menú lateral desde el encabezado NO DEBE modificar reglas de negocio, permisos, filtros, datos financieros ni el estado de autenticación.
 
 ### Requisitos de Extensibilidad 
 
@@ -1058,6 +1092,11 @@ El módulo de Contabilidad y Finanzas DEBE:
 - **MensajeConfirmacion**: Aviso claro que informa el resultado de guardar o confirma una eliminación.
 - **MenuAdaptable**: Presentación del menú que se ajusta a celular conservando secciones y permisos.
 - **EstadoInterfaz**: Estado visual coherente para éxito, error, advertencia, información y ausencia de datos.
+- **RutFormateado**: Valor del RUT presentado con puntos y guion mientras se escribe, equivalente al valor introducido sin esos signos y con k en mayúscula o minúscula.
+- **DigitoVerificador**: Carácter final del RUT validado con la regla chilena estándar para determinar si el RUT es válido antes de autenticar.
+- **MensajeRutInvalido**: Aviso específico que informa que el RUT no es válido por su dígito verificador y bloquea el acceso.
+- **BotonMenu**: Control del encabezado que abre y cierra el menú lateral sin cambiar de pantalla ni modificar la sesión.
+- **EstadoMenuLateral**: Condición del menú lateral como abierto o cerrado, reflejada en el botón "Menú".
 
 ## Criterios de Éxito 
 
@@ -1198,6 +1237,14 @@ El módulo de Contabilidad y Finanzas DEBE:
 - **SC-133**: El 100% de los roles ve el mismo conjunto de secciones en menú amplio y menú de celular, según sus permisos.
 - **SC-134**: El 95% de los usuarios encuentra una sección o dato ordenado en menos de 10 segundos.
 - **SC-135**: Al menos el 90% de los usuarios encuestados percibe la interfaz como profesional y coherente.
+- **SC-136**: El 100% de los RUT introducidos sin puntos ni guion se presenta con formato chileno antes de confirmar el acceso, sin perder ni duplicar caracteres.
+- **SC-137**: El 100% de los RUT de prueba autentica correctamente cuando el dígito verificador se escribe en mayúscula o minúscula.
+- **SC-138**: El 100% de los RUT con dígito verificador inválido muestra el mensaje "El RUT ingresado no es válido" y no otorga acceso.
+- **SC-139**: El 100% de los intentos con un RUT válido no registrado o una contraseña incorrecta muestra el mensaje "RUT o contraseña incorrectos" y no abre ningún panel.
+- **SC-140**: El 100% de las selecciones del botón "Menú" cambia el estado del menú lateral en menos de 1 segundo.
+- **SC-141**: El 100% de los roles ve exactamente las mismas secciones al abrir el menú desde el botón del encabezado que las definidas en su matriz de acceso.
+- **SC-142**: El 100% de los cierres del menú conserva la pantalla activa, la sesión y los datos del módulo sin cambios.
+- **SC-143**: Al menos el 95% de los usuarios identifica cómo abrir y cerrar el menú lateral sin ayuda en menos de 5 segundos.
 
 ## Suposiciones
 
@@ -1220,7 +1267,8 @@ El módulo de Contabilidad y Finanzas DEBE:
 - Todas las operaciones del módulo se registran en una sola moneda (MXN); no se contemplan conversiones de moneda.
 - La autenticación se simula dentro de la experiencia de demostración del módulo; no se contempla un servicio de identidad externo.
 - Los cuatro usuarios de prueba son ficticios, deterministas y se restauran al estado inicial al comenzar una demostración.
-- El RUT se acepta con formato chileno de 7 u 8 dígitos y dígito verificador numérico o K, con o sin puntos y guion; no se valida su autenticidad fuera del listado de usuarios de prueba.
+- El RUT se acepta con formato chileno de 7 u 8 dígitos y dígito verificador numérico o K; se admite K en mayúscula o minúscula, se formatea automáticamente mientras se escribe y se valida su dígito verificador antes de intentar el acceso.
+- Los cuatro RUT de prueba cumplen la validación del dígito verificador y el del Auditor termina en K para permitir probar la aceptación de mayúscula y minúscula.
 - Las contraseñas de prueba distinguen mayúsculas y minúsculas y son de uso exclusivo para demostración.
 - Los paneles de inicio son vistas de acceso y resumen; las reglas de permisos se detallan en la Historia de Usuario 9.
 - La Historia de Usuario 9 define el menú y los permisos vigentes y prevalece sobre menciones genéricas de roles en historias anteriores; una acción descrita para un rol solo se considera habilitada si su menú la incluye.
@@ -1229,7 +1277,11 @@ El módulo de Contabilidad y Finanzas DEBE:
 - El Auditor tiene acceso de solo lectura a reportes; no puede crear, editar, eliminar ni cambiar estados en ninguna sección.
 - Para registrar un asiento, el Contador puede seleccionar un periodo abierto sin acceder a la opción de gestionar periodos.
 - Un cambio de rol requiere cerrar sesión y autenticarse nuevamente; no se contempla la reevaluación de permisos durante una sesión abierta.
-- El mensaje de error ante credenciales inválidas es deliberadamente genérico para no revelar si un RUT está registrado.
+- El mensaje de error ante credenciales inválidas es deliberadamente genérico para no revelar si un RUT está registrado; el mensaje específico de RUT no válido se reserva para fallas del dígito verificador.
+- El formateo automático no cambia la identidad del RUT: un mismo RUT con o sin puntos, guion y con k minúscula se considera equivalente para autenticar.
+- Un RUT con dígito verificador inválido se bloquea con un mensaje específico antes de evaluar la contraseña; un RUT válido pero no registrado usa el mensaje genérico de credenciales incorrectas.
+- El botón "Menú" se ofrece únicamente cuando existe una sesión válida; antes del inicio de sesión no hay menú lateral que abrir.
+- El menú lateral puede estar abierto o cerrado; el botón "Menú" invierte el estado visible cada vez que se selecciona.
 - Los botones de carga y restablecimiento se muestran en el panel del Administrador financiero, único rol con permiso para modificar el estado general del módulo según la Historia de Usuario 9; los demás roles no los ven.
 - "Cargar datos de ejemplo" reemplaza cualquier conjunto previo por la semilla, mientras que "Restablecer datos" limpia los registros financieros y devuelve el módulo al estado inicial sin eliminar usuarios de prueba.
 - Los periodos de la semilla son consecutivos, no se superponen y al menos uno permanece abierto para permitir registrar nuevos asientos.

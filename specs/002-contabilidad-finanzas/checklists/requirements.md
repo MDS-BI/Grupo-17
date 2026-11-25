@@ -2,6 +2,7 @@
 
 **Propósito**: Validar la completitud y calidad de la especificación antes de proceder a la planificación
 **Creada**: 2026-11-23
+**Actualizada**: 2026-11-25
 **Funcionalidad**: [Enlace a spec.md](spec.md)
 
 ## Calidad del Contenido
@@ -42,4 +43,5 @@
 - Validación aplicada tras agregar la Historia de Usuario 19 para exportar cada reporte financiero a PDF y Excel con nombre de empresa, fecha y totales.
 - Validación aplicada tras agregar la Historia de Usuario 20 para filtrar asientos y pagos por fecha, cuenta, monto y estado.
 - Validación aplicada tras agregar la Historia de Usuario 21 para colores, íconos, tablas ordenables, confirmaciones y menú adaptable en celular.
+- Validación aplicada tras actualizar la Historia de Usuario 8 con formateo automático del RUT, aceptación de k mayúscula o minúscula, validación del dígito verificador, mensaje "El RUT ingresado no es válido" y control de apertura y cierre del menú lateral desde el botón "Menú" del encabezado; los RUT de prueba fueron corregidos para cumplir la validación y uno termina en K.
 - La especificación está lista para la planificación y la implementación.
