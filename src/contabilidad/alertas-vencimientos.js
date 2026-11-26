@@ -1,4 +1,4 @@
-﻿import { sumarCentavos } from './dinero.js';
+﻿import { aCentavos, sumarCentavos } from './dinero.js';
 import { calcularEstadoPago } from './pagos.js';
 
 function normalizarFecha(valor) {
@@ -70,8 +70,7 @@ function montoCentavos(pago) {
   if (Number.isFinite(pago?.montoCentavos)) return Math.round(pago.montoCentavos);
   if (Number.isFinite(pago?.monto_centavos)) return Math.round(pago.monto_centavos);
   if (Number.isFinite(pago?.amount)) return Math.round(pago.amount);
-  const monto = Number(pago?.monto ?? pago?.total ?? 0);
-  return Math.round(monto * 100);
+  return aCentavos(pago?.monto ?? pago?.total ?? 0);
 }
 
 function construirAlerta(categoria, pagos, entidades) {

@@ -8,6 +8,7 @@ import { renderLogo, applyShellLabels, setActiveModule, inicializarShellAccesibl
 import { renderDashboard, renderAlertasTesorero } from './components/dashboard.js';
 import { setupSearchBar, renderSearchResults } from './components/search-bar.js';
 import { formatearCLP, sumarCentavos } from './contabilidad/dinero.js';
+import { FECHA_REFERENCIA_SEMILLA } from './contabilidad/semilla.js';
 import * as Almacen from './contabilidad/almacenamiento.js';
 import * as Cuentas from './contabilidad/cuentas.js';
 import * as Periodos from './contabilidad/periodos.js';
@@ -228,7 +229,7 @@ function datosContabilidad(){
 
 function refrescarDashboard(){
   const visible = Boolean(modoAcceso && Permisos.puedeVerAlertas(sesionActual()));
-  renderDashboard({ mostrarAlertasTesorero: visible });
+  renderDashboard({ mostrarAlertasTesorero: visible, fechaReferencia: FECHA_REFERENCIA_SEMILLA });
 }
 
 function actualizarAlertasPanel(){
@@ -237,6 +238,7 @@ function actualizarAlertasPanel(){
   renderAlertasTesorero(raiz, {
     pagos: Pagos.listarPagos(),
     entidades: loadEntities(),
+    fechaReferencia: FECHA_REFERENCIA_SEMILLA,
     visible: Boolean(modoAcceso && Permisos.puedeVerAlertas(sesionActual()))
   });
 }
@@ -288,7 +290,7 @@ function pagosParaFiltro(){
     return {
       ...pago,
       fecha: pago.date,
-      estado: ResumenPagos.calcularEstadoPago(pago),
+      estado: ResumenPagos.calcularEstadoPago(pago, FECHA_REFERENCIA_SEMILLA),
       concepto: pago.numero,
       montoCentavos: Number(pago.amount) || 0,
       cuentaIds
@@ -456,7 +458,7 @@ function refrescarPagos(){
   poblarSelectCuentas(qs('filtro-pago-cuenta'));
 
   const todosLosPagos = pagosParaFiltro();
-  const resumen = ResumenPagos.resumirPagos(todosLosPagos);
+  const resumen = ResumenPagos.resumirPagos(todosLosPagos, FECHA_REFERENCIA_SEMILLA);
   const tarjetaEnFoco = renderizarResumenPagos(
     qs('pago-resumen-tarjetas'),
     resumen,
@@ -485,6 +487,7 @@ function refrescarPagos(){
     puedeAnular: puedeSeccion('pagos', 'anular'),
     eliminable: puedeSeccion('pagos', 'anular'),
     orden: ordenTablas.pagos,
+    fechaActual: FECHA_REFERENCIA_SEMILLA,
     puedeVerHistorial: puedeConsultarAuditoriaMovimiento()
   });
   qs('pagos-empty').hidden = todosLosPagos.length > 0;

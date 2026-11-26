@@ -1,6 +1,7 @@
 ﻿import { obtenerPermiso, permisosEfectivos, puedeVerAlertas } from '../contabilidad/permisos.js';
 import { formatearCLP } from '../contabilidad/dinero.js';
 import { resumirPagos } from '../contabilidad/resumen-pagos.js';
+import { FECHA_REFERENCIA_SEMILLA } from '../contabilidad/semilla.js';
 
 function alertasTesorero(sesion) {
   if (!puedeVerAlertas(sesion)) return '';
@@ -134,7 +135,7 @@ function panelContador(datos) {
 
 function panelTesorero(datos) {
   const pagos = lista(datos.pagos);
-  const resumenPagos = resumirPagos(pagos);
+  const resumenPagos = resumirPagos(pagos, FECHA_REFERENCIA_SEMILLA);
   const cobros = pagos.filter((pago) => texto(pago.tipo) === 'cobro');
   const egresos = pagos.filter((pago) => texto(pago.tipo) === 'pago');
   const entidades = new Set(pagos.map((pago) => pago.entity_id).filter(Boolean));

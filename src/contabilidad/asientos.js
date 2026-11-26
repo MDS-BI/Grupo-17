@@ -264,7 +264,7 @@ export function cambiarEstadoAsiento(id, estado, opciones = {}) {
   lista[indice] = actualizado;
   saveAsientos(lista);
   auditarAsiento({
-    accion: estado === 'aprobado' ? 'aprobar' : estado === 'cancelado' ? 'anular' : 'editar',
+    accion: estado === 'cancelado' ? 'anular' : 'editar',
     antes: actual,
     despues: actualizado,
     sesion: sesionDe(opciones),

@@ -1,13 +1,15 @@
-import { compararFechas, fechaHoyISO, haySolapamiento, periodoContieneFecha } from './fechas.js';
+import { compararFechas, haySolapamiento, periodoContieneFecha } from './fechas.js';
 import { sumarCentavos } from './dinero.js';
 import { calcularEstadoPago } from './resumen-pagos.js';
 
 const MARCA = '2026-10-01T00:00:00.000Z';
 
+export const FECHA_REFERENCIA_SEMILLA = MARCA.slice(0, 10);
+
 const SECCIONES = ['panel', 'resumen', 'cuentas', 'asientos', 'pagos', 'periodos', 'reportes', 'entidades', 'documentos', 'busqueda', 'datosDemo'];
 const EXCLUIDAS = new Set(['entidades', 'documentos', 'busqueda']);
 
-function fechaRelativa(dias, referencia = fechaHoyISO()) {
+function fechaRelativa(dias, referencia = FECHA_REFERENCIA_SEMILLA) {
   const fecha = new Date(`${referencia}T00:00:00.000Z`);
   fecha.setUTCDate(fecha.getUTCDate() + dias);
   return fecha.toISOString().slice(0, 10);
@@ -310,7 +312,7 @@ function construirAuditoriaSemilla(asientos = [], pagos = []) {
   return eventos;
 }
 
-export function validarSemilla(datos = {}, { fechaReferencia = fechaHoyISO() } = {}) {
+export function validarSemilla(datos = {}, { fechaReferencia = FECHA_REFERENCIA_SEMILLA } = {}) {
   const { periodos = [], asientos = [], pagos = [], cuentas = [] } = datos;
   const errores = [];
   const idsCuentas = new Set(cuentas.map((cuenta) => cuenta.id));
@@ -377,7 +379,7 @@ export function validarSemilla(datos = {}, { fechaReferencia = fechaHoyISO() } =
   return { valido: errores.length === 0, errores };
 }
 
-export function generarSemilla({ entidades = [], documentos = [], fechaReferencia = fechaHoyISO() } = {}) {
+export function generarSemilla({ entidades = [], documentos = [], fechaReferencia = FECHA_REFERENCIA_SEMILLA } = {}) {
   const cliente = entidades.find((e) => e.category === 'Cliente') || entidades[0] || null;
   const proveedor = entidades.find((e) => e.category === 'Proveedor') || entidades[1] || entidades[0] || null;
   const clienteId = cliente ? cliente.entity_id : null;

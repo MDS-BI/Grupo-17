@@ -8,12 +8,13 @@ Definir la interfaz entre permisos de sesión, menú y paneles de inicio. Implem
 
 | Pantalla | Único control que la abre | Roles con acceso |
 |---|---|---|
-| Panel de inicio del rol | Inicio de sesión correcto | Administrador financiero, Contador, Tesorero, Auditor |
-| Cuentas contables | "Cuentas contables" en el menú | Administrador financiero, Contador |
-| Asientos contables | "Asientos contables" en el menú | Administrador financiero, Contador |
-| Pagos y cobros | "Pagos y cobros" en el menú | Administrador financiero, Tesorero |
-| Periodos contables | "Periodos contables" en el menú | Administrador financiero |
-| Reportes financieros | "Reportes financieros" en el menú | Administrador financiero, Contador, Auditor |
+| Panel de inicio del rol (`dashboard`) | "Panel" en el menú; el inicio de sesión abre el mismo panel | Administrador financiero, Contador, Tesorero, Auditor |
+| Resumen financiero (`resumen`) | "Resumen financiero" en el menú | Administrador financiero, Contador |
+| Cuentas contables (`cuentas`) | "Cuentas contables" en el menú | Administrador financiero, Contador |
+| Asientos contables (`asientos`) | "Asientos contables" en el menú | Administrador financiero, Contador |
+| Pagos y cobros (`pagos`) | "Pagos y cobros" en el menú | Administrador financiero, Tesorero |
+| Periodos contables (`periodos`) | "Periodos contables" en el menú | Administrador financiero |
+| Reportes financieros (`reportes`) | "Reportes financieros" en el menú | Administrador financiero, Contador, Auditor |
 | Entidades | Sin control de navegación | Ninguno |
 | Documentos | Sin control de navegación | Ninguno |
 | Búsqueda | Sin control de navegación | Ninguno |

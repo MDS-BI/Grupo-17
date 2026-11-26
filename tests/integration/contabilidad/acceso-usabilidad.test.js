@@ -31,6 +31,9 @@ describe('acceso con formato anterior', () => {
     expect(qs('usuarios-prueba-body')).not.toBeNull();
     expect(css).not.toMatch(/#view-acceso\[data-acceso-pantalla\]/);
     expect(css).not.toMatch(/#acceso-formulario\[data-acceso-centrado\]/);
+    expect(css).not.toMatch(/\.acceso-card\s*\{[^}]*max-width:\s*420px/s);
+    expect(css).toMatch(/\.acceso-usuarios\s*\{[^}]*width:\s*100%/s);
+    expect(css).not.toMatch(/\.acceso-usuarios\s*\{[^}]*margin:[^}]*auto/s);
   });
 
   it('formatea el RUT en el formulario real y valida el dígito verificador', async () => {
@@ -50,6 +53,23 @@ describe('acceso con formato anterior', () => {
     qs('acceso-formulario').dispatchEvent(new dom.window.Event('submit', { bubbles: true, cancelable: true }));
     expect(qs('error-acceso-rut').textContent).toBe('El RUT ingresado no es válido');
     expect(qs('view-acceso').hidden).toBe(false);
+  });
+
+  it('permite borrar y corregir el dígito verificador con el teclado', async () => {
+    await bootContabilidad(undefined, { requireAccess: true, sesion: null });
+
+    const rut = qs('acceso-rut');
+    rut.value = '11.111.111-1';
+    rut.focus();
+    rut.setSelectionRange(rut.value.length, rut.value.length);
+    rut.dispatchEvent(new dom.window.KeyboardEvent('keydown', { key: 'Backspace', bubbles: true }));
+    rut.value = rut.value.slice(0, -1);
+    rut.dispatchEvent(new dom.window.Event('input', { bubbles: true }));
+    expect(rut.value).toBe('11.111.111');
+
+    rut.value += '2';
+    rut.dispatchEvent(new dom.window.Event('input', { bubbles: true }));
+    expect(rut.value).toBe('11.111.111-2');
   });
 
   it('conserva los campos y las validaciones del acceso', async () => {

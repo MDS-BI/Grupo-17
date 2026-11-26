@@ -16,6 +16,15 @@ describe('alertas-vencimientos', () => {
     expect(clasificarAlertaPago({ anulado: true, status: 'pendiente', fechaVencimiento: '2026-03-01' }, ref)).toBe('anulado');
   });
 
+  it('convierte los montos de alertas con la utilidad central de centavos', () => {
+    const pagos = [
+      { id: 'p1', entidadId: 'e1', monto: '1,50', estado: 'pendiente', fechaVencimiento: '2026-03-01' },
+      { id: 'p2', entidadId: 'e2', monto: '1.005', estado: 'pendiente', fechaVencimiento: '2026-03-01' }
+    ];
+    const resultado = alertasDeVencimientos(pagos, [], new Date('2026-03-10T12:00:00'));
+    expect(resultado.vencido.totalCentavos).toBe(150);
+  });
+
   it('agrupa alertas por severidad con totales', () => {
     const pagos = [
       { id: 'p1', entidadId: 'e1', montoCentavos: 1000, estado: 'pendiente', fechaVencimiento: '2026-03-01' },

@@ -7,11 +7,13 @@ export function normalizarRUT(valor) {
 }
 
 export function formatearRUT(valor) {
-  const texto = String(valor ?? '').toUpperCase().replace(/[^\dK]/g, '').replace(/K(?=.)/g, '');
+  const original = String(valor ?? '');
+  const borrandoVerificador = /-\s*$/.test(original);
+  const texto = original.toUpperCase().replace(/[^\dK]/g, '').replace(/K(?=.)/g, '');
   if (texto.length <= 1) return texto;
-  const cuerpo = texto.slice(0, -1);
-  const verificador = texto.slice(-1);
-  return `${cuerpo.replace(/\B(?=(\d{3})+(?!\d))/g, '.')}-${verificador}`;
+  const cuerpo = borrandoVerificador ? texto : texto.slice(0, -1);
+  const puntos = cuerpo.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  return borrandoVerificador ? puntos : `${puntos}-${texto.slice(-1)}`;
 }
 
 export function calcularDigitoVerificador(cuerpo) {

@@ -99,13 +99,13 @@ describe('cierre integral de periodos contables', () => {
     expect(revision.errores.asientos).toContain('no está cuadrado');
   });
 
-  it('cierra solo con administrador y deja constancia en auditoría', () => {
+  it('cierra solo con administrador sin añadir eventos de periodos a la auditoría', () => {
     expect(() => cerrarPeriodo('per-2026-11', AUDITOR)).toThrow('Acceso no disponible');
 
     const cerrado = cerrarPeriodo('per-2026-11', ADMIN);
     expect(cerrado.status).toBe('cerrado');
     expect(obtenerPeriodo('per-2026-11').status).toBe('cerrado');
-    expect(listarEventos({ accion: 'cerrar', entidadId: 'per-2026-11' })).toHaveLength(1);
+    expect(listarEventos({ entidadId: 'per-2026-11' })).toHaveLength(0);
   });
 
   it('bloquea altas, ediciones y aprobaciones en periodos cerrados', () => {

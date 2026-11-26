@@ -55,6 +55,21 @@ describe('gráficas del panel financiero', () => {
     expect(qs('dashboard-empty').hidden).toBe(false);
   });
 
+  it('muestra estados vacíos en las gráficas cuando no hay movimientos aprobados', async () => {
+    await bootContabilidad(undefined, { requireAccess: true, sesion: 'administrador' });
+    saveAsientos([]);
+    saveLineas([]);
+    qs('nav-cuentas').click();
+    qs('nav-dashboard').click();
+
+    expect(qs('chart-ingresos-gastos').textContent).toContain('No hay movimientos aprobados');
+    expect(qs('dashboard-empty').hidden).toBe(false);
+    expect(qs('chart-ingresos-gastos').querySelectorAll('svg').length).toBe(0);
+    expect(qs('chart-resultado').textContent).toContain('No hay movimientos aprobados');
+    expect(qs('chart-resultado').querySelectorAll('svg').length).toBe(0);
+    expect(qs('chart-gastos-cuenta').querySelectorAll('svg').length).toBe(0);
+  });
+
   it('muestra mensaje vacío cuando no hay periodos', async () => {
     await bootContabilidad();
     const { savePeriodos } = await import('../../../src/contabilidad/almacenamiento.js');

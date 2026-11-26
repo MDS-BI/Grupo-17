@@ -3,16 +3,9 @@ import { periodoContieneFecha } from './fechas.js';
 
 export const MENSAJE_ACCESO_AUDITORIA = 'Acceso no disponible';
 
-const ACCIONES_VALIDAS = Object.freeze([
-  'crear',
-  'editar',
-  'anular',
-  'aprobar',
-  'cerrar',
-  'abrir',
-  'acceso',
-  'rol'
-]);
+const ACCIONES_VALIDAS = Object.freeze(['crear', 'editar', 'anular']);
+
+const TIPOS_VALIDOS = Object.freeze(['asiento', 'pago']);
 
 function texto(valor) {
   return typeof valor === 'string' ? valor.trim() : '';
@@ -129,8 +122,9 @@ export function registrarEvento({
 } = {}) {
   const accionNormalizada = texto(accion).toLowerCase();
   if (!ACCIONES_VALIDAS.includes(accionNormalizada)) return null;
-  const tipo = texto(tipoMovimiento) || texto(entidad);
-  const entidadNormalizada = texto(entidad) || tipo;
+  const tipo = (texto(tipoMovimiento) || texto(entidad)).toLowerCase();
+  if (!TIPOS_VALIDOS.includes(tipo)) return null;
+  const entidadNormalizada = tipo;
   const idEntidad = texto(entidadId) || texto(movimiento && movimiento.id) || null;
   const cambiosNormalizados = normalizarCambios(
     camposModificados === undefined ? cambios : camposModificados
@@ -167,17 +161,6 @@ export function registrarEvento({
   if (texto(periodo)) evento.periodo = texto(periodo);
   saveRegistrosActividad([...eventos, evento]);
   return copiar(evento);
-}
-
-export function registrarEventoAcceso({ accion = 'acceso', descripcion, sesion, modulo = 'acceso' } = {}) {
-  return registrarEvento({
-    accion,
-    tipoMovimiento: 'acceso',
-    entidad: 'acceso',
-    modulo,
-    descripcion,
-    sesion
-  });
 }
 
 function textoFiltro(valor) {

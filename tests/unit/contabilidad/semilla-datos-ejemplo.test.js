@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { instalarAlmacen } from '../../setup/contabilidad.js';
-import { generarSemilla, generarRoles, generarUsuarios, generarSemillaBase, validarSemilla } from '../../../src/contabilidad/semilla.js';
+import { FECHA_REFERENCIA_SEMILLA, generarSemilla, generarRoles, generarUsuarios, generarSemillaBase, validarSemilla } from '../../../src/contabilidad/semilla.js';
 import { calcularEstadoPago } from '../../../src/contabilidad/pagos.js';
 
 describe('semilla de datos de ejemplo', () => {
@@ -16,6 +16,14 @@ describe('semilla de datos de ejemplo', () => {
     const primera = JSON.stringify(generarSemilla(base));
     const segunda = JSON.stringify(generarSemilla(base));
     expect(primera).toBe(segunda);
+  });
+
+  it('usa una fecha de referencia fija para los vencimientos', () => {
+    const datos = generarSemilla(generarSemillaBase());
+    expect(FECHA_REFERENCIA_SEMILLA).toBe('2026-10-01');
+    expect(datos.pagos.find((pago) => pago.id === 'pag-0003').fechaVencimiento).toBe('2026-09-11');
+    expect(datos.pagos.find((pago) => pago.id === 'pag-0004').fechaVencimiento).toBe('2026-11-30');
+    expect(datos.pagos.find((pago) => pago.id === 'pag-0005').fechaVencimiento).toBe('2026-10-06');
   });
 
   it('cumple los mínimos acordados', () => {

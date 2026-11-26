@@ -108,6 +108,18 @@ describe('shell accesible de contabilidad', () => {
     expect(qs('menu-toggle').getAttribute('aria-expanded')).toBe('false');
   });
 
+  it('muestra el botón Menú y refleja visualmente su estado con sesión válida', async () => {
+    await bootContabilidad(undefined, { requireAccess: true, sesion: 'administrador' });
+
+    const toggle = qs('menu-toggle');
+    expect(toggle.hidden).toBe(false);
+    expect(css).toMatch(/\.menu-toggle\{[^}]*display:\s*inline-flex/s);
+    expect(css).toMatch(/\.menu-toggle\[aria-expanded="true"\]\s*\{[^}]*primary-soft/s);
+
+    toggle.setAttribute('aria-expanded', 'true');
+    expect(toggle.getAttribute('aria-expanded')).toBe('true');
+  });
+
   it('muestra nombre, rol y cierre de sesión agrupados en el encabezado en todas las pantallas', async () => {
     await bootContabilidad(undefined, { requireAccess: true, sesion: 'administrador' });
     const sesion = obtenerSesionActiva();

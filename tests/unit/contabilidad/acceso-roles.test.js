@@ -29,6 +29,9 @@ describe('acceso por roles', () => {
     expect(validarDigitoVerificador('1.111.119-k')).toBe(true);
     expect(validarDigitoVerificador('1.111.119-K')).toBe(true);
     expect(normalizarRUT('1.111.119-k')).toBe(normalizarRUT('1.111.119-K'));
+    expect(formatearRUT('11.111.111-')).toBe('11.111.111');
+    expect(formatearRUT('1.111.119-')).toBe('1.111.119');
+    expect(formatearRUT('11.111.1112')).toBe('11.111.111-2');
   });
 
   it('rechaza un dígito verificador inválido con mensaje específico', () => {

@@ -69,6 +69,18 @@ describe('filtros-movimientos', () => {
     expect(filtrarPagos(pagos, { fechaDesde: '2026-03-01' }).map((pago) => pago.id)).toEqual(['con-asiento']);
   });
 
+  it('convierte montos con la utilidad central de centavos', () => {
+    const filtrar = (monto) => filtrarAsientosDetallado(
+      [{ id: 'a1', fecha: '2026-03-05', monto }],
+      {}
+    ).totalCentavos;
+
+    expect(filtrar('1,50')).toBe(150);
+    expect(filtrar(10)).toBe(1000);
+    expect(filtrar('1.005')).toBe(0);
+    expect(filtrar('abc')).toBe(0);
+  });
+
   it('limpiarFiltros devuelve objeto vacío utilizable', () => {
     expect(limpiarFiltros()).toEqual({});
   });

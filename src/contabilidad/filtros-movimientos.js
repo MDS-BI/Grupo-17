@@ -24,10 +24,10 @@ function montoCentavosRegistro(registro) {
   if (Number.isFinite(registro?.amount)) return Math.round(registro.amount);
   if (Array.isArray(registro?.lineas)) {
     return sumarCentavos(registro.lineas.map((l) => Math.abs(Number(
-      l.montoCentavos ?? l.monto_centavos ?? l.debit ?? l.credit ?? Math.round(Number(l.monto || 0) * 100)
+      l.montoCentavos ?? l.monto_centavos ?? l.debit ?? l.credit ?? aCentavos(l.monto || 0)
     )) || 0));
   }
-  return Math.round(Number(registro?.monto ?? registro?.total ?? 0) * 100);
+  return aCentavos(registro?.monto ?? registro?.total ?? 0);
 }
 
 function fechaRegistro(registro) {

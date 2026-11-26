@@ -956,3 +956,17 @@ Task: "Implementar balanceGeneral con activos, pasivos, patrimonio y resultado a
 ### Verificación para US31
 
 - [X] T321 Verificar con `npm test` y `npm run build` que no quedan referencias a la moneda anterior ni a las etiquetas anteriores de IVA y que cálculos, datos y permisos permanecen iguales per `spec.md` SC-162–SC-164
+
+---
+
+## Phase 40: Convergence
+
+- [X] T322 Fijar una fecha de referencia determinista en la semilla de `src/contabilidad/semilla.js:10,380,513,531,551` y propagarla desde `src/contabilidad/almacenamiento.js:121,128,142`, añadiendo pruebas de cargas repetidas per `.specify/memory/constitution.md:41-42`, `spec.md:978`, `data-model.md:359-371` (contradicción CRITICAL)
+- [X] T323 Mostrar el botón `menu-toggle` con una sesión válida también en escritorio eliminando el `display:none` de `src/styles.css:1058` o limitando su alcance, con una prueba DOM de visibilidad per `spec.md:1226,1503` (incumplimiento HIGH)
+- [X] T324 Aplicar el estado visual abierto/cerrado al botón `menu-toggle`, reemplazando el selector `.acciones-menu-toggle[aria-expanded="true"]` de `src/styles.css:658` por uno que use `#menu-toggle[aria-expanded]`/`[data-menu-movil]`, con prueba ARIA per `spec.md:1229,1503` (incumplimiento HIGH)
+- [X] T325 Eliminar la limitación de ancho y el centrado exclusivos del formulario y la tabla de acceso en `src/styles.css:889-899` (`.acceso-card`, `.acceso-usuarios`), conservando el ancho del módulo y añadiendo una aserción de SC-144 per `spec.md:1233-1234,1504` (contradicción HIGH)
+- [X] T326 Restringir `registrarEvento` en `src/contabilidad/auditoria.js:6-15,111-168` a `crear`/`editar`/`anular` de asientos y pagos, retirando o reclasificando los eventos `aprobar` de `src/contabilidad/asientos.js:266-277` y `crear`/`cerrar` de `src/contabilidad/periodos.js:43-88` del registro consolidado, con pruebas per `spec.md:1068-1071`, `contracts/registro-actividad.md:13-14,27` (contradicción HIGH)
+- [X] T327 Alinear `MAPA_NAVEGACION` en `src/components/menu.js:5-13` y las opciones de `index.html:32-51` con el mapa único de `contracts/navegacion-unica.md:9-19`, retirando o renombrando las entradas no declaradas "Panel" y "Resumen financiero" sin duplicar destinos, con prueba de unicidad per `spec.md:986-991` (contradicción MEDIUM)
+- [X] T328 Mostrar mensajes de estado vacío en las gráficas de `src/components/dashboard.js:84-89,301-317` cuando existan periodos pero no movimientos aprobados o no haya gastos, ocultando las series vacías, per `spec.md:942`, `contracts/dashboard-charts.md:71-72` (implementación parcial MEDIUM)
+- [X] T329 Sustituir las conversiones monetarias duplicadas de `src/contabilidad/filtros-movimientos.js:27,30` y `src/contabilidad/alertas-vencimientos.js:74` por `aCentavos()` de `src/contabilidad/dinero.js`, con casos límite per `.specify/memory/constitution.md:24-25,54-55`, `contracts/filtros-movimientos.md:22` (contradicción MEDIUM)
+- [X] T330 Permitir corregir y borrar el dígito verificador del RUT sin impedir la edición en `src/contabilidad/validaciones-acceso.js:9-14` y `src/app.js:1159-1172`, añadiendo una prueba de teclado per `spec.md:1224` (incumplimiento MEDIUM)

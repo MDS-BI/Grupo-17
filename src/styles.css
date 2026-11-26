@@ -655,7 +655,7 @@ button.danger:hover { background: var(--danger-soft); }
 }
 
 .acciones-menu { position: relative; }
-.acciones-menu-toggle[aria-expanded="true"] { background: var(--primary-soft); }
+.acciones-menu-toggle[aria-expanded="true"], .menu-toggle[aria-expanded="true"] { background: var(--primary-soft); }
 .acciones-menu-lista {
   position: absolute;
   right: 0;
@@ -887,15 +887,13 @@ button.danger:hover { background: var(--danger-soft); }
 }
 
 .acceso-card {
-  max-width: 420px;
   display: grid;
   gap: 14px;
 }
 
 .acceso-usuarios {
-  width: min(100%, 420px);
-  max-width: 420px;
-  margin: 18px auto 0;
+  width: 100%;
+  margin: 18px 0 0;
 }
 
 .tabla-usuarios {
@@ -1055,7 +1053,7 @@ button.danger:hover { background: var(--danger-soft); }
 
 .brand-identidad{display:flex;flex-direction:column;gap:1px;min-width:0}
 .brand-modulo{font-size:.72rem;color:var(--muted,var(--muted));line-height:1.2}
-.menu-toggle{display:none;align-items:center;gap:.4rem;border:1px solid var(--border);background:#fff;color:var(--text);border-radius:.5rem;padding:.45rem .7rem;font:inherit;cursor:pointer}
+.menu-toggle{display:inline-flex;align-items:center;gap:.4rem;border:1px solid var(--border);background:#fff;color:var(--text);border-radius:.5rem;padding:.45rem .7rem;font:inherit;cursor:pointer}
 .menu-toggle:focus-visible,.nav-module:focus-visible,.panel-rol-ir:focus-visible,.secondary:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--primary);outline-offset:2px}
 .nav-icono{width:1.1rem;display:inline-flex;justify-content:center;font-size:.95rem}
 .nav-svg{display:none}

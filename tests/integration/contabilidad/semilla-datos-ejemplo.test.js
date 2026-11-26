@@ -35,6 +35,15 @@ describe('cargar y restablecer datos de ejemplo', () => {
     expect(qs('mensaje-panel').textContent).toContain('Datos de ejemplo cargados');
   });
 
+  it('carga fechas idénticas en dos cargas consecutivas', async () => {
+    await bootContabilidad(undefined, { requireAccess: true, sesion: 'administrador' });
+    cargarDatosEjemplo();
+    const primera = JSON.stringify(loadPagos().map((pago) => [pago.id, pago.fechaVencimiento]));
+    cargarDatosEjemplo();
+    const segunda = JSON.stringify(loadPagos().map((pago) => [pago.id, pago.fechaVencimiento]));
+    expect(segunda).toBe(primera);
+  });
+
   it('conserva periodos y registros cerrados al restablecer y cargar de nuevo', async () => {
     await bootContabilidad(undefined, { requireAccess: true, sesion: 'administrador' });
     const asientosCerrados = loadAsientos().filter((asiento) => asiento.period_id === 'per-2026-09').map((asiento) => asiento.id);

@@ -3,7 +3,6 @@ import { instalarAlmacen } from '../../setup/contabilidad.js';
 import { inicializarContabilidad, loadRegistrosActividad, saveRegistrosActividad } from '../../../src/contabilidad/almacenamiento.js';
 import {
   registrarEvento,
-  registrarEventoAcceso,
   listarEventos,
   consultarEventos,
   historialPorMovimiento,
@@ -92,13 +91,26 @@ describe('registro de auditoría', () => {
     expect(listarEventos()[0].timestamp >= listarEventos()[1].timestamp).toBe(true);
   });
 
-  it('registra accesos, evita duplicados de anulación y restringe la consulta', () => {
-    const acceso = registrarEventoAcceso({
-      descripcion: 'Inició sesión como auditor',
-      sesion: { usuarioRut: '44.444.444-4', rolId: 'auditor' }
-    });
-    expect(acceso).toMatchObject({ accion: 'acceso', modulo: 'acceso', rolId: 'auditor' });
-
+  it('rechaza acciones y tipos ajenos al registro consolidado, evita duplicados de anulación y restringe la consulta', () => {
+    expect(registrarEvento({
+      accion: 'crear',
+      tipoMovimiento: 'periodo',
+      entidadId: 'per-2026-11',
+      sesion: ADMIN
+    })).toBeNull();
+    expect(registrarEvento({
+      accion: 'cerrar',
+      tipoMovimiento: 'asiento',
+      entidadId: 'asi-0001',
+      sesion: ADMIN
+    })).toBeNull();
+    expect(registrarEvento({
+      accion: 'aprobar',
+      tipoMovimiento: 'asiento',
+      entidadId: 'asi-0001',
+      sesion: ADMIN,
+      cambios: [{ campo: 'status', valorAnterior: 'borrador', valorNuevo: 'aprobado' }]
+    })).toBeNull();
     expect(registrarEvento({ accion: 'editar', tipoMovimiento: 'asiento' })).toBeNull();
 
     const primera = registrarEvento({
@@ -127,7 +139,7 @@ describe('registro de auditoría', () => {
     const asiento = crearAsiento(asientoValido(), { sesion: ADMIN });
     aprobarAsiento(asiento.id, { sesion: ADMIN });
     const historialAsiento = historialPorMovimiento('asiento', asiento.id);
-    expect(historialAsiento.map((evento) => evento.accion).sort()).toEqual(['aprobar', 'crear']);
+    expect(historialAsiento.map((evento) => evento.accion).sort()).toEqual(['crear', 'editar']);
     expect(historialAsiento.every((evento) => evento.entidadId === asiento.id)).toBe(true);
     expect(historialAsiento.every((evento) => evento.usuarioRut === ADMIN.usuarioRut)).toBe(true);
 

@@ -81,12 +81,21 @@ function mostrarVacio(contenedor, mensaje){
   contenedor.innerHTML = `<p class="empty chart-empty">${escapeHtml(mensaje)}</p>`;
 }
 
+function sinMovimientosAprobados(series){
+  return series.length > 0 && series.every(({ resumen }) => Number(resumen.movimientos) === 0);
+}
+
 function renderGraficoBarras(contenedor, series){
   if(!contenedor) return;
   if(series.length === 0){
     mostrarVacio(contenedor, 'No hay periodos contables registrados.');
     return;
   }
+  if(sinMovimientosAprobados(series)){
+    mostrarVacio(contenedor, 'No hay movimientos aprobados para las gráficas.');
+    return;
+  }
+
 
   const ancho = 720;
   const alto = 280;
@@ -137,6 +146,10 @@ function renderGraficoResultado(contenedor, series){
   if(!contenedor) return;
   if(series.length === 0){
     mostrarVacio(contenedor, 'No hay periodos contables registrados.');
+    return;
+  }
+  if(sinMovimientosAprobados(series)){
+    mostrarVacio(contenedor, 'No hay movimientos aprobados para las gráficas.');
     return;
   }
 

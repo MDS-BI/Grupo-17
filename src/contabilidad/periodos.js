@@ -1,7 +1,6 @@
 import { loadPeriodos, savePeriodos, loadAsientos, loadLineas, loadPagos, loadSesion } from './almacenamiento.js';
 import { validarPeriodo, validarCierrePeriodo, validarEscrituraPeriodo, MENSAJE_PERIODO_CERRADO } from './validaciones-periodos.js';
 import { periodoContieneFecha } from './fechas.js';
-import { registrarEvento, calcularCambios } from './auditoria.js';
 
 export const MENSAJE_PERIODO_REAPERTURA = 'Los periodos cerrados no pueden reabrirse.';
 
@@ -40,25 +39,6 @@ export function obtenerPeriodo(id) {
   return loadPeriodos().find((p) => p.id === id) || null;
 }
 
-function auditarPeriodo(antes, despues, sesion, accionForzada) {
-  const cambios = calcularCambios(antes, despues, ['name', 'startDate', 'endDate', 'status']);
-  const accion = accionForzada || (despues.status === 'cerrado' ? 'cerrar' : 'editar');
-  registrarEvento({
-    accion,
-    tipoMovimiento: 'periodo',
-    modulo: 'periodos',
-    entidad: 'periodo',
-    entidadId: despues.id,
-    numero: despues.name,
-    sesion,
-    cambios: accion === 'editar' ? cambios : [],
-    descripcion: accion === 'cerrar'
-      ? `Cerró el periodo contable ${despues.name}`
-      : `Actualizó el periodo contable ${despues.name}`,
-    periodo: despues.id
-  });
-}
-
 export function crearPeriodo(payload = {}, opciones = {}) {
   const periodos = loadPeriodos();
   const revision = validarPeriodo(payload, { periodos });
@@ -74,18 +54,6 @@ export function crearPeriodo(payload = {}, opciones = {}) {
     updatedAt: marca
   };
   savePeriodos([...periodos, periodo]);
-  const sesion = sesionDe(opciones.sesion);
-  registrarEvento({
-    accion: 'crear',
-    tipoMovimiento: 'periodo',
-    modulo: 'periodos',
-    entidad: 'periodo',
-    entidadId: periodo.id,
-    numero: periodo.name,
-    sesion,
-    descripcion: `Creó el periodo contable ${periodo.name}`,
-    periodo: periodo.id
-  });
   return periodo;
 }
 
@@ -119,7 +87,6 @@ export function actualizarPeriodo(id, cambios = {}, opciones = {}) {
   const lista = [...periodos];
   lista[indice] = actualizado;
   savePeriodos(lista);
-  auditarPeriodo(actual, actualizado, sesion, opciones.accionAuditoria);
   return actualizado;
 }
 
@@ -161,16 +128,6 @@ export function eliminarPeriodo(id, opciones = {}) {
     return { eliminado: false, cerrado: true, periodo: actualizado };
   }
   savePeriodos(periodos.filter((p) => p.id !== id));
-  registrarEvento({
-    accion: 'anular',
-    modulo: 'periodos',
-    entidad: 'periodo',
-    entidadId: id,
-    numero: periodo.name,
-    sesion,
-    descripcion: `Eliminó el periodo contable ${periodo.name}`,
-    periodo: id
-  });
   return { eliminado: true, cerrado: false };
 }
 

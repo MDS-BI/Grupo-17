@@ -1,5 +1,5 @@
 import { loadEntities, saveEntities, loadDocuments, saveDocuments, leerValor, escribirValor, eliminarValor } from '../storage.js';
-import { generarSemilla, generarSemillaBase, generarRoles, generarUsuarios } from './semilla.js';
+import { FECHA_REFERENCIA_SEMILLA, generarSemilla, generarSemillaBase, generarRoles, generarUsuarios } from './semilla.js';
 
 const PREFIJO = 'erp_contabilidad:';
 
@@ -102,7 +102,7 @@ function asegurarDatosBase() {
 }
 
 function construirSemillaFinanciera(entidades, documentos) {
-  return generarSemilla({ entidades, documentos });
+  return generarSemilla({ entidades, documentos, fechaReferencia: FECHA_REFERENCIA_SEMILLA });
 }
 
 function persistirSemilla(datos) {

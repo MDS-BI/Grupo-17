@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { crearDom, bootContabilidad, qs } from '../../setup/contabilidad.js';
+import { listarEventos } from '../../../src/contabilidad/auditoria.js';
 
 let dom;
 
@@ -40,7 +41,7 @@ describe('interfaz profesional y cierre integral', () => {
     expect(document.documentElement.style.getPropertyValue('--primary-dark')).toContain('color-mix');
   });
 
-  it('cierra un periodo desde el listado y deja constancia en auditoría', async () => {
+  it('cierra un periodo desde el listado sin añadir eventos de periodos a la auditoría', async () => {
     await bootContabilidad(undefined, { requireAccess: true, sesion: 'administrador' });
     qs('nav-periodos').click();
 
@@ -48,6 +49,7 @@ describe('interfaz profesional y cierre integral', () => {
 
     expect(qs('periodos-lista').textContent).toContain('cerrado');
     expect(qs('periodos-lista').querySelectorAll('.estado-ok').length).toBeGreaterThan(0);
+    expect(listarEventos({ entidadId: 'per-2026-11' })).toHaveLength(0);
 
     qs('nav-reportes').click();
     const actividad = document.querySelector('[data-registro-actividad]');
