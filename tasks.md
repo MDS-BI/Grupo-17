@@ -181,7 +181,6 @@ Tarea: "Crear la lista básica de pagos en src/components/payment-list.js"
 2. Completar la Fase 2: Fundacional.
 3. Completar la Fase 3: Registrar un pago.
 4. **DETENERSE y VALIDAR**: probar el registro de forma independiente.
-5. Demostrar el MVP si está listo.
 
 ### Entrega Incremental
 
@@ -199,7 +198,6 @@ Tarea: "Crear la lista básica de pagos en src/components/payment-list.js"
 3. Coordinar al final los cambios compartidos en `src/components/payment-list.js` y `src/app.js`.
 4. Completar juntos el pulido y la verificación.
 
----
 
 ## Notas
 

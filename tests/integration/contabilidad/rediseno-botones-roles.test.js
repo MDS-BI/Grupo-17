@@ -107,9 +107,19 @@ describe('rediseño formal y revisión por roles', () => {
         .map((boton) => boton.dataset.module);
       expect(visibles).toEqual(rol.menu);
 
-      const demo = document.querySelectorAll('[data-accion="cargar-datos"], [data-accion="restablecer-datos"]');
-      if (rol.id === 'administrador') expect(demo).toHaveLength(2);
-      else expect(demo).toHaveLength(0);
+      const selectorDemo = '[data-accion="cargar-datos"], [data-accion="restablecer-datos"]';
+      const demoPanel = qs('view-panel-inicio').querySelectorAll(selectorDemo);
+      const demoDashboard = qs('view-dashboard').querySelectorAll(selectorDemo);
+      qs('nav-dashboard').click();
+      const accionesDashboard = qs('view-dashboard').querySelector('[data-acciones-datos-ejemplo]');
+      if (rol.id === 'administrador') {
+        expect(demoPanel).toHaveLength(2);
+        expect(demoDashboard).toHaveLength(2);
+        expect(accionesDashboard.hidden).toBe(false);
+      } else {
+        expect(demoPanel).toHaveLength(0);
+        expect(accionesDashboard.hidden).toBe(true);
+      }
 
       if (rol.id === 'tesorero') {
         qs('nav-pagos').click();

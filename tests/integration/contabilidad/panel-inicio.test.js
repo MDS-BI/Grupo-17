@@ -24,12 +24,14 @@ describe('panel de inicio de Contabilidad y Finanzas', () => {
     expect([...vista.querySelectorAll('[data-panel-seccion]')].map((seccion) => seccion.dataset.panelSeccion)).toEqual([
       'resumen-integral',
       'estado-periodos',
-      'asuntos-prioritarios'
+      'asuntos-prioritarios',
+      'analisis-financiero'
     ]);
     expect([...vista.querySelectorAll('[data-panel-seccion] > h3')].map((titulo) => titulo.textContent)).toEqual([
       'Resumen integral',
       'Estado de periodos',
-      'Asuntos prioritarios'
+      'Asuntos prioritarios',
+      'Análisis financiero'
     ]);
     expect(vista.textContent).toContain('Ingresos del periodo');
     expect(vista.textContent).toContain('Abiertos: 3 · Cerrados: 2');
@@ -50,6 +52,29 @@ describe('panel de inicio de Contabilidad y Finanzas', () => {
     expect(tarjetas[2].classList.contains('stat-card-negativo')).toBe(true);
     expect(vista.querySelector('[data-panel-seccion="estado-periodos"]').classList.contains('panel-seccion-periodos')).toBe(true);
     expect(vista.querySelector('[data-panel-seccion="asuntos-prioritarios"]').classList.contains('panel-seccion-prioritarios')).toBe(true);
+    expect(vista.querySelector('[data-panel-seccion="analisis-financiero"]').classList.contains('panel-seccion-analisis')).toBe(true);
+    expect(vista.querySelector('[data-panel-seccion="analisis-financiero"] .chart-grid')).not.toBeNull();
+  });
+
+  it('muestra las acciones de datos al final del panel financiero solo para el administrador', async () => {
+    await bootContabilidad(undefined, { requireAccess: true, sesion: 'administrador' });
+    qs('nav-dashboard').click();
+    const acciones = qs('view-dashboard').querySelector('[data-acciones-datos-ejemplo]');
+
+    expect(acciones.hidden).toBe(false);
+    expect(qs('view-dashboard').querySelector('.chart-grid')).toBeNull();
+    expect(qs('view-panel-inicio').querySelector('[data-panel-seccion="analisis-financiero"] .chart-grid')).not.toBeNull();
+    expect([...acciones.querySelectorAll('button')].map((boton) => boton.textContent.trim())).toEqual([
+      'Cargar datos de ejemplo',
+      'Restablecer datos'
+    ]);
+  });
+
+  it('oculta las acciones de datos del panel financiero a otros roles', async () => {
+    await bootContabilidad(undefined, { requireAccess: true, sesion: 'auditor' });
+    qs('nav-dashboard').click();
+
+    expect(qs('view-dashboard').querySelector('[data-acciones-datos-ejemplo]').hidden).toBe(true);
   });
 
   it('muestra el panel del contador sin controles de ejemplo', async () => {

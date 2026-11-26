@@ -2,6 +2,7 @@
 import { formatearCLP } from '../contabilidad/dinero.js';
 import { resumirPagos } from '../contabilidad/resumen-pagos.js';
 import { FECHA_REFERENCIA_SEMILLA } from '../contabilidad/semilla.js';
+import { plantillaAnalisisFinanciero } from './analisis-financiero.js';
 
 function alertasTesorero(sesion) {
   if (!puedeVerAlertas(sesion)) return '';
@@ -111,6 +112,7 @@ function panelAdministrador(datos) {
           <li>Cuentas contables: ${lista(datos.cuentas).length}</li>
         </ul>`, 'panel-seccion-prioritarios')}
     </div>
+    ${seccion('analisis-financiero', 'Análisis financiero', plantillaAnalisisFinanciero(), 'panel-seccion-analisis')}
   `;
 }
 

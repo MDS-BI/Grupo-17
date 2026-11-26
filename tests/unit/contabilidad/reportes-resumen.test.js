@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { instalarAlmacen } from '../../setup/contabilidad.js';
 import { inicializarContabilidad, loadAsientos, saveAsientos, loadLineas, saveLineas } from '../../../src/contabilidad/almacenamiento.js';
-import { calcularResumen } from '../../../src/contabilidad/reportes.js';
+import { calcularResumen, calcularGastosPorCuenta } from '../../../src/contabilidad/reportes.js';
 
 function vaciarMovimientos(periodoId) {
   const asientos = loadAsientos().filter((asiento) => asiento.period_id !== periodoId);
@@ -26,6 +26,14 @@ describe('resumen financiero', () => {
     expect(resumen.totalCredit).toBe(366000);
     expect(resumen.movimientos).toBe(2);
     expect(resumen.hayMovimientos).toBe(true);
+  });
+
+  it('la distribución por cuenta suma el total de gastos del resumen', () => {
+    for (const periodoId of ['per-2026-08', 'per-2026-10', 'per-2026-11']) {
+      const filas = calcularGastosPorCuenta(periodoId);
+      const total = filas.reduce((acumulado, fila) => acumulado + fila.gastoCentavos, 0);
+      expect(total).toBe(calcularResumen(periodoId).gastos);
+    }
   });
 
   it('excluye asientos cancelados del cálculo', () => {

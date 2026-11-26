@@ -253,6 +253,50 @@ export function calcularSaldosCuentas(arg1 = null, arg2 = null, fechaLimite = nu
     .sort((a, b) => texto(a.code).localeCompare(texto(b.code), 'es', { numeric: true }));
 }
 
+export function calcularGastosPorCuenta(periodoId = null, opciones = {}) {
+  const cuentas = ordenarCuentas(opciones.cuentas ?? loadCuentas());
+  const listaAsientos = Array.isArray(opciones.asientos) ? opciones.asientos : loadAsientos();
+  const periodo = resolverPeriodo(periodoId);
+  const aprobados = listaAsientos.filter(
+    (asiento) => asiento.status === 'aprobado' && asientoEnPeriodo(asiento, periodo)
+  );
+  const lineas = lineasDeAsientos(aprobados, opciones.lineas ?? null);
+  const cuentasPorId = new Map(cuentas.map((cuenta) => [cuenta.id ?? cuenta.cuentaId, cuenta]));
+  const porCuenta = new Map();
+
+  for (const linea of lineas) {
+    const cuenta = cuentasPorId.get(linea.cuenta_id);
+    if (cuenta?.type !== 'gasto') continue;
+    const gasto = sumarCentavos([linea.debit, -linea.credit]);
+    if (gasto <= 0) continue;
+    const id = cuenta.id ?? cuenta.cuentaId;
+    porCuenta.set(id, sumarCentavos([porCuenta.get(id) || 0, gasto]));
+  }
+
+  const filas = [...porCuenta.entries()].map(([id, gastoCentavos]) => {
+    const cuenta = cuentasPorId.get(id);
+    return {
+      cuentaId: id,
+      codigo: texto(cuenta.code ?? cuenta.codigo),
+      nombre: texto(cuenta.name ?? cuenta.nombre),
+      gastoCentavos
+    };
+  });
+  const total = sumarCentavos(filas.map((fila) => fila.gastoCentavos));
+
+  return filas
+    .sort((a, b) => {
+      const porGasto = b.gastoCentavos - a.gastoCentavos;
+      if (porGasto !== 0) return porGasto;
+      const porCodigo = a.codigo.localeCompare(b.codigo, 'es', { numeric: true });
+      return porCodigo !== 0 ? porCodigo : a.cuentaId.localeCompare(b.cuentaId);
+    })
+    .map((fila) => ({
+      ...fila,
+      porcentaje: total === 0 ? 0 : Math.round((fila.gastoCentavos / total) * 1000) / 10
+    }));
+}
+
 function sumarPorCuenta(lineas) {
   const mapa = new Map();
   for (const linea of lineas) {
@@ -498,7 +542,7 @@ export function periodosDisponibles() {
   return [...loadPeriodos()].sort((a, b) => String(a.startDate).localeCompare(String(b.startDate)));
 }
 
-export function obtenerSeriesDashboard(periodos = periodosDisponibles()) {
+export function obtenerSeriesDashboard(periodos = periodosDisponibles(), periodoId = null) {
   const ingresosGastos = periodos.map((periodo) => {
     const resumen = calcularResumen(periodo.id);
     return {
@@ -513,23 +557,11 @@ export function obtenerSeriesDashboard(periodos = periodosDisponibles()) {
     periodo: punto.periodo,
     resultadoCentavos: sumarCentavos([punto.ingresosCentavos, -punto.gastosCentavos])
   }));
-  const distribucion = calcularSaldosCuentas()
-    .filter((cuenta) => cuenta.type === 'gasto' && cuenta.saldo > 0)
-    .map((cuenta) => ({
-      cuentaId: cuenta.id,
-      codigo: cuenta.code,
-      nombre: cuenta.name,
-      gastoCentavos: cuenta.saldo
-    }))
-    .sort((a, b) => b.gastoCentavos - a.gastoCentavos);
-  const totalGastos = sumarCentavos(distribucion.map((cuenta) => cuenta.gastoCentavos));
+  const distribucion = calcularGastosPorCuenta(periodoId);
   return {
     ingresosGastos,
     resultado,
-    distribucion: distribucion.map((cuenta) => ({
-      ...cuenta,
-      porcentaje: totalGastos === 0 ? 0 : Math.round((cuenta.gastoCentavos / totalGastos) * 1000) / 10
-    })),
+    distribucion,
     vacio: ingresosGastos.every((punto) => punto.ingresosCentavos === 0 && punto.gastosCentavos === 0)
   };
 }

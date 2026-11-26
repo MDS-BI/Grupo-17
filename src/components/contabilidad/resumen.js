@@ -1,6 +1,30 @@
-import { formatoMoneda, poblarSelect, mostrarMensaje } from './comun.js';
+import { escapeHtml, formatoMoneda, poblarSelect, mostrarMensaje } from './comun.js';
 
-export function renderResumen({ periodos = [], periodoId = '', resumen }) {
+function renderGastosPorCuenta(filas = []) {
+  const cuerpo = document.getElementById('resumen-gastos-cuerpo');
+  const tabla = document.getElementById('resumen-gastos-tabla');
+  const vacio = document.getElementById('resumen-gastos-empty');
+  if (!cuerpo || !tabla || !vacio) return;
+  cuerpo.textContent = '';
+  const hayFilas = filas.length > 0;
+  tabla.hidden = !hayFilas;
+  vacio.hidden = hayFilas;
+  if (!hayFilas) return;
+
+  for (const fila of filas) {
+    const filaDom = document.createElement('tr');
+    filaDom.dataset.cuentaId = fila.cuentaId;
+    filaDom.dataset.valorCentavos = String(fila.gastoCentavos);
+    filaDom.innerHTML = `
+      <td>${escapeHtml(`${fila.codigo} — ${fila.nombre}`)}</td>
+      <td class="num">${formatoMoneda(fila.gastoCentavos)}</td>
+      <td class="num">${Number(fila.porcentaje).toFixed(1)}%</td>
+    `;
+    cuerpo.appendChild(filaDom);
+  }
+}
+
+export function renderResumen({ periodos = [], periodoId = '', resumen, gastosPorCuenta = [] }) {
   const selector = document.getElementById('resumen-periodo');
   const opciones = periodos.map((p) => ({ value: p.id, label: `${p.name} (${p.status})` }));
   poblarSelect(selector, opciones, { valor: periodoId });
@@ -17,8 +41,10 @@ export function renderResumen({ periodos = [], periodoId = '', resumen }) {
     resultado.classList.toggle('negative', datos.resultado < 0);
   }
   mostrarMensaje('resumen-empty', datos.hayMovimientos ? '' : 'No hay información financiera disponible para el periodo seleccionado.');
+  renderGastosPorCuenta(gastosPorCuenta);
 }
 
 export function renderResumenError(mensaje) {
   mostrarMensaje('resumen-empty', mensaje);
+  renderGastosPorCuenta([]);
 }

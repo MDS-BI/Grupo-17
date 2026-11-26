@@ -1449,6 +1449,9 @@ button.danger:hover {
   background: var(--surface);
 }
 
+.panel-seccion-analisis { margin-top: var(--space-4); }
+.panel-seccion-analisis > h3 { margin-bottom: var(--space-3); }
+
 .panel-tabla-periodos { width: 100%; margin-top: var(--space-2); font-size: var(--fs-sm); }
 .panel-tabla-periodos th, .panel-tabla-periodos td {
   padding: var(--space-2) var(--space-3);
@@ -1478,6 +1481,8 @@ button.danger:hover {
 .stats-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-4); margin: var(--space-4) 0; }
 .stats-grid .stat-card { flex: none; min-width: 0; max-width: none; }
 
+.resumen-gastos { margin-top: var(--space-5); }
+.resumen-gastos h3 { margin: 0 0 var(--space-3); font-size: var(--fs-md); }
 .tabla-financiera, table { font-size: var(--fs-sm); }
 .tabla-financiera th { color: var(--muted); font-size: var(--fs-xs); text-transform: uppercase; }
 .tabla-financiera td, .tabla-financiera th { padding: var(--space-2) var(--space-3); border-bottom-color: var(--border); }

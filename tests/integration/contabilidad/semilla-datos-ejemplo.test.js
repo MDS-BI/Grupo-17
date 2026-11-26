@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { crearDom, bootContabilidad, qs } from '../../setup/contabilidad.js';
+import { crearDom, bootContabilidad, qs, enviar } from '../../setup/contabilidad.js';
 import {
   cargarDatosEjemplo,
   loadAsientos,
@@ -62,6 +62,36 @@ describe('cargar y restablecer datos de ejemplo', () => {
     expect(loadPeriodos()).toHaveLength(0);
     expect(loadUsuarios()).toHaveLength(4);
     expect(loadRoles()).toHaveLength(4);
+  });
+
+  it('carga los datos de ejemplo al iniciar sesión cuando no hay periodos', async () => {
+    await bootContabilidad(undefined, { requireAccess: true, sesion: 'administrador' });
+    restablecerEstadoInicial();
+    expect(loadPeriodos()).toHaveLength(0);
+
+    qs('acceso-rut').value = '11.111.111-1';
+    qs('acceso-contraseña').value = 'Admin2026!';
+    enviar(qs('acceso-formulario'));
+
+    expect(loadPeriodos()).toHaveLength(5);
+    expect(qs('view-panel-inicio').textContent).toContain('Abiertos: 3 · Cerrados: 2');
+  });
+
+  it('carga y restablece los datos desde el panel financiero sin abandonar la vista', async () => {
+    await bootContabilidad(undefined, { requireAccess: true, sesion: 'administrador' });
+    const dashboard = qs('view-dashboard');
+    qs('nav-dashboard').click();
+
+    dashboard.querySelector('[data-accion="restablecer-datos"]').click();
+    expect(loadPeriodos()).toHaveLength(0);
+    expect(dashboard.hidden).toBe(false);
+    expect(qs('dashboard-empty').hidden).toBe(false);
+
+    dashboard.querySelector('[data-accion="cargar-datos"]').click();
+    expect(loadPeriodos()).toHaveLength(5);
+    expect(dashboard.hidden).toBe(false);
+    expect(qs('dashboard-periodo').options).toHaveLength(5);
+    expect(qs('mensaje-confirmacion').textContent).toContain('Datos de ejemplo cargados');
   });
 
   it('no muestra acciones de semilla a otros roles', async () => {

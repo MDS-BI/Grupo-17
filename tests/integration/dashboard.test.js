@@ -59,12 +59,8 @@ describe('User Story 3 - panel de inicio de Contabilidad y Finanzas', () => {
 
     expect(qs('dashboard-heading').textContent).toContain('Contabilidad y Finanzas');
     expect(document.querySelector('label[for="dashboard-periodo"]').textContent).toBe('Periodo contable');
-    expect(qs('dashboard-charts-heading').textContent).toBe('Análisis financiero');
-    expect([...document.querySelectorAll('#view-dashboard .chart-card h3')].map((el) => el.textContent.trim())).toEqual([
-      'Ingresos vs gastos por periodo',
-      'Gastos por cuenta',
-      'Resultado financiero por periodo'
-    ]);
+    expect(qs('dashboard-charts-heading')).toBeNull();
+    expect(document.querySelectorAll('#view-dashboard .chart-card h3')).toHaveLength(0);
     expect([...document.querySelectorAll('.nav-module')].filter((boton) => !boton.hidden).map((boton) => boton.dataset.module)).toEqual([
       'dashboard',
       'resumen',

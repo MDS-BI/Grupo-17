@@ -47,11 +47,11 @@ La implementación inicial se enfocará en una interfaz frontend funcional que p
 ## Escenarios de Usuario y Pruebas 
 
 ### Historia de Usuario 1 -  Consultar el resumen financiero (Prioridad: P1)
-Como gerente o encargado de finanzas, quiero consultar un resumen de los ingresos, gastos y resultados financieros de la empresa, para conocer su situación económica y facilitar la toma de decisiones.
+Como gerente o encargado de finanzas, quiero consultar un resumen de los ingresos, gastos y resultados financieros de la empresa y, debajo de las tarjetas, una tabla con los gastos por cuenta del periodo seleccionado, para conocer su situación económica, identificar dónde se concentra el gasto y facilitar la toma de decisiones.
 
-**Por qué esta prioridad**: El resumen financiero permite visualizar rápidamente la situación económica de la empresa y constituye una herramienta importante para el seguimiento de sus operaciones.
+**Por qué esta prioridad**: El resumen financiero permite visualizar rápidamente la situación económica de la empresa y constituye una herramienta importante para el seguimiento de sus operaciones. La tabla de gastos por cuenta complementa las tarjetas con el detalle del periodo elegido sin obligar a salir del resumen.
 
-**Prueba Independiente**: Un usuario puede abrir el módulo de Contabilidad y Finanzas, visualizar un panel con los principales indicadores financieros y consultar los valores correspondientes a un periodo determinado.
+**Prueba Independiente**: Un usuario puede abrir el módulo de Contabilidad y Finanzas, visualizar un panel con los principales indicadores financieros, consultar los valores correspondientes a un periodo determinado y ver debajo de las tarjetas la tabla de gastos por cuenta de ese periodo.
 
 **Escenarios de Aceptación**:
 
@@ -59,6 +59,7 @@ Como gerente o encargado de finanzas, quiero consultar un resumen de los ingreso
 2. **Dado** que el panel principal está visible, **cuando** el usuario selecciona un periodo determinado, **entonces** los indicadores se actualizan para mostrar la información correspondiente a ese periodo.
 3. **Dado** que existen movimientos contables registrados, **cuando** el usuario consulta el resumen financiero, **entonces** los valores mostrados se calculan a partir de dichos movimientos.
 4. **Dado** que no existen movimientos registrados, **cuando** el usuario ingresa al panel, **entonces** se muestra un mensaje indicando que no hay información financiera disponible.
+5. **Dado** que el usuario está en "Resumen financiero" con un periodo seleccionado, **cuando** revisa la información debajo de las tarjetas, **entonces** se muestra una tabla con los gastos por cuenta de ese periodo, con los importes en CLP y un estado vacío claro cuando no haya gastos.
 
 ---
 
@@ -152,20 +153,21 @@ Como analista financiero o contador, quiero generar y consultar reportes de los 
 
 ### Historia de Usuario 7 - Consultar el análisis financiero visual del panel (Prioridad: P2)
 
-Como gerente o analista financiero, quiero visualizar gráficas de ingresos, gastos, resultado y distribución de gastos por cuenta en el panel principal, para interpretar rápidamente la evolución y la composición de las operaciones de la empresa.
+Como gerente o analista financiero, quiero que el Panel del Administrador financiero incluya la sección "Análisis financiero" con tres gráficas —ingresos vs gastos por periodo, gastos por cuenta y resultado financiero por periodo— ubicada entre "Estado de periodos" y los botones "Cargar datos de ejemplo" y "Restablecer datos", para interpretar rápidamente la evolución y la composición de las operaciones de la empresa.
 
-**Por qué esta prioridad**: Las gráficas complementan los indicadores del resumen y hacen más evidentes las tendencias y la concentración de gastos sin sustituir las tablas ni los reportes financieros.
+**Por qué esta prioridad**: Las gráficas complementan los indicadores del resumen y hacen más evidentes las tendencias y la concentración de gastos sin sustituir las tablas ni los reportes financieros. Ubicar "Análisis financiero" entre el estado de los periodos y las acciones de datos mantiene el análisis visual junto a la información operativa que le da contexto.
 
-**Prueba Independiente**: Un usuario abre el panel, selecciona un periodo contable y observa las gráficas de barras, de línea y de dona actualizadas con los movimientos aprobados de ese periodo, además de mensajes cuando no hay datos.
+**Prueba Independiente**: El Administrador financiero abre su Panel, comprueba que "Análisis financiero" aparece después de "Estado de periodos" y antes de los botones de datos de ejemplo, y observa las tres gráficas actualizadas con los movimientos aprobados del periodo seleccionado, además de mensajes cuando no hay datos.
 
 **Escenarios de Aceptación**:
 
-1. **Dado** que el usuario abre el panel principal, **cuando** se cargan las gráficas, **entonces** se muestran la comparación de ingresos y gastos por periodo, la evolución del resultado y la distribución de gastos por cuenta.
-2. **Dado** que el panel está visible, **cuando** el usuario selecciona un periodo contable, **entonces** las gráficas se actualizan con la información correspondiente a ese periodo.
-3. **Dado** que existen movimientos contables aprobados, **cuando** se renderizan las gráficas, **entonces** los valores provienen de los mismos cálculos de resumen y saldos utilizados por los reportes.
-4. **Dado** que no existen periodos o movimientos registrados, **cuando** se cargan las gráficas, **entonces** se muestran mensajes de estado vacío en español en lugar de gráficas sin información.
-5. **Dado** que el usuario consulta una gráfica, **cuando** revisa las etiquetas o herramientas de cada punto, **entonces** los importes se muestran en CLP con el mismo formato que el resto del módulo.
-6. **Dado** que se compara la gráfica de barras, **cuando** se revisan sus series, **entonces** ingresos y gastos usan colores diferentes y diferenciables.
+1. **Dado** que el Administrador financiero abre su Panel, **cuando** se cargan las secciones, **entonces** la sección "Análisis financiero" se muestra entre "Estado de periodos" y los botones "Cargar datos de ejemplo" y "Restablecer datos".
+2. **Dado** que la sección "Análisis financiero" está visible, **cuando** se revisan sus gráficas, **entonces** se muestran "Ingresos vs gastos por periodo", "Gastos por cuenta" y "Resultado financiero por periodo".
+3. **Dado** que el panel está visible, **cuando** el usuario selecciona un periodo contable, **entonces** las tres gráficas se actualizan con la información correspondiente a ese periodo.
+4. **Dado** que existen movimientos contables aprobados, **cuando** se renderizan las gráficas, **entonces** los valores provienen de los mismos cálculos de resumen y saldos utilizados por los reportes.
+5. **Dado** que no existen periodos o movimientos registrados, **cuando** se cargan las gráficas, **entonces** se muestran mensajes de estado vacío en español en lugar de gráficas sin información.
+6. **Dado** que el usuario consulta una gráfica, **cuando** revisa las etiquetas o herramientas de cada punto, **entonces** los importes se muestran en CLP con el mismo formato que el resto del módulo.
+7. **Dado** que se compara la gráfica "Ingresos vs gastos por periodo", **cuando** se revisan sus series, **entonces** ingresos y gastos usan colores diferentes y diferenciables.
 
 ---
 
@@ -903,7 +905,7 @@ Como usuario del módulo, quiero que todas las cifras, unidades y datos de ejemp
 ### Requisitos Funcionales
 
 - **FR-001**: El sistema DEBE permitir a los usuarios consultar un panel principal con un resumen de los ingresos, gastos y resultados financieros de la empresa.
-- **FR-002**: El sistema DEBE permitir filtrar el resumen financiero según el periodo seleccionado.
+- **FR-002**: El sistema DEBE permitir filtrar el resumen financiero según el periodo seleccionado y mostrar, debajo de las tarjetas, una tabla con los gastos por cuenta de ese periodo, con importes en CLP y un estado vacío claro cuando no haya gastos.
 - **FR-003**: El sistema DEBE permitir crear, consultar y editar cuentas contables.
 - **FR-004**: El sistema DEBE solicitar como mínimo un código, nombre y tipo para registrar una cuenta contable.
 - **FR-005**: El sistema DEBE permitir organizar las cuentas contables mediante relaciones jerárquicas entre cuentas principales y subcuentas.
@@ -936,16 +938,16 @@ Como usuario del módulo, quiero que todas las cifras, unidades y datos de ejemp
 - **FR-032**: El sistema DEBE impedir eliminar un documento que tenga asientos contables asociados, conservando la referencia al documento de origen.
 - **FR-033**: El sistema DEBE impedir crear un periodo contable cuyas fechas se superpongan con las de otro periodo existente, independientemente de su estado.
 - **FR-034**: El sistema DEBE operar con una sola moneda (CLP) y NO DEBE realizar conversiones de moneda durante el MVP.
-- **FR-035**: El sistema DEBE mostrar en el panel principal una gráfica de barras con los ingresos y gastos de cada periodo contable, usando colores diferentes e inequívocos para cada serie.
-- **FR-036**: El sistema DEBE mostrar en el panel principal una gráfica de línea con la evolución del resultado financiero por periodo contable.
-- **FR-037**: El sistema DEBE mostrar en el panel principal una gráfica de distribución de los gastos por cuenta del periodo seleccionado.
-- **FR-038**: El sistema DEBE actualizar las gráficas cuando el usuario seleccione un periodo contable diferente y mostrar mensajes de estado vacío cuando no existan datos.
+- **FR-035**: El sistema DEBE mostrar en la sección "Análisis financiero" del Panel del Administrador financiero, ubicada entre "Estado de periodos" y los botones "Cargar datos de ejemplo" y "Restablecer datos", la gráfica "Ingresos vs gastos por periodo", con barras para cada periodo contable y colores diferentes e inequívocos para cada serie.
+- **FR-036**: El sistema DEBE mostrar en la misma sección la gráfica "Resultado financiero por periodo", con la evolución del resultado financiero por periodo contable.
+- **FR-037**: El sistema DEBE mostrar en la misma sección la gráfica "Gastos por cuenta" con la distribución de los gastos del periodo seleccionado.
+- **FR-038**: El sistema DEBE actualizar las tres gráficas cuando el usuario seleccione un periodo contable diferente y mostrar mensajes de estado vacío cuando no existan datos.
 - **FR-039**: Los importes presentados en las gráficas DEBEN formatearse en CLP mediante las utilidades compartidas del módulo.
 - **FR-040**: El sistema DEBE solicitar RUT y contraseña para permitir el acceso al módulo.
 - **FR-041**: El sistema DEBE contar con cuatro usuarios de prueba ficticios, uno por cada rol: Administrador financiero, Contador, Tesorero y Auditor.
 - **FR-042**: El sistema DEBE autenticar a cada usuario de prueba únicamente cuando su RUT y su contraseña coincidan.
 - **FR-043**: El sistema DEBE mostrar un panel de inicio distinto según el rol autenticado.
-- **FR-044**: El panel del Administrador financiero DEBE mostrar el resumen integral, el estado de los periodos y los asuntos prioritarios.
+- **FR-044**: El panel del Administrador financiero DEBE mostrar el resumen integral, el estado de los periodos, la sección "Análisis financiero" con las tres gráficas definidas en FR-035 a FR-037 —ubicada entre el estado de los periodos y los botones "Cargar datos de ejemplo" y "Restablecer datos"— y los asuntos prioritarios.
 - **FR-045**: El panel del Contador DEBE mostrar cuentas contables, asientos y reportes disponibles.
 - **FR-046**: El panel del Tesorero DEBE mostrar pagos, cobros y flujo de efectivo.
 - **FR-047**: El panel del Auditor DEBE mostrar trazabilidad de movimientos, reportes e historial para consulta.

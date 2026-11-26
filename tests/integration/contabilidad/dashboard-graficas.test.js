@@ -23,18 +23,19 @@ afterEach(() => {
   dom.window.close();
 });
 
-describe('gráficas del panel financiero', () => {
+describe('gráficas del panel financiero del administrador', () => {
   it('muestra barras, línea y dona derivadas de reportes', async () => {
-    await bootContabilidad();
-    qs('nav-cuentas').click();
-    qs('nav-dashboard').click();
+    await bootContabilidad(undefined, { requireAccess: true, sesion: 'administrador' });
     expect(qs('chart-ingresos-gastos').querySelectorAll('svg').length).toBe(1);
     expect(qs('chart-resultado').querySelectorAll('svg').length).toBe(1);
     expect(qs('chart-gastos-cuenta').querySelectorAll('svg').length).toBe(1);
-    expect(qs('dashboard-empty').hidden).toBe(true);
+    expect(qs('chart-gastos-periodo').textContent).toBe('2026-11');
     expect(qs('chart-gastos-cuenta').querySelector('.chart-donut-total').textContent).toMatch(/^\$-?[\d.,]+[kM]?$/);
     const etiquetasEje = [...document.querySelectorAll('.chart-axis-label')].map((etiqueta) => etiqueta.textContent);
     expect(etiquetasEje.some((etiqueta) => /^(\$|-\$)/.test(etiqueta))).toBe(true);
+
+    qs('nav-dashboard').click();
+    expect(qs('dashboard-empty').hidden).toBe(true);
   });
 
   it('usa colores distintos para ingresos y gastos', () => {
@@ -45,8 +46,7 @@ describe('gráficas del panel financiero', () => {
   });
 
   it('actualiza las gráficas al cambiar de periodo', async () => {
-    await bootContabilidad();
-    qs('nav-cuentas').click();
+    await bootContabilidad(undefined, { requireAccess: true, sesion: 'administrador' });
     qs('nav-dashboard').click();
     const etiquetas = qs('chart-gastos-leyenda').textContent;
     vaciarMovimientos('per-2026-11');
@@ -55,23 +55,30 @@ describe('gráficas del panel financiero', () => {
     expect(qs('dashboard-empty').hidden).toBe(false);
   });
 
-  it('muestra estados vacíos en las gráficas cuando no hay movimientos aprobados', async () => {
+  it('muestra estados vacíos accesibles cuando no hay movimientos aprobados', async () => {
     await bootContabilidad(undefined, { requireAccess: true, sesion: 'administrador' });
     saveAsientos([]);
     saveLineas([]);
-    qs('nav-cuentas').click();
     qs('nav-dashboard').click();
+    elegir(qs('dashboard-periodo'), qs('dashboard-periodo').value);
 
     expect(qs('chart-ingresos-gastos').textContent).toContain('No hay movimientos aprobados');
-    expect(qs('dashboard-empty').hidden).toBe(false);
+    expect(qs('chart-ingresos-gastos').querySelector('[role="status"]')).not.toBeNull();
     expect(qs('chart-ingresos-gastos').querySelectorAll('svg').length).toBe(0);
     expect(qs('chart-resultado').textContent).toContain('No hay movimientos aprobados');
     expect(qs('chart-resultado').querySelectorAll('svg').length).toBe(0);
     expect(qs('chart-gastos-cuenta').querySelectorAll('svg').length).toBe(0);
+    expect(qs('dashboard-empty').hidden).toBe(false);
+  });
+
+  it('oculta la sección de gráficas a otros roles', async () => {
+    await bootContabilidad(undefined, { requireAccess: true, sesion: 'contador' });
+    expect(document.querySelector('[data-panel-seccion="analisis-financiero"]')).toBeNull();
+    expect(document.querySelector('[data-grafica="ingresos-gastos"]')).toBeNull();
   });
 
   it('muestra mensaje vacío cuando no hay periodos', async () => {
-    await bootContabilidad();
+    await bootContabilidad(undefined, { requireAccess: true, sesion: 'administrador' });
     const { savePeriodos } = await import('../../../src/contabilidad/almacenamiento.js');
     savePeriodos([]);
     qs('nav-dashboard').click();

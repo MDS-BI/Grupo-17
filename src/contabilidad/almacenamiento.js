@@ -69,7 +69,9 @@ export function saveSesion(sesion) {
 }
 
 export function limpiarContabilidad() {
-  Object.values(CLAVES).filter((clave) => clave !== CLAVES.usuarios && clave !== CLAVES.roles).forEach((clave) => eliminarValor(clave));
+  Object.values(CLAVES)
+    .filter((clave) => clave !== CLAVES.usuarios && clave !== CLAVES.roles && clave !== CLAVES.sesion)
+    .forEach((clave) => eliminarValor(clave));
 }
 
 export function inicializarAcceso() {

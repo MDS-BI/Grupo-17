@@ -33,6 +33,7 @@ import { renderReporte } from './components/contabilidad/reportes.js';
 import { renderAcceso, renderizarUsuariosPrueba, obtenerCredenciales, mostrarErroresAcceso, limpiarFormularioAcceso } from './components/acceso.js';
 import { renderizarMenu, renderizarIconosMenu, moduloVisible, navegar } from './components/menu.js';
 import { renderizarPanelInicio } from './components/panel-por-rol.js';
+import { renderAnalisisFinanciero } from './components/analisis-financiero.js';
 import { renderizarResumenPagos } from './components/contabilidad/pago-resumen.js';
 import * as Sesion from './contabilidad/sesion.js';
 import * as Permisos from './contabilidad/permisos.js';
@@ -100,6 +101,13 @@ function asegurarContabilidad(){
     Almacen.inicializarContabilidad();
     contabilidadInicializada = true;
   }
+}
+
+function cargarDatosSiNoHayPeriodos(){
+  if(Periodos.listarPeriodos().length > 0) return false;
+  Almacen.cargarDatosEjemplo();
+  contabilidadInicializada = true;
+  return true;
 }
 
 function sesionActual(){
@@ -199,8 +207,15 @@ function datosPanel(){
     periodos,
     asientos: Asientos.listarAsientos(),
     pagos: Pagos.listarPagos(),
+    periodoId,
     resumen: periodoId ? Reportes.calcularResumen(periodoId) : { ingresos: 0, gastos: 0, resultado: 0, movimientos: 0 }
   };
+}
+
+function renderizarAnalisisPanel(datos = datosPanel()){
+  const sesion = sesionActual();
+  if(!sesion || sesion.rolId !== 'administrador') return;
+  renderAnalisisFinanciero({ periodoId: datos.periodoId, periodos: datos.periodos });
 }
 
 function aplicarSesion(){
@@ -227,9 +242,31 @@ function datosContabilidad(){
   };
 }
 
+function actualizarAccionesDashboard(){
+  const contenedor = document.querySelector('[data-acciones-datos-ejemplo]');
+  if(!contenedor) return;
+  contenedor.hidden = !modoAcceso || !puede('cargarDatos') || !puede('restablecerDatos');
+}
+
 function refrescarDashboard(){
   const visible = Boolean(modoAcceso && Permisos.puedeVerAlertas(sesionActual()));
   renderDashboard({ mostrarAlertasTesorero: visible, fechaReferencia: FECHA_REFERENCIA_SEMILLA });
+  actualizarAccionesDashboard();
+}
+
+function refrescarTrasCambioDatos(){
+  if(pantallaActual === 'dashboard'){
+    refrescarDashboard();
+    const sesion = sesionActual();
+    if(sesion){
+      const datos = datosPanel();
+      renderizarPanelInicio(sesion, datos);
+      renderizarAnalisisPanel(datos);
+      actualizarAlertasPanel();
+    }
+    return true;
+  }
+  return aplicarSesion();
 }
 
 function actualizarAlertasPanel(){
@@ -385,7 +422,8 @@ function refrescarResumen(){
   const periodos = Periodos.listarPeriodos();
   const periodoId = elegirPeriodo(periodos, qs('resumen-periodo').value);
   const resumen = periodoId ? Reportes.calcularResumen(periodoId) : null;
-  renderResumen({ periodos, periodoId, resumen });
+  const gastosPorCuenta = periodoId ? Reportes.calcularGastosPorCuenta(periodoId) : [];
+  renderResumen({ periodos, periodoId, resumen, gastosPorCuenta });
 }
 
 function refrescarCuentas(){
@@ -652,7 +690,9 @@ function showModule(name, opts = {}){
   if(name === 'panel'){
     const sesion = sesionActual();
     if(sesion){
-      renderizarPanelInicio(sesion, datosPanel());
+      const datos = datosPanel();
+      renderizarPanelInicio(sesion, datos);
+      renderizarAnalisisPanel(datos);
       actualizarAlertasPanel();
     }
   }
@@ -1188,6 +1228,7 @@ function handleAccesoSubmit(ev){
     return;
   }
   limpiarFormularioAcceso();
+  cargarDatosSiNoHayPeriodos();
   aplicarSesion();
 }
 
@@ -1216,7 +1257,7 @@ function handlePanelClick(ev){
     if(!confirmar('¿Cargar los datos de ejemplo? Se reemplazarán los datos contables actuales.')) return;
     Almacen.cargarDatosEjemplo();
     contabilidadInicializada = true;
-    aplicarSesion();
+    refrescarTrasCambioDatos();
     informar('Datos de ejemplo cargados correctamente.');
     return;
   }
@@ -1228,7 +1269,7 @@ function handlePanelClick(ev){
     if(!confirmar('¿Restablecer los datos iniciales? Se conservarán los usuarios y los roles.')) return;
     Almacen.restablecerEstadoInicial();
     contabilidadInicializada = true;
-    aplicarSesion();
+    refrescarTrasCambioDatos();
     informar('Datos restablecidos correctamente.');
   }
 }
@@ -1323,7 +1364,11 @@ function wireEvents(){
   document.querySelectorAll('.nav-module').forEach(btn => {
     btn.addEventListener('click', () => showModule(btn.dataset.module));
   });
-  on('dashboard-periodo', 'change', refrescarDashboard);
+  on('dashboard-periodo', 'change', () => {
+    refrescarDashboard();
+    const datos = datosPanel();
+    renderizarAnalisisPanel({ ...datos, periodoId: qs('dashboard-periodo').value || datos.periodoId });
+  });
   qs('entity-form').addEventListener('submit', handleEntitySubmit);
   qs('cancel-edit').addEventListener('click', clearEntityForm);
   qs('document-form').addEventListener('submit', handleDocumentSubmit);
@@ -1371,6 +1416,7 @@ function wireEvents(){
   on('acceso-rut', 'input', handleRutInput);
   on('acceso-formulario', 'submit', handleAccesoSubmit);
   on('view-panel-inicio', 'click', handlePanelClick);
+  on('view-dashboard', 'click', handlePanelClick);
   document.addEventListener('click', handleAccionesGlobales);
   document.addEventListener('keydown', handleAccionesGlobalesTeclado);
 
@@ -1432,6 +1478,7 @@ export function initApp(resolved, opciones = {}){
 export function iniciarSesionApp(rut, contraseña){
   const revision = Sesion.iniciarSesion(rut, contraseña);
   if(!revision.ok) return revision;
+  cargarDatosSiNoHayPeriodos();
   const aceptada = aplicarSesion();
   return { ok: aceptada, sesion: revision.sesion };
 }

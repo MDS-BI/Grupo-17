@@ -159,36 +159,9 @@
             </div>
           </div>
 
-          <h2 id="dashboard-charts-heading">Análisis financiero</h2>
-          <div class="chart-grid">
-            <section class="chart-card chart-card-wide" aria-labelledby="chart-ingresos-heading">
-              <div class="chart-header">
-                <h3 id="chart-ingresos-heading">Ingresos vs gastos por periodo</h3>
-                <div class="chart-legend" aria-hidden="true">
-                  <span><i class="chart-swatch chart-swatch-ingresos"></i>Ingresos</span>
-                  <span><i class="chart-swatch chart-swatch-gastos"></i>Gastos</span>
-                </div>
-              </div>
-              <div id="chart-ingresos-gastos" class="chart-canvas"></div>
-            </section>
-
-            <section class="chart-card" aria-labelledby="chart-gastos-heading">
-              <h3 id="chart-gastos-heading">Gastos por cuenta <span id="chart-gastos-periodo" class="muted"></span></h3>
-              <div class="chart-donut">
-                <div id="chart-gastos-cuenta" class="chart-canvas chart-canvas-donut"></div>
-                <ul id="chart-gastos-leyenda" class="chart-legend-list"></ul>
-              </div>
-            </section>
-
-            <section class="chart-card" aria-labelledby="chart-resultado-heading">
-              <div class="chart-header">
-                <h3 id="chart-resultado-heading">Resultado financiero por periodo</h3>
-                <div class="chart-legend" aria-hidden="true">
-                  <span><i class="chart-swatch chart-swatch-resultado"></i>Resultado</span>
-                </div>
-              </div>
-              <div id="chart-resultado" class="chart-canvas"></div>
-            </section>
+          <div class="panel-inicio-acciones form-actions" data-acciones-datos-ejemplo hidden>
+            <button type="button" class="secondary boton-destacado" data-accion="cargar-datos">Cargar datos de ejemplo</button>
+            <button type="button" class="secondary" data-accion="restablecer-datos">Restablecer datos</button>
           </div>
         </section>
 
@@ -403,6 +376,22 @@
                 <span class="stat-label">Resultado financiero</span>
               </div>
             </div>
+            <section class="resumen-gastos" aria-labelledby="resumen-gastos-heading">
+              <h3 id="resumen-gastos-heading">Gastos por cuenta</h3>
+              <div id="resumen-gastos-empty" class="empty estado-vacio-listado" hidden>No hay gastos aprobados para el periodo seleccionado.</div>
+              <div class="tabla-wrap">
+                <table id="resumen-gastos-tabla" class="tabla-financiera" aria-label="Gastos por cuenta, importes en CLP">
+                  <thead>
+                    <tr>
+                      <th scope="col">Cuenta</th>
+                      <th scope="col" class="num">Monto</th>
+                      <th scope="col" class="num">Porcentaje</th>
+                    </tr>
+                  </thead>
+                  <tbody id="resumen-gastos-cuerpo"></tbody>
+                </table>
+              </div>
+            </section>
           </section>
         </section>
 
