@@ -18,6 +18,7 @@
   --danger: var(--error);
   --sidebar-bg: var(--primary-dark);
   --sidebar-text: var(--surface);
+  --sidebar-hover: rgba(255, 255, 255, 0.10);
   --radius: 10px;
   --shadow: 0 1px 3px rgba(15, 38, 43, 0.08), 0 1px 2px rgba(15, 38, 43, 0.04);
   --topbar-h: 60px;
@@ -138,7 +139,7 @@ h2 { font-size: 1.05rem; margin: 0 0 12px; }
 
 .nav-module svg { flex-shrink: 0; }
 
-.nav-module:hover { background: rgba(15, 76, 92, 0.25); color: #ffffff; }
+.nav-module:hover { background: var(--sidebar-hover); color: #ffffff; }
 
 .nav-module:focus-visible,
 .action-card:focus-visible,
@@ -154,6 +155,7 @@ textarea:focus-visible {
   background: var(--primary);
   color: #ffffff;
   font-weight: 600;
+  border-left-color: var(--surface);
 }
 
 .content {
@@ -1079,9 +1081,10 @@ button.danger:hover { background: var(--danger-soft); }
 .alerta-detalle-fecha{grid-column:1/-1;color:var(--muted);font-size:.85rem}
 .alerta-sin,.alerta-sin-items,.alerta-adicionales{margin:.5rem 0 0}
 
-.filtros-movimientos{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.75rem;margin:1rem 0;align-items:end}
+.filtros-movimientos{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.75rem;margin:1rem 0;align-items:end}
 .filtros-movimientos label{display:block;font-size:.85rem;font-weight:600;margin-bottom:.25rem}
-.filtros-movimientos input,.filtros-movimientos select{width:100%}
+.filtros-movimientos input,.filtros-movimientos select{width:100%;height:var(--control-h)}
+.filtros-movimientos input[type="date"]{padding-block:var(--space-1)}
 .filtros-acciones{display:flex;align-items:end}
 .filtros-acciones .secondary{width:100%}
 .campo-con-limpieza{position:relative}
@@ -1096,7 +1099,7 @@ button.danger:hover { background: var(--danger-soft); }
 .reporte-detalle{margin-top:1rem}
 .totales-reporte{display:flex;flex-wrap:wrap;gap:.75rem;margin-top:.75rem}
 .total-reporte{background:var(--bg);border-radius:.5rem;padding:.4rem .65rem;font-size:.9rem;font-weight:600}
-.boton-total{width:100%;border:0;background:transparent;color:inherit;font:inherit;font-variant-numeric:tabular-nums;text-align:right;padding:0;cursor:pointer;text-decoration:underline dotted transparent;text-underline-offset:3px}
+.boton-total{width:100%;border:0;background:transparent;color:inherit;font:inherit;font-variant-numeric:tabular-nums;text-align:right;justify-content:flex-end;padding:0;cursor:pointer;text-decoration:underline dotted transparent;text-underline-offset:3px}
 .boton-total:hover,.boton-total:focus-visible{color:var(--primary);text-decoration-color:currentColor}
 .detalle-totales{margin-top:1rem}
 .detalle-totales-cabecera{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.75rem}
@@ -1315,9 +1318,9 @@ button.danger:hover {
 
 .topbar { background: var(--surface); border-bottom-color: var(--border); }
 .sidebar { background: var(--primary-dark); color: var(--surface); }
-.nav-module { background: transparent; color: inherit; font-size: var(--fs-sm); gap: var(--space-3); padding: var(--space-3); }
-.nav-module:hover { background: var(--primary); color: var(--surface); }
-.nav-module.active { background: var(--primary); color: var(--surface); }
+.nav-module { background: transparent; color: inherit; font-size: var(--fs-sm); gap: var(--space-3); padding: var(--space-3); padding-left: calc(var(--space-3) - 4px); justify-content: flex-start; border-left: 4px solid transparent; }
+.nav-module:hover { background: var(--sidebar-hover); color: var(--surface); }
+.nav-module.active { background: var(--primary); color: var(--surface); border-left-color: var(--surface); font-weight: 600; }
 
 .nav-icono {
   position: relative;
@@ -1523,6 +1526,8 @@ button.danger:hover {
 #view-cuentas > section, #view-asientos > section, #view-pagos > section, #view-periodos > section { order: initial; }
 
 .tabla-financiera tfoot tr.fila-totales th,
-.tabla-financiera tfoot tr.fila-totales td { border-top: 2px solid var(--border-strong); font-weight: 700; }
+.tabla-financiera tfoot tr.fila-totales td { border-top: 2px solid var(--border-strong); font-weight: 700; background: var(--bg); }
+.tabla-financiera tfoot tr.fila-totales th:not(.num) { text-align: right; }
 .tabla-financiera tfoot tr.fila-totales td.num { text-align: right; font-variant-numeric: tabular-nums; }
+.tabla-financiera tfoot tr.fila-totales th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .estado-vacio-listado { color: var(--muted); padding: .75rem 0; text-align: center; }

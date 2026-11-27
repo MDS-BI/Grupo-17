@@ -27,6 +27,8 @@ describe('filtros sin superposición', () => {
     expect([...select.options].some((opcion) => opcion.textContent.length > 12)).toBe(true);
     expect(css).toMatch(/\.campo-con-limpieza\s+input,\.campo-con-limpieza\s+select\s*\{[^}]*padding-right:\s*64px/s);
     expect(css).toMatch(/\.campo-con-limpieza\s+\.limpiar-campo\s*\{[^}]*right:\s*30px/s);
+    expect(css).toMatch(/\.filtros-movimientos\s*\{[^}]*minmax\(180px,1fr\)/s);
+    expect(css).toMatch(/\.filtros-movimientos input,\.filtros-movimientos select\s*\{[^}]*height:\s*var\(--control-h\)/s);
 
     elegir(select, select.options[1].value);
     expect(select.value).not.toBe('');

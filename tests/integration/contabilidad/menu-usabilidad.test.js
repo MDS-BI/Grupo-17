@@ -27,6 +27,8 @@ describe('menú lateral alineado a la izquierda', () => {
     expect(css).toMatch(/\.sidebar\s*\{[^}]*left:\s*0/s);
     expect(css).toMatch(/\.sidebar\.sidebar-abierta\s*\{[^}]*left:\s*0/s);
     expect(css).toMatch(/\.side-nav\s*\{[^}]*align-items:\s*flex-start/s);
+    expect(css).toMatch(/\.nav-module\s*\{[^}]*justify-content:\s*flex-start/s);
+    expect(css).toMatch(/\.nav-module\s*\{[^}]*border-left:\s*4px solid transparent/s);
     expect(css).toMatch(/@media \(max-width: 640px\)[\s\S]*\.sidebar\s*\{[^}]*left:\s*0/s);
   });
 
